@@ -1,0 +1,6 @@
+bin/
+obj/
+publish/
+build-plugin/
+build-temp-plugin/
+*.user

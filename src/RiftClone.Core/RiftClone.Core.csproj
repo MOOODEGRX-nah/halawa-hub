@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>RiftClone.Core</RootNamespace>
+    <!-- كواشف Steam/GOG تستخدم سجل الويندوز عمدًا، ومحاطة بـ try/catch تتعامل
+         بأمان مع أي نظام غير ويندوز، فنسكّت تحذير المحلل CA1416 هنا -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,60 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RiftClone.App.ViewModels"
+        x:Class="RiftClone.App.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Halawa-Hub" Width="900" Height="600"
+        Background="#0F0F1A"
+        FlowDirection="RightToLeft">
+
+    <Grid Margin="16" RowDefinitions="Auto,Auto,*,Auto,Auto">
+
+        <!-- شريط علوي -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Halawa-Hub" FontSize="22" FontWeight="Bold"
+                       Foreground="White" VerticalAlignment="Center"/>
+            <Button Content="تحديث القائمة" Width="110" Height="32" Margin="16,0,0,0"
+                    Command="{Binding RefreshCommand}"/>
+        </StackPanel>
+
+        <!-- شريط إشعار التحديث، يظهر فقط لما فيه إصدار أحدث -->
+        <Border Grid.Row="1" Background="#2A2A4A" CornerRadius="6" Padding="12,8" Margin="0,0,0,12"
+                IsVisible="{Binding HasUpdateMessage}">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding UpdateMessage}"
+                           Foreground="White" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Content="تحميل التحديث" Margin="12,0,0,0"
+                        Command="{Binding OpenUpdateCommand}"/>
+            </Grid>
+        </Border>
+
+        <!-- قائمة الألعاب -->
+        <ListBox Grid.Row="2" ItemsSource="{Binding Games}"
+                 SelectedItem="{Binding SelectedGame}"
+                 Background="#1A1A2E">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="*,140,120" Margin="6,4">
+                        <TextBlock Grid.Column="0" Text="{Binding Name}"
+                                   Foreground="White" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Platform}"
+                                   Foreground="#AAAAAA" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="{Binding StatusText}"
+                                   Foreground="#AAAAAA" VerticalAlignment="Center"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- رسالة حالة/خطأ (بديل MessageBox اللي كان بـ WPF) -->
+        <TextBlock Grid.Row="3" Text="{Binding StatusMessage}"
+                   Foreground="#FF6B6B" Margin="0,8,0,0"
+                   IsVisible="{Binding HasStatusMessage}"
+                   TextWrapping="Wrap"/>
+
+        <!-- زر التشغيل -->
+        <Button Grid.Row="4" Content="تشغيل اللعبة المحددة" Height="42" Margin="0,12,0,0"
+                Command="{Binding LaunchCommand}" FontSize="14" FontWeight="Bold"
+                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+    </Grid>
+</Window>

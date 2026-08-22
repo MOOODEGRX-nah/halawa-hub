@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HalawaHub.App</RootNamespace>
+    <AssemblyName>Halawa-Hub</AssemblyName>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.1.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.1.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.3" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.1.3" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.1.3" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HalawaHub.Core\HalawaHub.Core.csproj" />
+  </ItemGroup>
+
+  <!-- ينشئ مجلد Plugins بجانب الملف التنفيذي عند كل بناء -->
+  <Target Name="EnsurePluginsFolder" AfterTargets="Build">
+    <MakeDir Directories="$(OutDir)Plugins" Condition="!Exists('$(OutDir)Plugins')" />
+  </Target>
+
+</Project>

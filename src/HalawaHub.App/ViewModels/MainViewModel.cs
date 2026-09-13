@@ -144,7 +144,6 @@ public class MainViewModel : INotifyPropertyChanged
 
     private string? _updateDownloadUrl;
     private string? _updateSha256;
-    private string? _updateSha256;
     private bool _isUpdating;
     private readonly UpdateChecker _updateChecker = new();
 
@@ -404,7 +403,6 @@ public class MainViewModel : INotifyPropertyChanged
         Log.Info("تحديث جديد متوفر: v" + update.LatestVersion);
             UpdateMessage = $"يتوفر إصدار جديد: v{update.LatestVersion} (لديك v{AppInfo.Version})";
         _updateDownloadUrl = update.DownloadUrl;
-            _updateSha256 = update.Sha256;
             _updateSha256 = update.Sha256;
         InstallUpdateCommand.RaiseCanExecuteChanged();
     }

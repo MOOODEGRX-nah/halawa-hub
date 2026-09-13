@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using HalawaHub.Core;
 
 namespace HalawaHub.Core.Updates;
 
@@ -40,19 +41,21 @@ public class UpdateChecker
 
             string? downloadUrl = null;
             string? sha256 = null;
-                if (root.TryGetProperty("assets", out var assets) && assets.GetArrayLength() > 0)
-                {
-                    downloadUrl = assets[0].GetProperty("browser_download_url").GetString();
-                    if (assets[0].TryGetProperty("digest", out var digest))
-                        sha256 = digest.GetString()?.Replace("sha256:", "");
-                }
+            if (root.TryGetProperty("assets", out var assets) && assets.GetArrayLength() > 0)
+            {
+                var asset = assets[0];
+                downloadUrl = asset.GetProperty("browser_download_url").GetString();
+                if (asset.TryGetProperty("digest", out var digest))
+                    sha256 = digest.GetString()?.Replace("sha256:", "");
+            }
 
             downloadUrl ??= root.TryGetProperty("html_url", out var h) ? h.GetString() : null;
 
             return new UpdateInfo(latestVersion, downloadUrl ?? "", IsVersionNewer(latestVersion, AppInfo.Version), sha256);
         }
-        catch
+        catch (Exception ex)
         {
+            Log.Error("فشل فحص التحديثات", ex);
             return null;
         }
     }

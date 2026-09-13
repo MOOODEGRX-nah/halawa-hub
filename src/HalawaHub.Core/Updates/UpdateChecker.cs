@@ -3,16 +3,12 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using HalawaHub.Core;
 
 namespace HalawaHub.Core.Updates;
 
-public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer);
+public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer, string? Sha256 = null);
 
-/// <summary>
-/// يفحص إصدارات GitHub Releases الخاصة بالمستودع ويقارنها بالإصدار الحالي.
-/// يفشل بصمت (يرجع null) عند أي مشكلة اتصال — عشان المستخدم بدون إنترنت
-/// ما يشوف أي خطأ مزعج، بس ما يظهر له إشعار تحديث وخلاص.
-/// </summary>
 public class UpdateChecker
 {
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
@@ -39,15 +35,22 @@ public class UpdateChecker
             if (string.IsNullOrEmpty(latestVersion)) return null;
 
             string? downloadUrl = null;
+            string? sha256 = null;
             if (root.TryGetProperty("assets", out var assets) && assets.GetArrayLength() > 0)
-                downloadUrl = assets[0].GetProperty("browser_download_url").GetString();
+            {
+                var asset = assets[0];
+                downloadUrl = asset.GetProperty("browser_download_url").GetString();
+                if (asset.TryGetProperty("digest", out var digest))
+                    sha256 = digest.GetString()?.Replace("sha256:", "");
+            }
 
             downloadUrl ??= root.TryGetProperty("html_url", out var h) ? h.GetString() : null;
 
-            return new UpdateInfo(latestVersion, downloadUrl ?? "", IsVersionNewer(latestVersion, AppInfo.Version));
+            return new UpdateInfo(latestVersion, downloadUrl ?? "", IsVersionNewer(latestVersion, AppInfo.Version), sha256);
         }
-        catch
+        catch (Exception ex)
         {
+            Log.Error("failed to check updates", ex);
             return null;
         }
     }
@@ -73,7 +76,6 @@ public class UpdateChecker
         }
     }
 
-    // يشيل أي لاحقة زي "-beta" قبل مقارنة الأرقام
     private static int[] ParseVersion(string version) =>
         version.Split('-')[0].Split('.').Select(p => int.TryParse(p, out var n) ? n : 0).ToArray();
 }

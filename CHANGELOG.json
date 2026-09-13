@@ -1,4 +1,8 @@
 {
+  "0.0.10.13": [
+    "SHA256 verification for update integrity",
+    "Automatic abort on verification failure"
+  ],
   "0.0.10.12": [
     "إصلاح فشل البناء بإرجاع ملفات التحديث لنسخة مستقرة",
     "تنظيف سجل التغييرات وتصحيحه"

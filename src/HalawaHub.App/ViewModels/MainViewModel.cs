@@ -143,7 +143,6 @@ public class MainViewModel : INotifyPropertyChanged
     public bool HasUpdateMessage => !string.IsNullOrEmpty(UpdateMessage);
 
     private string? _updateDownloadUrl;
-    private string? _updateSha256;
     private bool _isUpdating;
     private readonly UpdateChecker _updateChecker = new();
 
@@ -403,7 +402,6 @@ public class MainViewModel : INotifyPropertyChanged
         Log.Info("تحديث جديد متوفر: v" + update.LatestVersion);
             UpdateMessage = $"يتوفر إصدار جديد: v{update.LatestVersion} (لديك v{AppInfo.Version})";
         _updateDownloadUrl = update.DownloadUrl;
-            _updateSha256 = update.Sha256;
         InstallUpdateCommand.RaiseCanExecuteChanged();
     }
 
@@ -415,7 +413,7 @@ public class MainViewModel : INotifyPropertyChanged
         InstallUpdateCommand.RaiseCanExecuteChanged();
         UpdateMessage = "جاري تحميل التحديث...";
 
-        var success = await SelfUpdater.DownloadAndApplyAsync(_updateDownloadUrl, status => UpdateMessage = status, _updateSha256);
+        var success = await SelfUpdater.DownloadAndApplyAsync(_updateDownloadUrl, status => UpdateMessage = status);
 
         if (success)
         {

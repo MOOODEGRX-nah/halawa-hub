@@ -3,15 +3,20 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
-using HalawaHub.Core;
 
 namespace HalawaHub.Core.Updates;
 
+/// <summary>
+/// يحمّل الإصدار الجديد ويثبّته تلقائيًا داخل البرنامج، بدل تحويل المستخدم
+/// لموقع خارجي يحمّل منه يدويًا. الفكرة: نحمّل ونفك ضغط الإصدار الجديد
+/// بمجلد مؤقت، نكتب سكربت صغير (.bat) ينتظر إغلاق البرنامج الحالي (عشان
+/// يفلت قفل الملف على exe)، يستبدل الملفات، يعيد فتح البرنامج، ثم يحذف
+/// نفسه. بعدها البرنامج يقفل نفسه ليسمح للسكربت يكمل شغله.
+/// </summary>
 public static class SelfUpdater
 {
-    public static async Task<bool> DownloadAndApplyAsync(string downloadUrl, Action<string>? onStatus = null, string? expectedSha256 = null)
+    public static async Task<bool> DownloadAndApplyAsync(string downloadUrl, Action<string>? onStatus = null)
     {
         try
         {
@@ -22,31 +27,15 @@ public static class SelfUpdater
             var zipPath = Path.Combine(tempRoot, "update.zip");
             var extractPath = Path.Combine(tempRoot, "extracted");
 
-            onStatus?.Invoke(¨×¬µ¨¼§­© ¿¶©·®...");
-            Log.Info($"t½Ý´©Ö¼ ÂÀøËØ¹̕" m{downloadUrl}");
-
+            onStatus?.Invoke("جاري تحميل التحديث...");
             using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
             {
                 http.DefaultRequestHeaders.UserAgent.ParseAdd("HalawaHub-Updater/1.0");
                 var bytes = await http.GetByteArrayAsync(downloadUrl);
-
-                // tġëÜ Ü æ¬ÑØ·® ·Û¹Ù·ëµ   quality hash before unzipping
-                if (!string.IsNullOrEmpty(expectedSha256))
-                {
-                    var actual = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
-                    if (!string.Equals(actual, expectedSha256, StringComparison.OrdinalIgnoreCase))
-                    {
-                        Log.Error($"t×è´Ô tġì ¶ð¹ óËØ ÂÀøËØ¹̕", expectedSha256, actual}");
-                        onStatus?.Invoke(·è¬Ø, attest, Bestest, Bestest, Bestest, Bestest, Bestest, Bestest");
-                        return false;
-                    }
-                    Log.Info("tC×è´Ô ¶Ø·® ·Û¹Ù·ëµ   quality");
-                }
-
                 await File.WriteAllBytesAsync(zipPath, bytes);
             }
 
-            onStatus?.Invoke("«ÌÙÄµÈÆÙ  vedƥ£Ê...");
+            onStatus?.Invoke("جاري استخراج الملفات...");
             ZipFile.ExtractToDirectory(zipPath, extractPath, overwriteFiles: true);
 
             var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
@@ -56,14 +45,13 @@ public static class SelfUpdater
             var scriptContent =
                 "@echo off\r\n" +
                 "timeout /t 2 /nobreak >nul\r\n" +
-                $"xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\"\r\n" +
+                $"xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\\"\r\n" +
                 $"start \"\" \"{Path.Combine(installDir, exeName)}\"\r\n" +
                 "del \"%~f0\"\r\n";
 
             await File.WriteAllTextAsync(scriptPath, scriptContent);
 
-            onStatus?.Invoke("«ÌÙÄµÈÆÙ ³Øä é×ÓÇí·©...");
-            Log.Info("©ÓØÇí·© é×ÓÇí·® ¹·«é×½ê  vedƥ£Ê");
+            onStatus?.Invoke("جاري إعادة التشغيل...");
             Process.Start(new ProcessStartInfo
             {
                 FileName = scriptPath,
@@ -74,9 +62,8 @@ public static class SelfUpdater
 
             return true;
         }
-        catch (Exception ex)
+        catch
         {
-            Log.Error("·è¬Ø é×ÓÇí·®  vedƥ£Ê", ex);
             return false;
         }
     }

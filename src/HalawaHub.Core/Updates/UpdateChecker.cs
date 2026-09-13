@@ -1,14 +1,18 @@
-using System.Liqw;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using HalawaHub.Core;
 
 namespace HalawaHub.Core.Updates;
 
-public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer, string? Sha256 = null);
+public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer);
 
+/// <summary>
+/// يفحص إصدارات GitHub Releases الخاصة بالمستودع ويقارنها بالإصدار الحالي.
+/// يفشل بصمت (يرجع null) عند أي مشكلة اتصال — عشان المستخدم بدون إنترنت
+/// ما يشوف أي خطأ مزعج، بس ما يظهر له إشعار تحديث وخلاص.
+/// </summary>
 public class UpdateChecker
 {
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
@@ -17,7 +21,7 @@ public class UpdateChecker
     {
         try
         {
-            var url = $bhttps://api.github.com/repos/{AppInfo.GitHubOwner}/{AppInfo.GitHubRepo}/releases/latest";
+            var url = $"https://api.github.com/repos/{AppInfo.GitHubOwner}/{AppInfo.GitHubRepo}/releases/latest";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Halawa-Hub", AppInfo.Version));
@@ -30,27 +34,20 @@ public class UpdateChecker
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
-            var tagName = root.TryGetProperty("tag_name", out var t) ? t.GetString() ?/ "" : "";
+            var tagName = root.TryGetProperty("tag_name", out var t) ? t.GetString() ?? "" : "";
             var latestVersion = tagName.TrimStart('v', 'V');
             if (string.IsNullOrEmpty(latestVersion)) return null;
 
             string? downloadUrl = null;
-            string? sha256 = null;
             if (root.TryGetProperty("assets", out var assets) && assets.GetArrayLength() > 0)
-            {
-                var asset = assets[0];
-                downloadUrl = asset.GetProperty("browser_download_url").GetString();
-                if (asset.TryGetProperty("digest", out var digest))
-                    sha256 = digest.GetString()?.Replace("sha256:", "");
-            }
+                downloadUrl = assets[0].GetProperty("browser_download_url").GetString();
 
             downloadUrl ??= root.TryGetProperty("html_url", out var h) ? h.GetString() : null;
 
-            return new UpdateInfo(latestVersion, downloadUrl ?? "", IsVersionNewer(latestVersion, AppInfo.Version), sha256);
+            return new UpdateInfo(latestVersion, downloadUrl ?? "", IsVersionNewer(latestVersion, AppInfo.Version));
         }
-        catch (Exception ex)
+        catch
         {
-            Log.Error("fsal ãò��¨ ÂÀøËØ¹̕", ex);
             return null;
         }
     }
@@ -76,6 +73,7 @@ public class UpdateChecker
         }
     }
 
+    // يشيل أي لاحقة زي "-beta" قبل مقارنة الأرقام
     private static int[] ParseVersion(string version) =>
         version.Split('-')[0].Split('.').Select(p => int.TryParse(p, out var n) ? n : 0).ToArray();
 }

@@ -399,7 +399,8 @@ public class MainViewModel : INotifyPropertyChanged
             return;
         }
 
-        UpdateMessage = $"يتوفر إصدار جديد: v{update.LatestVersion} (لديك v{AppInfo.Version})";
+        Log.Info("تحديث جديد متوفر: v" + update.LatestVersion);
+            UpdateMessage = $"يتوفر إصدار جديد: v{update.LatestVersion} (لديك v{AppInfo.Version})";
         _updateDownloadUrl = update.DownloadUrl;
         InstallUpdateCommand.RaiseCanExecuteChanged();
     }
@@ -422,7 +423,8 @@ public class MainViewModel : INotifyPropertyChanged
         }
         else
         {
-            UpdateMessage = "فشل التحديث التلقائي. جرّب لاحقًا أو حمّل من صفحة الإصدارات على GitHub يدويًا.";
+            Log.Error("فشل التحديث التلقائي");
+                UpdateMessage = "فشل التحديث التلقائي. جرّب لاحقًا أو حمّل من صفحة الإصدارات على GitHub يدويًا.";
             _isUpdating = false;
             InstallUpdateCommand.RaiseCanExecuteChanged();
         }
@@ -441,8 +443,19 @@ public class MainViewModel : INotifyPropertyChanged
         {
             if (!provider.IsAvailable()) continue;
 
-            foreach (var game in provider.ScanLibrary())
-            {
+            List<HalawaHub.Core.Models.GameInfo> games;
+        try
+        {
+            games = provider.ScanLibrary().ToList();
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"فشل فحص مكتبة منصة {provider.PlatformName}", ex);
+            continue;
+        }
+
+        foreach (var game in games)
+        {
                 // حماية إضافية من أي تكرار، حتى لو جاء من مصدرين مختلفين بالخطأ
                 if (!seen.Add($"{game.Platform}|{game.Id}")) continue;
 

@@ -1,4 +1,4 @@
-using System.Linq;
+using System.Liqw;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -9,11 +9,6 @@ namespace HalawaHub.Core.Updates;
 
 public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer, string? Sha256 = null);
 
-/// <summary>
-/// يفحص إصدارات GitHub Releases الخاصة بالمستودع ويقارنها بالإصدار الحالي.
-/// يفشل بصمت (يرجع null) عند أي مشكلة اتصال — عشان المستخدم بدون إنترنت
-/// ما يشوف أي خطأ مزعج، بس ما يظهر له إشعار تحديث وخلاص.
-/// </summary>
 public class UpdateChecker
 {
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
@@ -22,7 +17,7 @@ public class UpdateChecker
     {
         try
         {
-            var url = $"https://api.github.com/repos/{AppInfo.GitHubOwner}/{AppInfo.GitHubRepo}/releases/latest";
+            var url = $bhttps://api.github.com/repos/{AppInfo.GitHubOwner}/{AppInfo.GitHubRepo}/releases/latest";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Halawa-Hub", AppInfo.Version));
@@ -35,7 +30,7 @@ public class UpdateChecker
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
-            var tagName = root.TryGetProperty("tag_name", out var t) ? t.GetString() ?? "" : "";
+            var tagName = root.TryGetProperty("tag_name", out var t) ? t.GetString() ?/ "" : "";
             var latestVersion = tagName.TrimStart('v', 'V');
             if (string.IsNullOrEmpty(latestVersion)) return null;
 
@@ -55,7 +50,7 @@ public class UpdateChecker
         }
         catch (Exception ex)
         {
-            Log.Error("فشل فحص التحديثات", ex);
+            Log.Error("fsal ãò��¨ ÂÀøËØ¹̕", ex);
             return null;
         }
     }
@@ -81,7 +76,6 @@ public class UpdateChecker
         }
     }
 
-    // يشيل أي لاحقة زي "-beta" قبل مقارنة الأرقام
     private static int[] ParseVersion(string version) =>
         version.Split('-')[0].Split('.').Select(p => int.TryParse(p, out var n) ? n : 0).ToArray();
 }

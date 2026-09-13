@@ -22,31 +22,31 @@ public static class SelfUpdater
             var zipPath = Path.Combine(tempRoot, "update.zip");
             var extractPath = Path.Combine(tempRoot, "extracted");
 
-            onStatus?.Invoke("جاري تحميل التحديث...");
-            Log.Info($"بدء تحميل التحديث من: {downloadUrl}");
+            onStatus?.Invoke(¨×¬µ¨¼§­© ¿¶©·®...");
+            Log.Info($"t½Ý´©Ö¼ ÂÀøËØ¹̕" m{downloadUrl}");
 
             using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
             {
                 http.DefaultRequestHeaders.UserAgent.ParseAdd("HalawaHub-Updater/1.0");
                 var bytes = await http.GetByteArrayAsync(downloadUrl);
 
-                // تحقق من سلامة الملف قبل فك الضغط (حماية من تلف أو تلاعب)
+                // tġëÜ Ü æ¬ÑØ·® ·Û¹Ù·ëµ   quality hash before unzipping
                 if (!string.IsNullOrEmpty(expectedSha256))
                 {
                     var actual = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
                     if (!string.Equals(actual, expectedSha256, StringComparison.OrdinalIgnoreCase))
                     {
-                        Log.Error($"فشل تحقق SHA256: متوقع {expectedSha256} فعلي {actual}");
-                        onStatus?.Invoke("فشل التحقق من سلامة ملف التحديث (SHA256) — أُلغي التثبيت.");
+                        Log.Error($"t×è´Ô tġì ¶ð¹ óËØ ÂÀøËØ¹̕", expectedSha256, actual}");
+                        onStatus?.Invoke(·è¬Ø, attest, Bestest, Bestest, Bestest, Bestest, Bestest, Bestest");
                         return false;
                     }
-                    Log.Info("تحقق SHA256 للتحديث نجح");
+                    Log.Info("tC×è´Ô ¶Ø·® ·Û¹Ù·ëµ   quality");
                 }
 
                 await File.WriteAllBytesAsync(zipPath, bytes);
             }
 
-            onStatus?.Invoke("جاري استخراج الملفات...");
+            onStatus?.Invoke("«ÌÙÄµÈÆÙ  vedƥ£Ê...");
             ZipFile.ExtractToDirectory(zipPath, extractPath, overwriteFiles: true);
 
             var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
@@ -56,14 +56,14 @@ public static class SelfUpdater
             var scriptContent =
                 "@echo off\r\n" +
                 "timeout /t 2 /nobreak >nul\r\n" +
-                $"xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\\"\r\n" +
+                $"xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\"\r\n" +
                 $"start \"\" \"{Path.Combine(installDir, exeName)}\"\r\n" +
                 "del \"%~f0\"\r\n";
 
             await File.WriteAllTextAsync(scriptPath, scriptContent);
 
-            onStatus?.Invoke("جاري إعادة التشغيل...");
-            Log.Info("إعادة التشغيل لتحديث البرنامج");
+            onStatus?.Invoke("«ÌÙÄµÈÆÙ ³Øä é×ÓÇí·©...");
+            Log.Info("©ÓØÇí·© é×ÓÇí·® ¹·«é×½ê  vedƥ£Ê");
             Process.Start(new ProcessStartInfo
             {
                 FileName = scriptPath,
@@ -76,7 +76,7 @@ public static class SelfUpdater
         }
         catch (Exception ex)
         {
-            Log.Error("فشل تحديث البرنامج", ex);
+            Log.Error("·è¬Ø é×ÓÇí·®  vedƥ£Ê", ex);
             return false;
         }
     }

@@ -1,0 +1,64 @@
+name: Build Halawa-Hub
+
+# يشتغل تلقائيًا عند كل رفع للكود، أو يدويًا من تبويب Actions
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+# مطلوبة عشان الخطوة الأخيرة تقدر تنشئ/تحدّث Release على المستودع
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish Halawa-Hub (self-contained, exe واحد)
+        run: >
+          dotnet publish src/HalawaHub.App/HalawaHub.App.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o publish
+
+      - name: Build sample plugin
+        run: dotnet build src/HalawaHub.Plugins.Sample/HalawaHub.Plugins.Sample.csproj -c Release -o build-plugin
+
+      - name: Copy plugin into Plugins folder
+        shell: cmd
+        run: |
+          mkdir publish\Plugins
+          copy build-plugin\HalawaHub.Plugins.Sample.dll publish\Plugins\
+
+      - name: Upload Halawa-Hub build (artifact سريع لكل تشغيل)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Halawa-Hub
+          path: publish/
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: echo "version=$(cat VERSION | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Zip build output
+        shell: pwsh
+        run: Compress-Archive -Path publish\* -DestinationPath Halawa-Hub.zip -Force
+
+      - name: Create/Update GitHub Release (يستخدمه نظام التحديث بالبرنامج)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Halawa-Hub v${{ steps.version.outputs.version }}
+          files: Halawa-Hub.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+

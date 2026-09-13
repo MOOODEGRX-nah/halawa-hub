@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HalawaHub.Core.Updates;
 
-public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer);
+public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer, string? Sha256 = null);
 
 /// <summary>
 /// يفحص إصدارات GitHub Releases الخاصة بالمستودع ويقارنها بالإصدار الحالي.
@@ -39,12 +39,17 @@ public class UpdateChecker
             if (string.IsNullOrEmpty(latestVersion)) return null;
 
             string? downloadUrl = null;
-            if (root.TryGetProperty("assets", out var assets) && assets.GetArrayLength() > 0)
-                downloadUrl = assets[0].GetProperty("browser_download_url").GetString();
+            string? sha256 = null;
+                if (root.TryGetProperty("assets", out var assets) && assets.GetArrayLength() > 0)
+                {
+                    downloadUrl = assets[0].GetProperty("browser_download_url").GetString();
+                    if (assets[0].TryGetProperty("digest", out var digest))
+                        sha256 = digest.GetString()?.Replace("sha256:", "");
+                }
 
             downloadUrl ??= root.TryGetProperty("html_url", out var h) ? h.GetString() : null;
 
-            return new UpdateInfo(latestVersion, downloadUrl ?? "", IsVersionNewer(latestVersion, AppInfo.Version));
+            return new UpdateInfo(latestVersion, downloadUrl ?? "", IsVersionNewer(latestVersion, AppInfo.Version), sha256);
         }
         catch
         {

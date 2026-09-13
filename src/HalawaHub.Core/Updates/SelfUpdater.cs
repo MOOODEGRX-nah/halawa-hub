@@ -16,7 +16,7 @@ namespace HalawaHub.Core.Updates;
 /// </summary>
 public static class SelfUpdater
 {
-    public static async Task<bool> DownloadAndApplyAsync(string downloadUrl, Action<string>? onStatus = null)
+    public static async Task<bool> DownloadAndApplyAsync(string downloadUrl, Action<string>? onStatus = null, string? expectedSha256 = null)
     {
         try
         {

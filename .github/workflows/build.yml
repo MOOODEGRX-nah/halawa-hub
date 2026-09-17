@@ -53,11 +53,22 @@ jobs:
         shell: pwsh
         run: Compress-Archive -Path publish\* -DestinationPath Halawa-Hub.zip -Force
 
-      - name: Create GitHub Release (gh CLI - official and reliable)
+      - name: Create GitHub Release (gh CLI with auto-retry)
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="v${{ steps.version.outputs.version }}"
           gh release delete "$TAG" --yes --cleanup-tag || true
-          gh release create "$TAG" Halawa-Hub.zip --title "Halawa-Hub $TAG" --notes "التفاصيل داخل البرنامج عبر نافذة ما الجديد" --latest
+          for i in 1 2 3; do
+            echo "===== attempt $i ====="
+            if gh release create "$TAG" Halawa-Hub.zip --title "Halawa-Hub $TAG" --notes "التفاصيل داخل البرنامج عبر نافذة ما الجديد" --latest; then
+              echo "Release created and uploaded OK"
+              exit 0
+            fi
+            echo "attempt $i failed - cleaning and retrying in 20s"
+            gh release delete "$TAG" --yes --cleanup-tag || true
+            sleep 20
+          done
+          echo "all attempts failed"
+          exit 1

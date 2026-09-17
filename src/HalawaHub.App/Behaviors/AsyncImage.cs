@@ -248,7 +248,12 @@ public static class AsyncImage
             if (token.IsCancellationRequested || state.PendingUrl != url) return;
 
             byte[] bytes;
-            if (url.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+        var fromDisk = CoverDiskCache.TryRead(cacheKey);
+        if (fromDisk != null)
+        {
+            bytes = fromDisk;
+        }
+        else if (url.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
             {
                 // غلاف محلي اختاره المستخدم يدويًا
                 var localPath = new Uri(url).LocalPath;
@@ -259,6 +264,7 @@ public static class AsyncImage
                 // نحمّل البايتات كاملة أول (Stream غير قابل للـ Seek مباشر من الشبكة
                 // يسبب مشاكل فك ترميز مع بعض المكتبات)، ثم نفك الترميز من ذاكرة قابلة للـ Seek
                 bytes = await Http.GetByteArrayAsync(url, token);
+            CoverDiskCache.TryWrite(cacheKey, bytes);
             }
 
             token.ThrowIfCancellationRequested();

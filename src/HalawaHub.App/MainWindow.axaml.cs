@@ -11,6 +11,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        SetupTrayAndCloseBehavior();
 
         // نرجّع آخر حجم/حالة محفوظة للنافذة بدل ما تفتح دايمًا بنفس الحجم الافتراضي
         var settings = SettingsService.Load();

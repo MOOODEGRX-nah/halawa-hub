@@ -1,12 +1,10 @@
 name: Build Halawa-Hub
 
-# يشتغل تلقائيًا عند كل رفع للكود، أو يدويًا من تبويب Actions
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
 
-# مطلوبة عشان الخطوة الأخيرة تقدر تنشئ/تحدّث Release على المستودع
 permissions:
   contents: write
 
@@ -22,43 +20,56 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Publish Halawa-Hub (self-contained, exe واحد)
+      - name: Publish Halawa-Hub (self-contained, single exe)
         run: >
           dotnet publish src/HalawaHub.App/HalawaHub.App.csproj
           -c Release -r win-x64 --self-contained true
           -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true
+          --nologo
           -o publish
 
       - name: Build sample plugin
-        run: dotnet build src/HalawaHub.Plugins.Sample/HalawaHub.Plugins.Sample.csproj -c Release -o build-plugin
+        run: dotnet build src/HalawaHub.Plugins.Sample/HalawaHub.Plugins.Sample.csproj -c Release -o build-plugin --nologo
 
       - name: Copy plugin into Plugins folder
         shell: cmd
         run: |
-          mkdir publish\Plugins
+          if not exist publish\Plugins mkdir publish\Plugins
           copy build-plugin\HalawaHub.Plugins.Sample.dll publish\Plugins\
-
-      - name: Upload Halawa-Hub build (artifact سريع لكل تشغيل)
-        uses: actions/upload-artifact@v4
-        with:
-          name: Halawa-Hub
-          path: publish/
 
       - name: Read version
         id: version
         shell: bash
         run: echo "version=$(cat VERSION | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Halawa-Hub
+          path: publish/
+
       - name: Zip build output
         shell: pwsh
         run: Compress-Archive -Path publish\* -DestinationPath Halawa-Hub.zip -Force
 
-      - name: Create/Update GitHub Release (يستخدمه نظام التحديث بالبرنامج)
+      - name: Delete old tag if exists (prevent conflict)
+        shell: bash
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -d "v${{ steps.version.outputs.version }}" 2>/dev/null || true
+          git push origin ":refs/tags/v${{ steps.version.outputs.version }}" 2>/dev/null || true
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Halawa-Hub v${{ steps.version.outputs.version }}
+          prerelease: true
+          make_latest: true
           files: Halawa-Hub.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
-
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

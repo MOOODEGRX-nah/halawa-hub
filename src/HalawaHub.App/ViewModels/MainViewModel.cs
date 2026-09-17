@@ -144,6 +144,18 @@ public class MainViewModel : INotifyPropertyChanged
 
     private string? _updateDownloadUrl;
     private string? _updateSha256;
+
+    private string _sortMode = "name";
+    public string SortMode
+    {
+        get => _sortMode;
+        set
+        {
+            _sortMode = value;
+            OnPropertyChanged(nameof(SortMode));
+            ApplyFilter();
+        }
+    }
     private bool _isUpdating;
     private readonly UpdateChecker _updateChecker = new();
 
@@ -533,6 +545,13 @@ public class MainViewModel : INotifyPropertyChanged
                 query = query.Where(c => c.Platform == SelectedNavItem);
                 break;
         }
+
+        query = SortMode switch
+        {
+            "lastplayed" => query.OrderByDescending(c => c.LastPlayed ?? DateTime.MinValue),
+            "platform" => query.OrderBy(c => c.Platform).ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase),
+            _ => query.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+        };
 
         foreach (var card in query)
             FilteredGames.Add(card);

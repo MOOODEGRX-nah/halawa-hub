@@ -418,6 +418,8 @@
                 <ToggleButton Classes="sort-chip" Content="الاسم" IsChecked="{Binding SortMode, Converter={StaticResource StringEqualsConverter}, ConverterParameter=name, Mode=TwoWay}"/>
                 <ToggleButton Classes="sort-chip" Content="آخر لعب" IsChecked="{Binding SortMode, Converter={StaticResource StringEqualsConverter}, ConverterParameter=lastplayed, Mode=TwoWay}"/>
                 <ToggleButton Classes="sort-chip" Content="المنصة" IsChecked="{Binding SortMode, Converter={StaticResource StringEqualsConverter}, ConverterParameter=platform, Mode=TwoWay}"/>
+                <Border Width="1" Background="#2A1418" Margin="8,2"/>
+                <ToggleButton Classes="sort-chip" Content="عرض قائمة" IsChecked="{Binding IsListView, Mode=TwoWay}"/>
             </StackPanel>
 
             <!-- قائمة الألعاب: لوحة Bento بالصفحة الرئيسية، أو الشبكة العادية لأي فلترة -->
@@ -581,6 +583,7 @@
             <ScrollViewer IsVisible="{Binding !IsHomeView}">
                 <ListBox ItemsSource="{Binding FilteredGames}"
                          SelectedItem="{Binding SelectedGame}"
+                         IsVisible="{Binding !IsListView}"
                          Background="Transparent"
                          BorderThickness="0">
                     <ListBox.ItemsPanel>
@@ -676,6 +679,58 @@
                                                 Command="{Binding #RootWindow.((vm:MainViewModel)DataContext).LaunchGameCommand}"
                                                 CommandParameter="{Binding}"/>
                                     </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- عرض القائمة (سطر لكل لعبة) -->
+                <ListBox ItemsSource="{Binding FilteredGames}"
+                         SelectedItem="{Binding SelectedGame}"
+                         IsVisible="{Binding IsListView}"
+                         Background="Transparent"
+                         BorderThickness="0">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="4"/>
+                            <Setter Property="Margin" Value="0,0,0,2"/>
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                        <Style Selector="ListBoxItem:selected Border#RowBorder">
+                            <Setter Property="BorderBrush" Value="#F5A623"/>
+                            <Setter Property="BorderThickness" Value="1.5"/>
+                        </Style>
+                        <Style Selector="ListBoxItem:pointerover Border#RowBorder">
+                            <Setter Property="Background" Value="#1F1012"/>
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border x:Name="RowBorder" CornerRadius="8" Background="#140A0C" BorderBrush="#2A1418" BorderThickness="1" Padding="10,8">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                                    <Border Grid.Column="0" Width="34" Height="46" CornerRadius="4" ClipToBounds="True" Background="#0D0608">
+                                        <Image Stretch="UniformToFill" IsVisible="{Binding HasCoverImage}"
+                                               behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
+                                               behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"
+                                               behaviors:AsyncImage.DecodeWidth="60"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"
+                                               Foreground="White" VerticalAlignment="Center" Margin="10,0"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <Border Grid.Column="2" Background="#801A0A0C" BorderThickness="1" CornerRadius="8"
+                                            Padding="7,2" VerticalAlignment="Center"
+                                            BorderBrush="{Binding Platform, Converter={StaticResource PlatformColorConverter}}">
+                                        <TextBlock Text="{Binding Platform}" FontSize="9" FontWeight="Bold"
+                                                   Foreground="{Binding Platform, Converter={StaticResource PlatformColorConverter}}"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="5" Margin="12,0" VerticalAlignment="Center">
+                                        <Ellipse Width="7" Height="7" Fill="{Binding IsInstalled, Converter={StaticResource BoolToStatusColorConverter}}"/>
+                                        <TextBlock Text="{Binding StatusText}" FontSize="10" Foreground="#9CA3AF"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="4" Classes="play-btn" Content="تشغيل" Padding="14,5"
+                                            Command="{Binding #RootWindow.((vm:MainViewModel)DataContext).LaunchGameCommand}"
+                                            CommandParameter="{Binding}"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>

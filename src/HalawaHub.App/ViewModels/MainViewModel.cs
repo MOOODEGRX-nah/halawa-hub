@@ -517,6 +517,17 @@ public class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(SelectedNavItem));
     }
 
+    private bool _isListView;
+    public bool IsListView
+    {
+        get => _isListView;
+        set
+        {
+            _isListView = value;
+            OnPropertyChanged(nameof(IsListView));
+        }
+    }
+
     private void ApplyFilter()
     {
         FilteredGames.Clear();

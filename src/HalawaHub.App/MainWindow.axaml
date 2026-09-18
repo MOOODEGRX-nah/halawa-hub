@@ -728,6 +728,7 @@
                                     <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="5" Margin="12,0" VerticalAlignment="Center">
                                         <Ellipse Width="7" Height="7" Fill="{Binding IsInstalled, Converter={StaticResource BoolToStatusColorConverter}}"/>
                                         <TextBlock Text="{Binding StatusText}" FontSize="10" Foreground="#9CA3AF"/>
+                                        <TextBlock Text="{Binding PlayTimeText}" FontSize="10" Foreground="#6B5457" Margin="6,0,0,0"/>
                                     </StackPanel>
                                     <Button Grid.Column="4" Classes="play-btn" Content="تشغيل" Padding="14,5"
                                             Command="{Binding #RootWindow.((vm:MainViewModel)DataContext).LaunchGameCommand}"
@@ -775,6 +776,7 @@
                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Platform}" FontWeight="Bold" Foreground="White" FontSize="14"/>
                                 <TextBlock Text="{Binding StatusText}" FontSize="11" Foreground="#9CA3AF" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding PlayTimeText}" FontSize="11" Foreground="#F5A623" Margin="0,2,0,0" IsVisible="{Binding HasPlayTime}"/>
                             </StackPanel>
                             <Button Grid.Column="1" Classes="play-btn" Content="تشغيل" Padding="16,8" Margin="0,0,8,0"
                                     Command="{Binding #RootWindow.((vm:MainViewModel)DataContext).LaunchGameCommand}"

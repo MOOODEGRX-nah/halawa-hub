@@ -25,6 +25,8 @@ public partial class MainWindow
             }
         };
 
+        Activated += (_, _) => (DataContext as MainViewModel)?.OnWindowRegainedFocus();
+
         try
         {
             var icon = new TrayIcon

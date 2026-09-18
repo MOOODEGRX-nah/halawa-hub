@@ -581,6 +581,7 @@
 
             <!-- ============ القائمة المفلترة العادية ============ -->
             <ScrollViewer IsVisible="{Binding !IsHomeView}">
+                <StackPanel>
                 <ListBox ItemsSource="{Binding FilteredGames}"
                          SelectedItem="{Binding SelectedGame}"
                          IsVisible="{Binding !IsListView}"
@@ -736,6 +737,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                </StackPanel>
             </ScrollViewer>
 
             </Grid>

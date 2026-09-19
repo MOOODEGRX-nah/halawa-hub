@@ -776,6 +776,7 @@
                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Platform}" FontWeight="Bold" Foreground="White" FontSize="14"/>
                                 <TextBlock Text="{Binding StatusText}" FontSize="11" Foreground="#9CA3AF" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding PlayTimeText}" FontSize="13" FontWeight="SemiBold" Foreground="#F5A623" Margin="0,6,0,0" IsVisible="{Binding HasPlayTime}"/>
                             <TextBlock Text="{Binding PlayTimeText}" FontSize="11" Foreground="#F5A623" Margin="0,2,0,0" IsVisible="{Binding HasPlayTime}"/>
                             </StackPanel>
                             <Button Grid.Column="1" Classes="play-btn" Content="تشغيل" Padding="16,8" Margin="0,0,8,0"

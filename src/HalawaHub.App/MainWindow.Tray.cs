@@ -1,4 +1,5 @@
 using Avalonia;
+using HalawaHub.App.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Platform;
 using System;

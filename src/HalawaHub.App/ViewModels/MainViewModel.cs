@@ -631,6 +631,53 @@ public class MainViewModel : INotifyPropertyChanged
         Log.Info( انتهت جلسة لعب {card.Name}: {(int)secs / 60} دقيقة");
     }
 
+    private GameCardViewModel? _sessionGame;
+    private DateTime _sessionStart;
+    private Process? _sessionProcess;
+
+    private void BeginPlaySession(GameCardViewModel card, Process? proc)
+    {
+        EndPlaySession();
+        _sessionGame = card;
+        _sessionStart = DateTime.UtcNow;
+
+        if (proc != null && File.Exists(card.Game.ExecutablePath))
+        {
+            try
+            {
+                _sessionProcess = proc;
+                proc.EnableRaisingEvents = true;
+                proc.Exited += (_, _) =>
+                    Avalonia.Threading.Dispatcher.UIThread.Post(EndPlaySession);
+            }
+            catch
+            {
+                _sessionProcess = null;
+            }
+        }
+
+        Log.Info($"بدأت جلسة لعب: {card.Name}");
+    }
+
+    public void OnWindowRegainedFocus()
+    {
+        if (_sessionGame != null && _sessionProcess == null)
+            EndPlaySession();
+    }
+
+    private void EndPlaySession()
+    {
+        var card = _sessionGame;
+        if (card == null) return;
+        _sessionGame = null;
+
+        var secs = (DateTime.UtcNow - _sessionStart).TotalSeconds;
+        PlayTimeService.AddSeconds(card.Game.Platform, card.Game.Id, secs);
+        card.RefreshPlayTime();
+        UpdateHomeViewCollections();
+        Log.Info($"انتهت جلسة لعب {card.Name}: {(int)secs / 60} دقيقة");
+    }
+
     private void LaunchGame(GameCardViewModel? card)
     {
         if (card == null) return;

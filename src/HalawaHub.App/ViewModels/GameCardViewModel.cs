@@ -80,6 +80,26 @@ public class GameCardViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasPlayTime));
     }
 
+    public string PlayTimeText
+    {
+        get
+        {
+            var total = PlayTimeService.GetTotal(Game.Platform, Game.Id);
+            if (total.TotalMinutes < 1) return "";
+            if (total.TotalHours < 1) return $"لعبت {(int)total.TotalMinutes} دقيقة";
+            if (total.TotalHours < 100) return $"لعبت {(int)total.TotalHours} ساعة";
+            return "لعبت 100+ ساعة";
+        }
+    }
+
+    public bool HasPlayTime => PlayTimeService.GetTotal(Game.Platform, Game.Id).TotalMinutes >= 1;
+
+    public void RefreshPlayTime()
+    {
+        OnPropertyChanged(nameof(PlayTimeText));
+        OnPropertyChanged(nameof(HasPlayTime));
+    }
+
     /// تُستدعى بعد ما تشتغل اللعبة فعليًا — تسجّل وقت التشغيل الحالي
     public void NotifyPlayed()
     {

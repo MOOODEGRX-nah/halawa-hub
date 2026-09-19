@@ -65,14 +65,15 @@ public class GameCardViewModel : INotifyPropertyChanged
         get
         {
             var total = PlayTimeService.GetTotal(Game.Platform, Game.Id);
-            if (total.TotalMinutes < 1) return "";
+            if (total.TotalSeconds < 5) return "";
+            if (total.TotalMinutes < 1) return "لعبت أقل من دقيقة";
             if (total.TotalHours < 1) return $"لعبت {(int)total.TotalMinutes} دقيقة";
             if (total.TotalHours < 100) return $"لعبت {(int)total.TotalHours} ساعة";
             return "لعبت 100+ ساعة";
         }
     }
 
-    public bool HasPlayTime => PlayTimeService.GetTotal(Game.Platform, Game.Id).TotalMinutes >= 1;
+    public bool HasPlayTime => PlayTimeService.GetTotal(Game.Platform, Game.Id).TotalSeconds >= 5;
 
     public void RefreshPlayTime()
     {

@@ -39,7 +39,7 @@ public class GameCardViewModel : INotifyPropertyChanged
             }
             catch
             {
-                // مسار محفوظ غير صالح (مثلاً انتقل الملف)، نتجاهل ونستخدم الغلاف الأصلي
+                // مسار محفوظ غير صالح (مثلاً انتقل الملف)، نتجاهله ونستخدم الغلاف الأصلي
             }
         }
     }
@@ -58,26 +58,6 @@ public class GameCardViewModel : INotifyPropertyChanged
             if (span.TotalDays < 7) return $"قبل {(int)span.TotalDays} أيام";
             return $"قبل {(int)(span.TotalDays / 7)} أسبوع";
         }
-    }
-
-    public string PlayTimeText
-    {
-        get
-        {
-            var total = PlayTimeService.GetTotal(Game.Platform, Game.Id);
-            if (total.TotalMinutes < 1) return "";
-            if (total.TotalHours < 1) return  لعبت {(int)total.TotalMinutes} دقيقة";
-            if (total.TotalHours < 100) return  لعبت {(int)total.TotalHours} ساعة";
-            return "لعبت 100+ ساعة";
-        }
-    }
-
-    public bool HasPlayTime => PlayTimeService.GetTotal(Game.Platform, Game.Id).TotalMinutes >= 1;
-
-    public void RefreshPlayTime()
-    {
-        OnPropertyChanged(nameof(PlayTimeText));
-        OnPropertyChanged(nameof(HasPlayTime));
     }
 
     public string PlayTimeText

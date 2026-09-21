@@ -559,7 +559,11 @@ public class MainViewModel : INotifyPropertyChanged
                 query = query.OrderByDescending(c => GetInstallTimestamp(c.Game)).Take(30);
                 break;
             default:
-                query = query.Where(c => c.Platform == SelectedNavItem);
+                // استخراج اسم المنصة من label مثل "Steam (45)" → "Steam"
+            var platformName = SelectedNavItem.Contains(" (")
+                ? SelectedNavItem.Substring(0, SelectedNavItem.IndexOf(" ("))
+                : SelectedNavItem;
+            query = query.Where(c => c.Platform == platformName);
                 break;
         }
 

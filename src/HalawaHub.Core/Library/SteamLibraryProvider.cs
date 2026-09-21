@@ -83,6 +83,14 @@ public class SteamLibraryProvider : IGameLibraryProvider
         var nameMatch = Regex.Match(content, "\"name\"\\s*\"([^\"]+)\"");
         var installDirMatch = Regex.Match(content, "\"installdir\"\\s*\"([^\"]+)\"");
 
+    var name = nameMatch.Groups[1].Value;
+    if (appId == "228980" ||
+        name.Contains("Redistributables", StringComparison.OrdinalIgnoreCase) ||
+        name.Contains("DirectX Runtime", StringComparison.OrdinalIgnoreCase) ||
+        name.Contains("Proton", StringComparison.OrdinalIgnoreCase) ||
+        name.Contains("Depot", StringComparison.OrdinalIgnoreCase))
+        return null;
+
         if (!nameMatch.Success || !installDirMatch.Success) return null;
 
         var installPath = Path.Combine(steamAppsPath, "common", installDirMatch.Groups[1].Value);

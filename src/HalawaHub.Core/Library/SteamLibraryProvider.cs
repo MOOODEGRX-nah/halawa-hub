@@ -91,7 +91,7 @@ public class SteamLibraryProvider : IGameLibraryProvider
         return new GameInfo
         {
             Id = appId,
-            Name = nameMatch.Groups[1].Value,
+            Name = name,
             InstallPath = installPath,
             ExecutablePath = $"steam://rungameid/{appId}",
             Platform = "Steam",

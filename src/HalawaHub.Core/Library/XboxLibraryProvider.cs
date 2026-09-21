@@ -45,7 +45,20 @@ Get-AppxPackage | Where-Object { -not $_.IsFramework -and $gamePackageIds.Contai
 
     public string PlatformName => "Xbox / Microsoft Store";
 
-    public bool IsAvailable() => OperatingSystem.IsWindows();
+    public bool IsAvailable()
+    {
+        if (!OperatingSystem.IsWindows()) return false;
+        try
+        {
+            // fast-path: ما فيه أي لعبة مسجلة بعقد Windows.Games = لا داعي لتشغيل PowerShell أصلًا
+            using var key = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(@"Extensions\ContractId\Windows.Games\PackageId");
+            return key != null && key.SubKeyCount > 0;
+        }
+        catch
+        {
+            return true; // ما قدرنا نقرأ السجل؟ خلي الفحص الكامل يحاول
+        }
+    }
 
     public IEnumerable<GameInfo> ScanLibrary()
     {

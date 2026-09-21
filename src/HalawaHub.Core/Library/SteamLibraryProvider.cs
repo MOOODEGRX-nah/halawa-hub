@@ -88,6 +88,15 @@ public class SteamLibraryProvider : IGameLibraryProvider
         var installPath = Path.Combine(steamAppsPath, "common", installDirMatch.Groups[1].Value);
         var appId = idMatch.Success ? idMatch.Groups[1].Value : Guid.NewGuid().ToString();
 
+    // حزم دعم تثبتها ستيم كـ"تطبيقات" وليست ألعابًا — نخفيها من المكتبة
+    var name = nameMatch.Groups[1].Value;
+    if (appId == "228980"
+        || name.Contains("Redistributables", StringComparison.OrdinalIgnoreCase)
+        || name.Contains("DirectX Runtime", StringComparison.OrdinalIgnoreCase)
+        || name.Contains("Proton", StringComparison.OrdinalIgnoreCase)
+        || name.Contains("Depot", StringComparison.OrdinalIgnoreCase))
+        return null;
+
         return new GameInfo
         {
             Id = appId,

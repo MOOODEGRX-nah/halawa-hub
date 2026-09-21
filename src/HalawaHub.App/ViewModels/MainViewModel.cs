@@ -504,23 +504,10 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void UpdateAvailablePlatforms()
     {
-        // المنصات المدعومة ثابتة (حتى لو ما فيها ألعاب) — المستخدم يشوف كل الخيارات المتاحة
-        var supportedPlatforms = new[] { "Steam", "Epic Games", "Riot Games", "Xbox / Microsoft Store", "GOG" };
-        var installedPlatforms = Games.Select(c => c.Platform).Distinct().ToHashSet();
+        var platforms = Games.Select(c => c.Platform).Distinct().OrderBy(p => p).ToList();
 
         AvailablePlatforms.Clear();
-        foreach (var platform in supportedPlatforms)
-        {
-            // نضيف المنصة المدعومة، ونضيف عدّاد الألعاب بين قوسين لو فيه
-            var count = Games.Count(c => c.Platform == platform);
-            var label = count > 0 ?  ({count})" : platform;
-            AvailablePlatforms.Add(label);
-        }
-
-        // لو المنصة المختارة اختفت من القائمة (ما فيها ألعاب بعد التحديث)، نرجع لـ "الكل"
-        var fixedItems = new[] { NavAll, NavFavorite, NavInstalled, NavRecent };
-        if (!fixedItems.Contains(_selectedNavItem) && !AvailablePlatforms.Contains(_selectedNavItem))
-            _selectedNavItem = NavAll;
+        foreach (var p in platforms) AvailablePlatforms.Add(p);
 
         // لو المنصة المختارة اختفت من القائمة (ما فيها ألعاب بعد التحديث)، نرجع لـ "الكل"
         var fixedItems = new[] { NavAll, NavFavorite, NavInstalled, NavRecent };
@@ -565,8 +552,14 @@ public class MainViewModel : INotifyPropertyChanged
                 // التثبيت نفسه — مو مثالي 100% لكنه مؤشر معقول لين نبني سجل حقيقي
                 query = query.OrderByDescending(c => GetInstallTimestamp(c.Game)).Take(30);
                 break;
+        default:
+            // استخراج اسم المنصة من label مثل "Steam (45)" → "Steam"
+            var platformName = SelectedNavItem.Contains(" (")
+                ? SelectedNavItem.Substring(0, SelectedNavItem.IndexOf(" ("))
+                : SelectedNavItem;
+            query = query.Where(c => c.Platform == platformName);
+            break;
             default:
-                query = query.Where(c => c.Platform == SelectedNavItem);
                 break;
         }
 

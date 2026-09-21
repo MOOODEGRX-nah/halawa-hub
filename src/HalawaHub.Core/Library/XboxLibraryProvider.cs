@@ -8,28 +8,38 @@ using HalawaHub.Core.Plugins;
 namespace HalawaHub.Core.Library;
 
 /// <summary>
-/// يكتشف ألعاب Xbox / Microsoft Store المثبتة.
-///
-/// المحاولات السابقة (استبعاد بالاسم، ثم SignatureKind=Store) فشلت لأن
-/// ويندوز الحديث يوزّع حتى مكوّنات النظام (WinAppRuntime، إضافات الفيديو،
-/// Widgets...) عبر المتجر، فتوصف "Store" برضه.
-///
-/// الحل الصحيح: نسأل ويندوز نفسه مباشرة عبر سجل "Windows.Games" Contract
-/// بالـ Registry — نفس المصدر اللي يعتمد عليه Xbox Game Bar لمعرفة أي
-/// تطبيق مسجّل رسميًا كـ "لعبة"، بدل التخمين بالاسم أو نوع التوقيع.
+/// كشف ألعاب Xbox / Microsoft Store بالمنهج العام المعروف بالصناعة:
+/// لا توجد API ترجع "الألعاب" جاهزة، لذلك نعدّد الحزم المثبتة (مصدر Playnite
+/// وshell:AppsFolder) ثم نصنفها بثلاث طبقات:
+///   1) عقد Windows.Games بالسجل (نفس مصدر Xbox Game Bar) بمطابقة مزدوجة
+///      (PackageFullName أو PackageFamilyName لاختلاف الصيغ بين إصدارات ويندوز)
+///   2) مسار التثبيت تحت XboxGames على أي قرص (ألعاب Gaming Services،
+///      لأن مجلد WindowsApps محمي من القراءة المباشرة)
+///   3) استبعاد الإطارات والحزم النظامية تلقائيًا (IsFramework)
+/// كل مرحلة تسجل أعدادها وأسماء عينات منها — أي جهاز يشخّص نفسه من السجل.
+/// ملاحظة: المكتبة السحابية (ألعاب غير مثبتة) تتطلب تسجيل دخول Xbox Live
+/// (نهج GOG Galaxy) وهي خطوة مستقبلية وليست كشفًا محليًا.
 /// </summary>
 public class XboxLibraryProvider : IGameLibraryProvider
 {
     private const string PsScript = @"
-$gamePackageIds = @{}
+$gameIds = @{}
 try {
     $regPath = 'Registry::HKEY_CLASSES_ROOT\Extensions\ContractId\Windows.Games\PackageId'
     if (Test-Path $regPath) {
-        Get-ChildItem $regPath -ErrorAction Stop | ForEach-Object { $gamePackageIds[$_.PSChildName] = $true }
+        Get-ChildItem $regPath -ErrorAction Stop | ForEach-Object { $gameIds[$_.PSChildName] = $true }
     }
 } catch { }
 
-Get-AppxPackage | Where-Object { -not $_.IsFramework -and $gamePackageIds.ContainsKey($_.PackageFullName) } | ForEach-Object {
+$candidates = Get-AppxPackage | Where-Object { -not $_.IsFramework }
+
+$games = $candidates | Where-Object {
+    $gameIds.ContainsKey($_.PackageFullName) -or
+    $gameIds.ContainsKey($_.PackageFamilyName) -or
+    ($_.InstallLocation -like '*\XboxGames\*')
+}
+
+$games | ForEach-Object {
     try {
         $manifest = Get-AppxPackageManifest $_.PackageFullName -ErrorAction Stop
         $app = $manifest.Package.Applications.Application | Select-Object -First 1
@@ -45,23 +55,13 @@ Get-AppxPackage | Where-Object { -not $_.IsFramework -and $gamePackageIds.Contai
 
     public string PlatformName => "Xbox / Microsoft Store";
 
-    public bool IsAvailable()
-    {
-        if (!OperatingSystem.IsWindows()) return false;
-        try
-        {
-            // fast-path: ما فيه أي لعبة مسجلة بعقد Windows.Games = لا داعي لتشغيل PowerShell أصلًا
-            using var key = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(@"Extensions\ContractId\Windows.Games\PackageId");
-            return key != null && key.SubKeyCount > 0;
-        }
-        catch
-        {
-            return true; // ما قدرنا نقرأ السجل؟ خلي الفحص الكامل يحاول
-        }
-    }
+    public bool IsAvailable() => OperatingSystem.IsWindows();
 
     public IEnumerable<GameInfo> ScanLibrary()
     {
+        var contractCount = CountContractKeys();
+        Log.Info($"Xbox: عقد Windows.Games فيه {contractCount} مفتاح مسجل");
+
         List<AppxEntry> entries;
         try
         {
@@ -69,8 +69,12 @@ Get-AppxPackage | Where-Object { -not $_.IsFramework -and $gamePackageIds.Contai
         }
         catch
         {
+            Log.Error("Xbox: فشل تشغيل سكربت الفحص");
             yield break;
         }
+
+        var sample = string.Join(", ", entries.Take(5).Select(e => e.Name));
+        Log.Info($"Xbox: تطابق {entries.Count} حزمة لعبة [{sample}]");
 
         foreach (var entry in entries)
         {
@@ -87,12 +91,24 @@ Get-AppxPackage | Where-Object { -not $_.IsFramework -and $gamePackageIds.Contai
                 Id = entry.PackageFamilyName,
                 Name = entry.Name,
                 InstallPath = entry.InstallLocation,
-                // أسلوب موثّق لتشغيل تطبيقات UWP من سطر الأوامر عبر مستكشف الملفات
                 ExecutablePath = "explorer.exe",
                 LaunchArguments = $"shell:appsFolder\\{entry.PackageFamilyName}!{appId}",
                 Platform = "Xbox / Microsoft Store",
                 IsInstalled = true
             };
+        }
+    }
+
+    private static int CountContractKeys()
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(@"Extensions\ContractId\Windows.Games\PackageId");
+            return key?.SubKeyCount ?? 0;
+        }
+        catch
+        {
+            return -1;
         }
     }
 
@@ -113,7 +129,7 @@ Get-AppxPackage | Where-Object { -not $_.IsFramework -and $gamePackageIds.Contai
 
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd() ?? "";
-            process?.WaitForExit(15000);
+            process?.WaitForExit(30000);
 
             if (string.IsNullOrWhiteSpace(output)) return new List<AppxEntry>();
 

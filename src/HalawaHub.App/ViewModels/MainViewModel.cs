@@ -504,10 +504,23 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void UpdateAvailablePlatforms()
     {
-        var platforms = Games.Select(c => c.Platform).Distinct().OrderBy(p => p).ToList();
+        // المنصات المدعومة ثابتة (حتى لو ما فيها ألعاب) — المستخدم يشوف كل الخيارات المتاحة
+        var supportedPlatforms = new[] { "Steam", "Epic Games", "Riot Games", "Xbox / Microsoft Store", "GOG" };
+        var installedPlatforms = Games.Select(c => c.Platform).Distinct().ToHashSet();
 
         AvailablePlatforms.Clear();
-        foreach (var p in platforms) AvailablePlatforms.Add(p);
+        foreach (var platform in supportedPlatforms)
+        {
+            // نضيف المنصة المدعومة، ونضيف عدّاد الألعاب بين قوسين لو فيه
+            var count = Games.Count(c => c.Platform == platform);
+            var label = count > 0 ?  ({count})" : platform;
+            AvailablePlatforms.Add(label);
+        }
+
+        // لو المنصة المختارة اختفت من القائمة (ما فيها ألعاب بعد التحديث)، نرجع لـ "الكل"
+        var fixedItems = new[] { NavAll, NavFavorite, NavInstalled, NavRecent };
+        if (!fixedItems.Contains(_selectedNavItem) && !AvailablePlatforms.Contains(_selectedNavItem))
+            _selectedNavItem = NavAll;
 
         // لو المنصة المختارة اختفت من القائمة (ما فيها ألعاب بعد التحديث)، نرجع لـ "الكل"
         var fixedItems = new[] { NavAll, NavFavorite, NavInstalled, NavRecent };

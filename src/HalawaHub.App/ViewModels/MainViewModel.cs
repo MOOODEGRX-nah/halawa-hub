@@ -54,7 +54,6 @@ public class MainViewModel : INotifyPropertyChanged
         set
         {
             _selectedNavItem = string.IsNullOrEmpty(value) ? NavAll : value;
-            OnPropertyChanged(nameof(SelectedNavItem));
             OnPropertyChanged(nameof(IsHomeView));
             ApplyFilter();
         }
@@ -504,10 +503,16 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void UpdateAvailablePlatforms()
     {
-        var platforms = Games.Select(c => c.Platform).Distinct().OrderBy(p => p).ToList();
+        // المنصات المدعومة ثابتة (حتى لو ما فيها ألعاب) — المستخدم يشوف كل الخيارات المتاحة
+        var supportedPlatforms = new[] { "Steam", "Epic Games", "Riot Games", "Xbox / Microsoft Store", "GOG" };
 
         AvailablePlatforms.Clear();
-        foreach (var p in platforms) AvailablePlatforms.Add(p);
+        foreach (var platform in supportedPlatforms)
+        {
+            var count = Games.Count(c => c.Platform == platform);
+            var label = count > 0 ? $"{platform} ({count})" : platform;
+            AvailablePlatforms.Add(label);
+        }
 
         // لو المنصة المختارة اختفت من القائمة (ما فيها ألعاب بعد التحديث)، نرجع لـ "الكل"
         var fixedItems = new[] { NavAll, NavFavorite, NavInstalled, NavRecent };
@@ -515,6 +520,7 @@ public class MainViewModel : INotifyPropertyChanged
             _selectedNavItem = NavAll;
 
         OnPropertyChanged(nameof(SelectedNavItem));
+    }
     }
 
     private bool _isListView;

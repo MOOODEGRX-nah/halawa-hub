@@ -521,7 +521,6 @@ public class MainViewModel : INotifyPropertyChanged
 
         OnPropertyChanged(nameof(SelectedNavItem));
     }
-    }
 
     private bool _isListView;
     public bool IsListView

@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <Version>0.0.10.25</Version>
+    <Version>0.0.10.26</Version>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
     <IncludeSourceRevisionInIdentifier>false</IncludeSourceRevisionInIdentifier>

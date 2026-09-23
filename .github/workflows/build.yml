@@ -43,6 +43,32 @@ jobs:
         shell: bash
         run: echo "version=$(cat VERSION | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
 
+      - name: Verify exe version matches VERSION (prevents E09 infinite update loop)
+        shell: pwsh
+        run: |
+          $expectedVersion = (Get-Content VERSION -Raw).Trim()
+          $exePath = Get-ChildItem -Path publish -Filter 'Halawa-Hub.exe' -Recurse | Select-Object -First 1
+          if (-not $exePath) {
+            Write-Error "Halawa-Hub.exe not found in publish/"
+            exit 1
+          }
+          $actualVersion = $exePath.VersionInfo.FileVersion
+          Write-Host "Expected: $expectedVersion"
+          Write-Host "Actual:   $actualVersion"
+          if ($actualVersion -ne $expectedVersion) {
+            Write-Error "FileVersion mismatch: exe='$actualVersion' but VERSION='$expectedVersion'"
+            exit 1
+          }
+          Write-Host "✓ Version guard passed"
+
+      - name: Generate SHA256 checksum
+        shell: bash
+        run: |
+          cd publish
+          sha256sum Halawa-Hub.exe > ../SHA256SUMS.txt
+          cd ..
+          cat SHA256SUMS.txt
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -53,6 +79,25 @@ jobs:
         shell: pwsh
         run: Compress-Archive -Path publish\* -DestinationPath Halawa-Hub.zip -Force
 
+      - name: Generate release notes from CHANGELOG
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION -Raw).Trim()
+          $changelog = Get-Content CHANGELOG.json -Raw | ConvertFrom-Json
+          $entry = $changelog.$version
+          if (-not $entry) {
+            Write-Warning "No CHANGELOG entry for $version, using fallback"
+            $notes = "## v$version`n`nالتفاصيل داخل البرنامج عبر نافذة ما الجديد"
+          } else {
+            $notes = "## v$version`n`n"
+            foreach ($line in $entry) {
+              $notes += "- $line`n"
+            }
+          }
+          $notes | Out-File -FilePath release-notes.md -Encoding UTF8
+          Write-Host "Generated release-notes.md:"
+          Get-Content release-notes.md
+
       - name: Create GitHub Release (gh CLI with auto-retry)
         shell: bash
         env:
@@ -62,7 +107,7 @@ jobs:
           gh release delete "$TAG" --yes --cleanup-tag || true
           for i in 1 2 3; do
             echo "===== attempt $i ====="
-            if gh release create "$TAG" Halawa-Hub.zip --title "Halawa-Hub $TAG" --notes "التفاصيل داخل البرنامج عبر نافذة ما الجديد" --latest; then
+            if gh release create "$TAG" Halawa-Hub.zip SHA256SUMS.txt --title "Halawa-Hub $TAG" --notes-file release-notes.md --latest; then
               echo "Release created and uploaded OK"
               exit 0
             fi

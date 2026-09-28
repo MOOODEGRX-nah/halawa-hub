@@ -3,7 +3,7 @@
         xmlns:vm="using:HalawaHub.App.ViewModels"
         xmlns:conv="using:HalawaHub.App.Converters"
         xmlns:behaviors="using:HalawaHub.App.Behaviors"
-        xmlns:anim="using:AnimatedImage.Avalonia"
+        xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
         x:Class="HalawaHub.App.MainWindow"
         x:Name="RootWindow"
         x:DataType="vm:MainViewModel"
@@ -481,7 +481,6 @@
                                                     <Grid>
                                                         <Image Stretch="UniformToFill" IsVisible="{Binding HasCoverImage}"
                                                                behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
-                                           anim:AnimatedImage.AnimatedSource="{Binding AnimatedCoverSource}"
                                                                behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"
                                                                behaviors:AsyncImage.DecodeWidth="180"/>
                                                         <Border Background="#99000000"/>
@@ -530,7 +529,6 @@
                                                             ClipToBounds="True" Background="#0D0608">
                                                         <Image Stretch="UniformToFill" IsVisible="{Binding HasCoverImage}"
                                                                behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
-                                           anim:AnimatedImage.AnimatedSource="{Binding AnimatedCoverSource}"
                                                                behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"
                                                                behaviors:AsyncImage.DecodeWidth="60"/>
                                                     </Border>
@@ -565,7 +563,6 @@
                                         <Grid>
                                             <Image Stretch="UniformToFill" IsVisible="{Binding HasCoverImage}"
                                                    behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
-                                           anim:AnimatedImage.AnimatedSource="{Binding AnimatedCoverSource}"
                                                    behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"
                                                    behaviors:AsyncImage.DecodeWidth="260"/>
                                             <Border Background="#80000000"/>
@@ -623,7 +620,6 @@
                                     <Image Stretch="UniformToFill"
                                            IsVisible="{Binding HasCoverImage}"
                                            behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
-                                           anim:AnimatedImage.AnimatedSource="{Binding AnimatedCoverSource}"
                                            behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"
                                            behaviors:AsyncImage.DecodeWidth="220"/>
 
@@ -718,7 +714,6 @@
                                     <Border Grid.Column="0" Width="34" Height="46" CornerRadius="4" ClipToBounds="True" Background="#0D0608">
                                         <Image Stretch="UniformToFill" IsVisible="{Binding HasCoverImage}"
                                                behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
-                                           anim:AnimatedImage.AnimatedSource="{Binding AnimatedCoverSource}"
                                                behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"
                                                behaviors:AsyncImage.DecodeWidth="60"/>
                                     </Border>
@@ -832,7 +827,6 @@
                                 <Border Height="220" CornerRadius="8" ClipToBounds="True" Background="#0D0608">
                                     <Image Stretch="Uniform" IsVisible="{Binding HasCoverImage}"
                                            behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
-                                           anim:AnimatedImage.AnimatedSource="{Binding AnimatedCoverSource}"
                                            behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"/>
                                 </Border>
                                 <Button Classes="outline-btn" Content="تغيير الغلاف" HorizontalAlignment="Left"

@@ -1,4 +1,8 @@
 {
+  "0.0.10.35": [
+    "إصلاح: حذف السطر المكرر لخاصية anim:ImageBehavior.AnimatedSource (كان مكررًا مرتين على نفس العنصر — الآن عنصر واحد فقط بتبويب Artwork)",
+    "الآن GIF/WEBP/APNG يتحرك بشكل صحيح بدون تكرار"
+  ],
   "0.0.10.34": [
     "إصلاح حاسم: استخدام range pattern لإضافة anim:ImageBehavior.AnimatedSource داخل كتلة Artwork فقط (كان السطر مفقودًا لأن Stretch و FallbackUrl مو على سطور متتالية)",
     "الآن GIF/WEBP/APNG يتحرك فعلاً عند اختياره كغلاف مخصص من تبويب Artwork"

@@ -1,10 +1,8 @@
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using HalawaHub.Core;
 
 namespace HalawaHub.Core.Updates;
@@ -50,13 +48,27 @@ public static class SelfUpdater
 
             var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
             var exeName = Path.GetFileName(Environment.ProcessPath ?? "Halawa-Hub.exe");
+            var logPath = Path.Combine(tempRoot, "update.log");
 
+            // bat script محسّن: taskkill + logging + retry
             var scriptPath = Path.Combine(tempRoot, "apply-update.bat");
             var scriptContent =
                 "@echo off\r\n" +
+                $"echo Update started at %date% %time% > \"{logPath}\"\r\n" +
+                "timeout /t 3 /nobreak >nul\r\n" +
+                $"echo Killing old process... >> \"{logPath}\"\r\n" +
+                $"taskkill /F /IM \"{exeName}\" /FI \"STATUS eq RUNNING\" >> \"{logPath}\" 2>&1\r\n" +
                 "timeout /t 2 /nobreak >nul\r\n" +
-                $"xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\\"\r\n" +
+                $"echo Copying files from {extractPath} to {installDir} >> \"{logPath}\"\r\n" +
+                $"xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\\" >> \"{logPath}\" 2>&1\r\n" +
+                $"if errorlevel 1 (\r\n" +
+                $"  echo xcopy failed, retrying... >> \"{logPath}\"\r\n" +
+                "  timeout /t 3 /nobreak >nul\r\n" +
+                $"  xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\\" >> \"{logPath}\" 2>&1\r\n" +
+                ")\r\n" +
+                $"echo Starting {exeName} >> \"{logPath}\"\r\n" +
                 $"start \"\" \"{Path.Combine(installDir, exeName)}\"\r\n" +
+                "echo Update completed >> \"%logPath%\"\r\n" +
                 "del \"%~f0\"\r\n";
 
             await File.WriteAllTextAsync(scriptPath, scriptContent);

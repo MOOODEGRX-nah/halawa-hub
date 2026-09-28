@@ -133,11 +133,33 @@ public class GameCardViewModel : INotifyPropertyChanged
     }
 
     /// تُستدعى لما يتوصّل رابط غلاف من مصدر خارجي (SteamGridDB) بعد التحميل الأولي
+    // هل الغلاف متحرك؟ (ملف محلي بامتداد gif/webp/apng)
+    public bool IsAnimatedCover
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(CoverImageUrl)) return false;
+            if (!CoverImageUrl.StartsWith("file://", StringComparison.OrdinalIgnoreCase)) return false;
+            try
+            {
+                var path = new Uri(CoverImageUrl).LocalPath;
+                var ext = System.IO.Path.GetExtension(path)?.ToLowerInvariant();
+                return ext is ".gif" or ".webp" or ".apng";
+            }
+            catch { return false; }
+        }
+    }
+
+    // مصدر الصورة المتحركة (null لو مش متحركة)
+    public string? AnimatedCoverSource => IsAnimatedCover ? CoverImageUrl : null;
+
     public void SetCoverUrl(string url)
     {
         Game.CoverImageUrl = url;
         OnPropertyChanged(nameof(CoverImageUrl));
         OnPropertyChanged(nameof(HasCoverImage));
+        OnPropertyChanged(nameof(IsAnimatedCover));
+        OnPropertyChanged(nameof(AnimatedCoverSource));
     }
 
     /// تُستدعى لما يختار المستخدم صورة غلاف مخصصة من جهازه
@@ -151,6 +173,8 @@ public class GameCardViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(CoverImageUrl));
         OnPropertyChanged(nameof(CoverImageUrlFallback));
         OnPropertyChanged(nameof(HasCoverImage));
+        OnPropertyChanged(nameof(IsAnimatedCover));
+        OnPropertyChanged(nameof(AnimatedCoverSource));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

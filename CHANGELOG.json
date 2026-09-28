@@ -1,4 +1,8 @@
 {
+  "0.0.10.34": [
+    "إصلاح حاسم: استخدام range pattern لإضافة anim:ImageBehavior.AnimatedSource داخل كتلة Artwork فقط (كان السطر مفقودًا لأن Stretch و FallbackUrl مو على سطور متتالية)",
+    "الآن GIF/WEBP/APNG يتحرك فعلاً عند اختياره كغلاف مخصص من تبويب Artwork"
+  ],
   "0.0.10.33": [
     "إصلاح: إضافة الخاصية anim:ImageBehavior.AnimatedSource بتبويب Artwork (كانت مفقودة ببلوك v0.0.10.32)",
     "الآن GIF/WEBP/APNG يتحرك فعلاً بتبويب Artwork عند اختياره كغلاف مخصص"

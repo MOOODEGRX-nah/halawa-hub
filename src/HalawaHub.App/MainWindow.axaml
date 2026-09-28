@@ -828,6 +828,7 @@
                                     <Image Stretch="Uniform" IsVisible="{Binding HasCoverImage}"
                                            behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
                                            behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"/>
+                                           anim:ImageBehavior.AnimatedSource="{Binding AnimatedCoverSource}"
                                 </Border>
                                 <Button Classes="outline-btn" Content="تغيير الغلاف" HorizontalAlignment="Left"
                                         Padding="16,8" Click="ChangeCoverButton_Click"/>

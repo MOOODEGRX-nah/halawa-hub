@@ -256,9 +256,10 @@ public partial class MainViewModel : INotifyPropertyChanged
     public RelayCommand VerifyApiKeyCommand { get; }
     public RelayCommand CloseChangelogCommand { get; }
 
-    public MainViewModel(ILibraryService libraryService, )
+    public MainViewModel(ILibraryService libraryService)
     {
         // النواة تبحث عن أي DLL داخل مجلد Plugins بجانب الملف التنفيذي
+        _libraryService = libraryService;
         var pluginsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
         _pluginLoader = new PluginLoader(pluginsDir);
         _pluginLoader.LoadPlugins();

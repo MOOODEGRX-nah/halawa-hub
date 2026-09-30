@@ -1,4 +1,8 @@
 {
+  "0.0.10.40": [
+    "إصلاح حرج: تصحيح constructor signature + إضافة field + instantiation لـ LibraryService (كان البناء سيفشل بسبب comma زيادة)",
+    "الآن LibraryService يعمل فعليًا وMainViewModel يستخدمه"
+  ],
   "0.0.10.39": [
     "استخراج LibraryService: فصل منطق فحص المكتبات من MainViewModel لخدمة مستقلة قابلة للاختبار",
     "استعداد لـ Dependency Injection الكامل بـ 0.0.10.45"

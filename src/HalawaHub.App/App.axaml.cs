@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using HalawaHub.App.ViewModels;
+using HalawaHub.Core.Library;
 
 namespace HalawaHub.App;
 
@@ -16,6 +17,7 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            var libraryService = new LibraryService();
             desktop.MainWindow = new MainWindow
             {
                 DataContext = new MainViewModel(libraryService)

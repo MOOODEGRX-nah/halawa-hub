@@ -1,0 +1,8 @@
+{
+  "Id": "730",
+  "Name": "Counter-Strike 2",
+  "InstallPath": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Global Offensive",
+  "ExecutablePath": "cs2.exe",
+  "Platform": "Steam",
+  "IsInstalled": true
+}

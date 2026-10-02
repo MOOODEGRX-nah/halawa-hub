@@ -1,0 +1,8 @@
+{
+  "Id": "Microsoft.HaloInfinite",
+  "Name": "Halo Infinite",
+  "InstallPath": "C:\\XboxGames\\Halo Infinite",
+  "ExecutablePath": "HaloInfinite.exe",
+  "Platform": "Xbox / Microsoft Store",
+  "IsInstalled": true
+}

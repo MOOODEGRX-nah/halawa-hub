@@ -1,4 +1,8 @@
 {
+  "0.0.10.46": [
+    "اختبارات fixtures موسعة: 4 ملفات اختبارات (DataPersistence/FilterService/LibraryService/UpdateService) + 5 fixtures JSON لكل منصة",
+    "حماية بيانات المستخدم (قاعدة R34): DataPersistenceTests يؤكد أن ملفات config/favorites تشتغل"
+  ],
   "0.0.10.45": [
     "إصلاح تعريف مكرر: حقل _libraryService كان معرّفًا بملفين partial معًا — حُذف من Library.cs وتوحدت حقول الخدمات الثلاثة بـ MainViewModel.cs",
     "قاعدة R33: البحث عن الحقول يشمل كل ملفات الـ partial وليس الملف الرئيسي فقط"

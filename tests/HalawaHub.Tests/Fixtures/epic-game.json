@@ -1,0 +1,8 @@
+{
+  "Id": "fortnite",
+  "Name": "Fortnite",
+  "InstallPath": "C:\\Program Files\\Epic Games\\Fortnite",
+  "ExecutablePath": "FortniteLauncher.exe",
+  "Platform": "Epic Games",
+  "IsInstalled": true
+}

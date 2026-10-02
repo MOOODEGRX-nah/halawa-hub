@@ -1,0 +1,8 @@
+{
+  "Id": "valorant",
+  "Name": "VALORANT",
+  "InstallPath": "C:\\Riot Games\\VALORANT",
+  "ExecutablePath": "VALORANT.exe",
+  "Platform": "Riot Games",
+  "IsInstalled": true
+}

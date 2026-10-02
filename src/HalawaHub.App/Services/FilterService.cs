@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using HalawaHub.App.ViewModels;
 using HalawaHub.Core.Models;
 
@@ -9,41 +12,44 @@ namespace HalawaHub.App.Services;
 /// </summary>
 public class FilterService : IFilterService
 {
-    private const string NavAll = "الكل";
-    private const string NavFavorite = "المفضلة";
-    private const string NavInstalled = "مثبت";
-    private const string NavRecent = "حديثًا";
-
     public IEnumerable<GameCardViewModel> ApplyFilter(
         IEnumerable<GameCardViewModel> games,
         string searchQuery,
         string selectedNavItem,
-        string sortMode)
+        string sortMode,
+        string navAll,
+        string navFavorite,
+        string navInstalled,
+        string navRecent)
     {
         IEnumerable<GameCardViewModel> query = games;
 
         if (!string.IsNullOrWhiteSpace(searchQuery))
             query = query.Where(c => c.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
 
-        switch (selectedNavItem)
+        if (selectedNavItem == navAll)
         {
-            case NavAll:
-                break;
-            case NavFavorite:
-                query = query.Where(c => c.IsFavorite);
-                break;
-            case NavInstalled:
-                query = query.Where(c => c.IsInstalled);
-                break;
-            case NavRecent:
-                query = query.OrderByDescending(c => GetInstallTimestamp(c.Game)).Take(30);
-                break;
-            default:
-                var platformName = selectedNavItem.Contains(" (")
-                    ? selectedNavItem.Substring(0, selectedNavItem.IndexOf(" ("))
-                    : selectedNavItem;
-                query = query.Where(c => c.Platform == platformName);
-                break;
+            // لا فلتر إضافي
+        }
+        else if (selectedNavItem == navFavorite)
+        {
+            query = query.Where(c => c.IsFavorite);
+        }
+        else if (selectedNavItem == navInstalled)
+        {
+            query = query.Where(c => c.IsInstalled);
+        }
+        else if (selectedNavItem == navRecent)
+        {
+            query = query.OrderByDescending(c => GetInstallTimestamp(c.Game)).Take(30);
+        }
+        else
+        {
+            // استخراج اسم المنصة من label مثل "Steam (45)" → "Steam"
+            var platformName = selectedNavItem.Contains(" (")
+                ? selectedNavItem.Substring(0, selectedNavItem.IndexOf(" ("))
+                : selectedNavItem;
+            query = query.Where(c => c.Platform == platformName);
         }
 
         query = sortMode switch

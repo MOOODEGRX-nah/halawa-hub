@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using HalawaHub.Core;
 using HalawaHub.Core.Updates;
 
@@ -21,23 +23,13 @@ public class UpdateService : IUpdateService
 
         if (update is not { IsNewer: true })
         {
-            return new UpdateCheckResult(
-                HasUpdate: false,
-                LatestVersion: null,
-                DownloadUrl: null,
-                Sha256: null,
-                Message: "البرنامج محدّث لآخر إصدار.");
+            return new UpdateCheckResult(false, null, null, null, "البرنامج محدّث لآخر إصدار.");
         }
 
         Log.Info("تحديث جديد متوفر: v" + update.LatestVersion);
         var message = $"يتوفر إصدار جديد: v{update.LatestVersion} (لديك v{AppInfo.Version})";
 
-        return new UpdateCheckResult(
-            HasUpdate: true,
-            LatestVersion: update.LatestVersion,
-            DownloadUrl: update.DownloadUrl,
-            Sha256: update.Sha256,
-            Message: message);
+        return new UpdateCheckResult(true, update.LatestVersion, update.DownloadUrl, update.Sha256, message);
     }
 
     public async Task<UpdateInstallResult> InstallUpdateAsync(
@@ -49,14 +41,10 @@ public class UpdateService : IUpdateService
 
         if (success)
         {
-            return new UpdateInstallResult(
-                Success: true,
-                Message: "التحديث جاهز، البرنامج بيعيد التشغيل الآن...");
+            return new UpdateInstallResult(true, "التحديث جاهز، البرنامج بيعيد التشغيل الآن...");
         }
 
         Log.Error("فشل التحديث التلقائي");
-        return new UpdateInstallResult(
-            Success: false,
-            Message: "فشل التحديث التلقائي. جرّب لاحقًا أو حمّل من صفحة الإصدارات على GitHub يدويًا.");
+        return new UpdateInstallResult(false, "فشل التحديث التلقائي. جرّب لاحقًا أو حمّل من صفحة الإصدارات على GitHub يدويًا.");
     }
 }

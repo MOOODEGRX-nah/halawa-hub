@@ -1,4 +1,8 @@
 {
+  "0.0.10.43": [
+    "إصلاح فشل بناء 0.0.10.41/0.0.10.42: استرجاع GetInstallTimestamp المستدعاة من Updates.cs + usings كاملة لكل الخدمات",
+    "تحصين FilterService: ثوابت التنقل تمرر من MainViewModel كـ parameters — استحالة انحراف بين التعريف والاستخدام"
+  ],
   "0.0.10.42": [
     "استخراج UpdateService: فصل منطق التحديث الذاتي من MainViewModel لخدمة مستقلة قابلة للاختبار",
     "UpdateService نقي (pure) — يقبل inputs ويرجع records بدون UI state"

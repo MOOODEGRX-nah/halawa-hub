@@ -1,4 +1,5 @@
-using HalawaHub.Core.Updates;
+using System;
+using System.Threading.Tasks;
 
 namespace HalawaHub.App.Services;
 
@@ -22,14 +23,8 @@ public record UpdateInstallResult(bool Success, string Message);
 /// </summary>
 public interface IUpdateService
 {
-    /// <summary>
-    /// يفحص توفر تحديث جديد.
-    /// </summary>
     Task<UpdateCheckResult> CheckForUpdateAsync();
 
-    /// <summary>
-    /// يحمّل ويطبّق التحديث.
-    /// </summary>
     Task<UpdateInstallResult> InstallUpdateAsync(
         string downloadUrl,
         string? sha256,

@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using HalawaHub.App.ViewModels;
 using HalawaHub.Core.Library;
+using HalawaHub.Core.Updates;
 using HalawaHub.App.Services;
 
 namespace HalawaHub.App;

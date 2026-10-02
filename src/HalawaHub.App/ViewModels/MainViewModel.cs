@@ -29,6 +29,9 @@ public partial class MainViewModel : INotifyPropertyChanged
     private readonly List<IGameLibraryProvider> _builtInProviders;
     private readonly SteamGridDbClient _coverClient;
     private readonly SteamNewsClient _newsClient = new();
+    private readonly ILibraryService _libraryService;
+    private readonly IFilterService _filterService;
+    private readonly IUpdateService _updateService;
 
     public ObservableCollection<GameCardViewModel> Games { get; } = new();
     public ObservableCollection<GameCardViewModel> FilteredGames { get; } = new();

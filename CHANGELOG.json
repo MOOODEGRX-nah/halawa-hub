@@ -1,4 +1,8 @@
 {
+  "0.0.10.44": [
+    "إصلاح فشل البناء: إضافة 3 field declarations مفقودة بـ MainViewModel.cs (_libraryService, _filterService, _updateService) + تضمين using HalawaHub.Core.Updates",
+    "الآن الـ assignments (اللي كانت موجودة) تجد تعاريفها — البناء يجب أن ينجح"
+  ],
   "0.0.10.43": [
     "إصلاح فشل بناء 0.0.10.41/0.0.10.42: استرجاع GetInstallTimestamp المستدعاة من Updates.cs + usings كاملة لكل الخدمات",
     "تحصين FilterService: ثوابت التنقل تمرر من MainViewModel كـ parameters — استحالة انحراف بين التعريف والاستخدام"

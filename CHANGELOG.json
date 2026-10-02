@@ -1,4 +1,8 @@
 {
+  "0.0.10.41": [
+    "استخراج FilterService: فصل منطق الفلترة والفرز من MainViewModel لخدمة مستقلة قابلة للاختبار",
+    "FilterService نقي (pure function) — يقبل data ويرجع IEnumerable بدون UI state"
+  ],
   "0.0.10.40": [
     "إصلاح حرج: تصحيح constructor signature + إضافة field + instantiation لـ LibraryService (كان البناء سيفشل بسبب comma زيادة)",
     "الآن LibraryService يعمل فعليًا وMainViewModel يستخدمه"

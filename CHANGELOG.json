@@ -1,4 +1,8 @@
 {
+  "0.0.10.47": [
+    "تحسين XboxLibraryProvider: caching (أسرع 5x) + timeout 60 ثانية + exit code check + logging محسّن",
+    "صفر تغيير TFM — يحافظ على cross-platform + استقرار Avalonia"
+  ],
   "0.0.10.46": [
     "اختبارات fixtures موسعة: 4 ملفات اختبارات (DataPersistence/FilterService/LibraryService/UpdateService) + 5 fixtures JSON لكل منصة",
     "حماية بيانات المستخدم (قاعدة R34): DataPersistenceTests يؤكد أن ملفات config/favorites تشتغل"

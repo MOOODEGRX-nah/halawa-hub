@@ -18,6 +18,9 @@ namespace HalawaHub.Core.Library;
 /// كل مرحلة تسجل أعدادها وعينة أسماء — أي جهاز يشخّص نفسه من السجل.
 /// </summary>
 public class XboxLibraryProvider : IGameLibraryProvider
+    private static List<AppxEntry>? _cachedEntries;
+    private static DateTime _lastScan = DateTime.MinValue;
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 {
     private const string PsScript = @"
 $gameIds = @{}
@@ -102,6 +105,30 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
 
     public IEnumerable<GameInfo> ScanLibrary()
     {
+
+        // Cache check — تجنب فحص PowerShell كل مرة
+        if (_cachedEntries != null && DateTime.UtcNow - _lastScan < CacheDuration)
+        {
+            Log.Info($"Xbox: cache hit ({_cachedEntries.Count} لعبة)");
+            foreach (var entry in _cachedEntries)
+            {
+                if (string.IsNullOrEmpty(entry.Name)) continue;
+                if (string.IsNullOrEmpty(entry.InstallLocation) || !Directory.Exists(entry.InstallLocation)) continue;
+                var isPkg = entry.Source == "package";
+                var appId = string.IsNullOrEmpty(entry.AppId) ? "App" : entry.AppId;
+                yield return new GameInfo
+                {
+                    Id = isPkg ? entry.PackageFamilyName : "xg|" + entry.InstallLocation,
+                    Name = entry.Name,
+                    InstallPath = entry.InstallLocation,
+                    ExecutablePath = isPkg ? "explorer.exe" : entry.ExePath,
+                    LaunchArguments = isPkg ? $"shell:appsFolder\\{entry.PackageFamilyName}!{appId}" : "",
+                    Platform = "Xbox / Microsoft Store",
+                    IsInstalled = true
+                };
+            }
+            yield break;
+        }
         var contractCount = CountContractKeys();
         Log.Info($"Xbox: عقد Windows.Games فيه {contractCount} مفتاح مسجل");
 
@@ -172,7 +199,7 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
 
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd() ?? "";
-            process?.WaitForExit(30000);
+            process?.WaitForExit(60000);
 
             if (string.IsNullOrWhiteSpace(output)) return new List<AppxEntry>();
 

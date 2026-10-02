@@ -1,4 +1,8 @@
 {
+  "0.0.10.45": [
+    "إصلاح تعريف مكرر: حقل _libraryService كان معرّفًا بملفين partial معًا — حُذف من Library.cs وتوحدت حقول الخدمات الثلاثة بـ MainViewModel.cs",
+    "قاعدة R33: البحث عن الحقول يشمل كل ملفات الـ partial وليس الملف الرئيسي فقط"
+  ],
   "0.0.10.44": [
     "إصلاح فشل البناء: إضافة 3 field declarations مفقودة بـ MainViewModel.cs (_libraryService, _filterService, _updateService) + تضمين using HalawaHub.Core.Updates",
     "الآن الـ assignments (اللي كانت موجودة) تجد تعاريفها — البناء يجب أن ينجح"

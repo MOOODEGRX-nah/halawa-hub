@@ -14,7 +14,6 @@ namespace HalawaHub.App.ViewModels;
 
 public partial class MainViewModel
 {
-    private readonly ILibraryService _libraryService;
 
     private void RefreshLibrary()
     {

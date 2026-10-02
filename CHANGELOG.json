@@ -1,4 +1,8 @@
 {
+  "0.0.10.48": [
+    "استكمال كاش Xbox فعليًا: إدراج سطري _cachedEntries/_lastScan بمرساة مرنة بعد فشل المراسي الحرفية مرتين (R37)",
+    "الكاش الآن يشتغل: أول فحص PowerShell ثم 5 دقائق cache hits"
+  ],
   "0.0.10.47": [
     "تحسين XboxLibraryProvider: caching (أسرع 5x) + timeout 60 ثانية + exit code check + logging محسّن",
     "صفر تغيير TFM — يحافظ على cross-platform + استقرار Avalonia"

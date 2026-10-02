@@ -136,6 +136,8 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
         try
         {
             entries = QueryInstalledPackages();
+        _cachedEntries = entries;
+        _lastScan = DateTime.UtcNow;
         }
         catch
         {
@@ -200,6 +202,11 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd() ?? "";
             process?.WaitForExit(60000);
+            if (process.ExitCode != 0)
+            {
+                Log.Error($"Xbox: PowerShell exited with code {process.ExitCode}");
+                return new List<AppxEntry>();
+            }
 
             if (string.IsNullOrWhiteSpace(output)) return new List<AppxEntry>();
 

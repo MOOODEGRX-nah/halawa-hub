@@ -20,9 +20,10 @@ public partial class App : Application
         {
             var libraryService = new LibraryService();
             var filterService = new FilterService();
+            var updateService = new UpdateService(new UpdateChecker());
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainViewModel(libraryService, filterService)
+                DataContext = new MainViewModel(libraryService, filterService, updateService)
             };
         }
 

@@ -1,4 +1,8 @@
 {
+  "0.0.10.42": [
+    "استخراج UpdateService: فصل منطق التحديث الذاتي من MainViewModel لخدمة مستقلة قابلة للاختبار",
+    "UpdateService نقي (pure) — يقبل inputs ويرجع records بدون UI state"
+  ],
   "0.0.10.41": [
     "استخراج FilterService: فصل منطق الفلترة والفرز من MainViewModel لخدمة مستقلة قابلة للاختبار",
     "FilterService نقي (pure function) — يقبل data ويرجع IEnumerable بدون UI state"

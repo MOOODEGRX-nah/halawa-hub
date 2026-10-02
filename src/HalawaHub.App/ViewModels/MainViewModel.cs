@@ -156,7 +156,6 @@ public partial class MainViewModel : INotifyPropertyChanged
         }
     }
     private bool _isUpdating;
-    private readonly UpdateChecker _updateChecker = new();
 
     private bool _isSettingsOpen;
     public bool IsSettingsOpen
@@ -256,11 +255,12 @@ public partial class MainViewModel : INotifyPropertyChanged
     public RelayCommand VerifyApiKeyCommand { get; }
     public RelayCommand CloseChangelogCommand { get; }
 
-    public MainViewModel(ILibraryService libraryService, IFilterService filterService)
+    public MainViewModel(ILibraryService libraryService, IFilterService filterService, IUpdateService updateService)
     {
         // النواة تبحث عن أي DLL داخل مجلد Plugins بجانب الملف التنفيذي
         _libraryService = libraryService;
         _filterService = filterService;
+        _updateService = updateService;
         var pluginsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
         _pluginLoader = new PluginLoader(pluginsDir);
         _pluginLoader.LoadPlugins();

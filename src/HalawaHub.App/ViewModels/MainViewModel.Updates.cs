@@ -28,11 +28,9 @@ public partial class MainViewModel
     {
         NewsEntries.Clear();
 
-        // خبر تحديث البرنامج نفسه، لو متوفر فعليًا
         if (HasUpdateMessage)
             NewsEntries.Add(new NewsItem("Halawa-Hub", UpdateMessage ?? "", "", DateTime.UtcNow));
 
-        // آخر خبر لأول لعبتين Steam بمكتبتك (API عام مجاني، بدون مفتاح)
         var steamGames = Games.Where(c => c.Platform == "Steam" && !string.IsNullOrEmpty(c.Game.Id))
                                .Take(2).ToList();
 
@@ -47,25 +45,20 @@ public partial class MainViewModel
 
     private void UpdateHomeViewCollections()
     {
-        // استمر من حيث توقفت — آخر لعبة شغّلتها فعليًا (فاضي لين تشغّل أول لعبة)
         ContinuePlayingGame = Games.Where(c => c.LastPlayed != null)
                                     .OrderByDescending(c => c.LastPlayed)
                                     .FirstOrDefault();
 
-        // تم تحميله حديثًا — أحدث 3 حسب تاريخ تعديل مجلد التثبيت
         RecentlyInstalled.Clear();
         foreach (var c in Games.OrderByDescending(c => GetInstallTimestamp(c.Game)).Take(3))
             RecentlyInstalled.Add(c);
         OnPropertyChanged(nameof(HasRecentlyInstalled));
 
-        // تشغيل سريع — المفضلة (لحد 4)
         FavoriteQuickLaunch.Clear();
         foreach (var c in Games.Where(c => c.IsFavorite).Take(4))
             FavoriteQuickLaunch.Add(c);
         OnPropertyChanged(nameof(HasFavoriteQuickLaunch));
 
-        // آخر الألعاب اللي لعبتها — كل المكتبة، مرتبة حسب آخر تشغيل (اللي ما
-        // تشغّل أبدًا ينزل لآخر الترتيب بدل ما يختفي)
         RecentlyPlayed.Clear();
         foreach (var c in Games.OrderByDescending(c => c.LastPlayed ?? DateTime.MinValue))
             RecentlyPlayed.Add(c);
@@ -81,7 +74,6 @@ public partial class MainViewModel
         _config.LastSeenVersion = AppInfo.Version;
         ConfigService.Save(_config);
 
-        // ما فيه ملاحظات مسجّلة لهذا الإصدار (أو أول تشغيل بالأساس) — لا نزعج المستخدم
         if (changes.Count == 0) return;
 
         ChangelogEntries.Clear();
@@ -97,10 +89,7 @@ public partial class MainViewModel
         {
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }
-        catch
-        {
-            // تجاهل، ما يستاهل مقاطعة المستخدم بخطأ لمجرد فشل فتح رابط
-        }
+        catch { }
     }
 
     private async Task VerifyApiKeyAsync()
@@ -121,18 +110,17 @@ public partial class MainViewModel
 
     private async Task CheckForUpdateAsync(bool manualCheck = false)
     {
-        var update = await _updateChecker.CheckForUpdateAsync();
+        var result = await _updateService.CheckForUpdateAsync();
 
-        if (update is not { IsNewer: true })
+        if (!result.HasUpdate)
         {
-            if (manualCheck) StatusMessage = "البرنامج محدّث لآخر إصدار.";
+            if (manualCheck) StatusMessage = result.Message;
             return;
         }
 
-        Log.Info("تحديث جديد متوفر: v" + update.LatestVersion);
-            UpdateMessage = $"يتوفر إصدار جديد: v{update.LatestVersion} (لديك v{AppInfo.Version})";
-        _updateDownloadUrl = update.DownloadUrl;
-            _updateSha256 = update.Sha256;
+        UpdateMessage = result.Message;
+        _updateDownloadUrl = result.DownloadUrl;
+        _updateSha256 = result.Sha256;
         InstallUpdateCommand.RaiseCanExecuteChanged();
     }
 
@@ -144,21 +132,22 @@ public partial class MainViewModel
         InstallUpdateCommand.RaiseCanExecuteChanged();
         UpdateMessage = "جاري تحميل التحديث...";
 
-        var success = await SelfUpdater.DownloadAndApplyAsync(_updateDownloadUrl, status => UpdateMessage = status, _updateSha256);
+        var result = await _updateService.InstallUpdateAsync(
+            _updateDownloadUrl,
+            _updateSha256,
+            status => UpdateMessage = status);
 
-        if (success)
+        if (result.Success)
         {
-            UpdateMessage = "التحديث جاهز، البرنامج بيعيد التشغيل الآن...";
+            UpdateMessage = result.Message;
             await Task.Delay(1200);
             Environment.Exit(0);
         }
         else
         {
-            Log.Error("فشل التحديث التلقائي");
-                UpdateMessage = "فشل التحديث التلقائي. جرّب لاحقًا أو حمّل من صفحة الإصدارات على GitHub يدويًا.";
+            UpdateMessage = result.Message;
             _isUpdating = false;
             InstallUpdateCommand.RaiseCanExecuteChanged();
         }
     }
-
 }

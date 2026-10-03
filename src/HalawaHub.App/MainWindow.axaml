@@ -507,7 +507,7 @@
                                                     <StackPanel>
                                                         <TextBlock Text="{Binding Title}" FontSize="11.5" Foreground="#D1D5DB"
                                                                    TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"/>
-                                                        <TextBlock Text="{Binding Name}" FontSize="9" Foreground="#6B5457" Margin="0,3,0,0"/>
+                                                        <TextBlock Text="{Binding GameName}" FontSize="9" Foreground="#6B5457" Margin="0,3,0,0"/>
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>

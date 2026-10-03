@@ -331,7 +331,7 @@
                     <ToggleButton Classes="nav-item" Content="المثبتة"
                                   IsChecked="{Binding SelectedNavItem, Converter={StaticResource StringEqualsConverter}, ConverterParameter=المثبتة, Mode=TwoWay}"/>
                     <ToggleButton Classes="nav-item" Content="المضافة حديثًا"
-                                  IsChecked="{Binding SelectedNavItem, Converter={StaticResource StringEqualsConverter}, ConverterParameter="المضافة حديثًا", Mode=TwoWay}"/>
+                                  IsChecked="{Binding SelectedNavItem, Converter={StaticResource StringEqualsConverter}, ConverterParameter='المضافة حديثًا', Mode=TwoWay}"/>
 
                     <Border Height="1" Background="#2A1418" Margin="4,10"/>
 

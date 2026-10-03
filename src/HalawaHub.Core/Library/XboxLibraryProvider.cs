@@ -18,10 +18,10 @@ namespace HalawaHub.Core.Library;
 /// كل مرحلة تسجل أعدادها وعينة أسماء — أي جهاز يشخّص نفسه من السجل.
 /// </summary>
 public class XboxLibraryProvider : IGameLibraryProvider
+{
     private static List<AppxEntry>? _cachedEntries;
     private static DateTime _lastScan = DateTime.MinValue;
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
-{
     private const string PsScript = @"
 $gameIds = @{}
 try {
@@ -106,10 +106,8 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
     public IEnumerable<GameInfo> ScanLibrary()
     {
 
-        // Cache check — تجنب فحص PowerShell كل مرة
         if (_cachedEntries != null && DateTime.UtcNow - _lastScan < CacheDuration)
         {
-            Log.Info($"Xbox: cache hit ({_cachedEntries.Count} لعبة)");
             foreach (var entry in _cachedEntries)
             {
                 if (string.IsNullOrEmpty(entry.Name)) continue;
@@ -202,7 +200,8 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
             using var process = Process.Start(psi);
             var output = process?.StandardOutput.ReadToEnd() ?? "";
             process?.WaitForExit(60000);
-            if (process.ExitCode != 0)
+
+            if (process != null && process.ExitCode != 0)
             {
                 Log.Error($"Xbox: PowerShell exited with code {process.ExitCode}");
                 return new List<AppxEntry>();

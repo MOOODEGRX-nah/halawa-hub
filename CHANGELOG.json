@@ -1,4 +1,7 @@
 {
+  "0.0.10.53": [
+    "حذف tools/git-push.sh: كان يتجاوز CI ويقوم بـ push مباشر للـ main بدون تحقق (B03)",
+  ],
   "0.0.10.52": [
     "fix: تصحيح XAML لزر المضافة حديثًا — double quotes داخل binding attribute كانت تكسر parser، استُبدلت بـ single quotes (قاعدة R44)"
   ],

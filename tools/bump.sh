@@ -1,9 +1,16 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
+# التحقق من الوسيط
 NEW="${1:?usage: tools/bump.sh X.Y.Z.W}"
 [[ "$NEW" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "bad version: $NEW"; exit 1; }
+
+# حارس: ممنوع إضافة مفتاح CHANGELOG موجود أصلًا (يمنع المفاتيح المكررة E10/R40)
+if grep -qF "\"${NEW}\": [" CHANGELOG.json; then
+    echo "bump refused: CHANGELOG.json already has an entry for $NEW (edit it by hand or pick a new version)"
+    exit 1
+fi
 
 # 1) Directory.Build.props (المصدر الوحيد)
 sed -i -E "s#<Version>[0-9]+(\.[0-9]+){3}</Version>#<Version>${NEW}</Version>#" Directory.Build.props
@@ -17,8 +24,7 @@ printf '%s\n' "$NEW" > VERSION
 sed -i -E "s#v[0-9]+(\.[0-9]+){3} \(Beta\)#v${NEW} (Beta)#" README.md
 [ "$(grep -cF "v${NEW} (Beta)" README.md)" = "1" ] || echo "WARN: README line not found/duplicated"
 
-# 4) CHANGELOG.json — إضافة إدخال أعلى الملف (مرساة NR==1)
-#    ملاحظة: Placeholder فارغ — المستخدم يملأه يدويًا قبل الرفع
+# 4) CHANGELOG.json — إضافة إدخال أعلى الملف
 awk -v ver="$NEW" '
 NR==1 {
     print
@@ -34,8 +40,8 @@ mv /tmp/cl_bump.json CHANGELOG.json
 echo "bumped to $NEW"
 echo ""
 echo "⚠️  CHANGELOG entry added with placeholder — fill it manually before commit:"
-echo "    \"0.0.10.26\": ["
+echo "    \"${NEW}\": ["
 echo "      \"[PLACEHOLDER: أضف ملاحظات الإصدار هنا]\""
 echo "    ]"
 echo ""
-bash tools/check-meta.sh
+bash tools/check-meta.sh || echo "NOTE: fix the META FAIL line(s) above (fill the placeholder note), then rerun: bash tools/check-meta.sh"

@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HalawaHub.App", "src\Halawa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HalawaHub.Plugins.Sample", "src\HalawaHub.Plugins.Sample\HalawaHub.Plugins.Sample.csproj", "{33333333-3333-3333-3333-333333333333}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HalawaHub.Tests", "tests\HalawaHub.Tests\HalawaHub.Tests.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

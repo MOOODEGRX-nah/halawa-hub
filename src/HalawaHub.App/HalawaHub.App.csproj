@@ -34,4 +34,7 @@
     <MakeDir Directories="$(OutDir)Plugins" Condition="!Exists('$(OutDir)Plugins')" />
   </Target>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="HalawaHub.Tests" />
+  </ItemGroup>
 </Project>

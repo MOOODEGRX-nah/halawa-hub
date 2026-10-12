@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using HalawaHub.Core;
 
 namespace HalawaHub.App.Services;
 
@@ -10,53 +11,111 @@ public static class ConfigService
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "HalawaHub", "config.json");
 
-    public static AppConfig Load()
+    public static AppConfig Load() => LoadFrom(ConfigPath);
+
+    public static void Save(AppConfig config) => SaveTo(ConfigPath, config);
+
+    // ===== internals: seam للاختبارات (B04/E5) =====
+
+    internal static AppConfig LoadFrom(string path)
     {
+        if (!File.Exists(path))
+        {
+            // أول تشغيل فعلًا — ننشئ افتراضي
+            var defaults = new AppConfig();
+            SaveTo(path, defaults);
+            return defaults;
+        }
+
+        // ملف موجود — نفصل أعطال IO عن أعطال JSON
+        string json;
         try
         {
-            if (File.Exists(ConfigPath))
-            {
-                var json = File.ReadAllText(ConfigPath);
-                var config = JsonSerializer.Deserialize<AppConfig>(json);
-                if (config != null) return config;
-            }
+            json = File.ReadAllText(path);
         }
-        catch
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            // ملف تالف، نتجاهل ونرجع الإعدادات الافتراضية
+            // ملف مقفل — لا نلمسه، نرجع افتراضي بدون كتابة
+            Log.Error($"config file unreadable (locked?): {ex.Message}", ex);
+            return new AppConfig();
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"config file read failed: {ex.Message}", ex);
+            return new AppConfig();
         }
 
-        // أول تشغيل: ننشئ ملف فاضي جاهز يعدّله المستخدم يدويًا لو حاب
-        var defaultConfig = new AppConfig();
+        AppConfig? parsed;
         try
         {
-            var dir = Path.GetDirectoryName(ConfigPath);
-            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-
-            File.WriteAllText(ConfigPath,
-                JsonSerializer.Serialize(defaultConfig, new JsonSerializerOptions { WriteIndented = true }));
+            parsed = JsonSerializer.Deserialize<AppConfig>(json);
         }
-        catch
+        catch (JsonException ex)
         {
-            // فشل الإنشاء، مو حرج — البرنامج يشتغل عادي بدون الميزة الاختيارية
+            // JSON تالف (السيناريو E5) — نعزله وننشئ افتراضي
+            Log.Error($"config.json corrupted — quarantining: {ex.Message}", ex);
+            Quarantine(path);
+            var defaults = new AppConfig();
+            SaveTo(path, defaults);
+            return defaults;
         }
 
-        return defaultConfig;
+        if (parsed is null)
+        {
+            // ملف فاضي أو JSON يعطي null
+            Log.Error("config.json deserialized to null — quarantining");
+            Quarantine(path);
+            var defaults = new AppConfig();
+            SaveTo(path, defaults);
+            return defaults;
+        }
+
+        return parsed;
     }
 
-    public static void Save(AppConfig config)
+    internal static void SaveTo(string path, AppConfig config)
     {
         try
         {
-            var dir = Path.GetDirectoryName(ConfigPath);
+            var dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
-            File.WriteAllText(ConfigPath,
-                JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
+            var content = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
+            WriteAtomic(path, content);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"config save failed: {ex.Message}", ex);
+        }
+    }
+
+    private static void Quarantine(string path)
+    {
+        try
+        {
+            var stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+            var quarantine = path + ".corrupt-" + stamp;
+            File.Move(path, quarantine, overwrite: false);
+            Log.Error($"quarantined corrupt config to: {quarantine}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"quarantine failed: {ex.Message}", ex);
+        }
+    }
+
+    private static void WriteAtomic(string path, string content)
+    {
+        var tmp = path + ".tmp-" + Guid.NewGuid().ToString("N");
+        try
+        {
+            File.WriteAllText(tmp, content);
+            File.Move(tmp, path, overwrite: true);
         }
         catch
         {
-            // فشل الحفظ، مو حرج
+            try { if (File.Exists(tmp)) File.Delete(tmp); } catch { /* best effort */ }
+            throw;
         }
     }
 }

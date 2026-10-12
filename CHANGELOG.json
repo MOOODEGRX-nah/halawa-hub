@@ -1,4 +1,7 @@
 {
+  "0.0.10.54": [
+    "B04: تحصين ConfigService — ملف تالف JSON يُعزل في config.json.corrupt-<timestamp> (لم يعد يُمسح المفتاح)، وأعطال IO لا تُعيد كتابة الملف (كان سيناريو E5 يُفقد SteamGridDbApiKey عند أي فاصلة ناقصة) + كتابة ذرية عبر temp + File.Move + 5 اختبارات انحدار (B04/E5)",
+  ],
   "0.0.10.53": [
     "حذف tools/git-push.sh: كان يتجاوز CI ويقوم بـ push مباشر للـ main بدون تحقق (B03)",
   ],

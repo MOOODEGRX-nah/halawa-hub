@@ -24,6 +24,9 @@ public partial class MainViewModel
         var allTools = _pluginLoader.GameTools;
 
         // استخدام الـ service
+        // B06: إبطال كاش Xbox حتى تظهر الألعاب المثبتة حديثًا فورًا
+        XboxLibraryProvider.InvalidateCache();
+
         var result = _libraryService.ScanAllLibraries(allProviders, allTools);
 
         // بناء GameCardViewModels من النتائج

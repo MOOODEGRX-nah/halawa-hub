@@ -1,4 +1,7 @@
 {
+  "0.0.10.56": [
+    "B06: تحصين Xbox provider — timeout حقيقي بـ ReadToEndAsync + WaitForExit(60s) + Kill(entireProcessTree) (E7 كان يقيس 4004ms لـ timeout مقداره 1000ms)، cache successes only (فشل عابر لم يعد يخفي كل ألعاب Xbox لـ 5 دقائق)، InvalidateCache() يستدعيه زر التحديث (لعبة Xbox جديدة تظهر فورًا بدل الانتظار 5 دقائق)، UTF-8 لكل من stdout و stderr + [Console]::OutputEncoding داخل السكربت (أسماء عربية/صينية)، مسار powershell.exe مطلق من %SystemRoot%، stderr ملتقط ومُسجَّل + 4 اختبارات انحدار (B06/E7)",
+  ],
   "0.0.10.55": [
     "B07: تحصين مزودي المكتبات — try/catch حول كل manifest في Steam/Riot/GOG/Epic (ملف مقفل لم يعد يخفي مكتبتك)، معرف Steam حتمي من اسم الملف بدل Guid.NewGuid (المفضلة وساعات اللعب لا تنكسر)، IsAvailable() داخل try (provider فاشل لم يعد يكسر المسح)، PlatformCounts تُشتق من البيانات (منصات الإضافات تظهر بالسايدبار تلقائيًا)، إصلاح تسريب RegistryKey في GOG + 5 اختبارات انحدار (E3/E4)",
   ],

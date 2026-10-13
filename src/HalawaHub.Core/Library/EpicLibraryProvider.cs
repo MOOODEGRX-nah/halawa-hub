@@ -23,7 +23,18 @@ public class EpicLibraryProvider : IGameLibraryProvider
     {
         if (!Directory.Exists(ManifestsPath)) yield break;
 
-        foreach (var itemFile in Directory.GetFiles(ManifestsPath, "*.item"))
+        string[] itemFiles;
+        try
+        {
+            itemFiles = Directory.GetFiles(ManifestsPath, "*.item");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Epic: cannot enumerate {ManifestsPath}", ex);
+            yield break;
+        }
+
+        foreach (var itemFile in itemFiles)
         {
             GameInfo? game = null;
             try
@@ -52,9 +63,10 @@ public class EpicLibraryProvider : IGameLibraryProvider
                     IsInstalled = Directory.Exists(installLocation)
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 // ملف مانيفست تالف أو بصيغة غير متوقعة، تجاهله وكمّل للي بعده
+                Log.Error($"Epic: manifest failed {Path.GetFileName(itemFile)}", ex);
             }
 
             if (game != null) yield return game;

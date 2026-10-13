@@ -26,7 +26,7 @@ public class LibraryServiceTests
 
         // Assert
         result.Games.Should().BeEmpty();
-        result.PlatformCounts.Should().HaveCount(5); // 5 منصات مدعومة
+        result.PlatformCounts.Should().BeEmpty(); // GroupBy من البيانات = 0 منصات عند عدم وجود ألعاب
     }
 
     [Fact]

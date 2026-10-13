@@ -1,4 +1,7 @@
 {
+  "0.0.10.55": [
+    "B07: تحصين مزودي المكتبات — try/catch حول كل manifest في Steam/Riot/GOG/Epic (ملف مقفل لم يعد يخفي مكتبتك)، معرف Steam حتمي من اسم الملف بدل Guid.NewGuid (المفضلة وساعات اللعب لا تنكسر)، IsAvailable() داخل try (provider فاشل لم يعد يكسر المسح)، PlatformCounts تُشتق من البيانات (منصات الإضافات تظهر بالسايدبار تلقائيًا)، إصلاح تسريب RegistryKey في GOG + 5 اختبارات انحدار (E3/E4)",
+  ],
   "0.0.10.54": [
     "B04: تحصين ConfigService — ملف تالف JSON يُعزل في config.json.corrupt-<timestamp> (لم يعد يُمسح المفتاح)، وأعطال IO لا تُعيد كتابة الملف (كان سيناريو E5 يُفقد SteamGridDbApiKey عند أي فاصلة ناقصة) + كتابة ذرية عبر temp + File.Move + 5 اختبارات انحدار (B04/E5)",
   ],

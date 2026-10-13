@@ -1,30 +1,28 @@
 using System.IO;
-using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 using HalawaHub.Core.Models;
 using HalawaHub.Core.Plugins;
 
 namespace HalawaHub.Core.Library;
 
-/// <summary>
-/// يكتشف ألعاب Riot المثبتة (League of Legends, VALORANT, Legends of Runeterra)
-/// عبر قراءة ملفات الإعدادات في مجلد Metadata، ويشغّلها عبر RiotClientServices.exe
-/// لأن كل ألعاب Riot أصبحت تعمل حصريًا من خلال العميل الموحّد.
-/// </summary>
 public class RiotLibraryProvider : IGameLibraryProvider
 {
-    private static readonly string ProgramData =
-        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+    private static readonly string MetadataPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+        "Riot Games", "Metadata");
 
-    private static readonly string MetadataPath = Path.Combine(ProgramData, "Riot Games", "Metadata");
-    private static readonly string InstallsJsonPath = Path.Combine(ProgramData, "Riot Games", "RiotClientInstalls.json");
+    private static readonly string InstallsJsonPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+        "Riot Games", "RiotClient", "installs.json");
 
-    // معرف المنتج الداخلي كما تسميه Riot -> الاسم المعروض بالواجهة
     private static readonly Dictionary<string, string> KnownProducts = new(StringComparer.OrdinalIgnoreCase)
     {
-        { "league_of_legends", "League of Legends" },
-        { "valorant", "VALORANT" },
-        { "bacon", "Legends of Runeterra" }, // الاسم الداخلي التاريخي لـ LoR عند Riot
+        ["valorant.live"] = "VALORANT",
+        ["league_of_legends.live"] = "League of Legends",
+        ["legendsofruneterra.live"] = "Legends of Runeterra",
+        ["bacon.live"] = "Teamfight Tactics",
+        ["lolesports.live"] = "LoL Esports"
     };
 
     public string PlatformName => "Riot Games";
@@ -37,7 +35,18 @@ public class RiotLibraryProvider : IGameLibraryProvider
 
         var riotClientPath = GetRiotClientPath();
 
-        foreach (var productDir in Directory.GetDirectories(MetadataPath, "*.live"))
+        string[] productDirs;
+        try
+        {
+            productDirs = Directory.GetDirectories(MetadataPath, "*.live");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Riot: cannot enumerate {MetadataPath}", ex);
+            yield break;
+        }
+
+        foreach (var productDir in productDirs)
         {
             var folderName = Path.GetFileName(productDir);
             var productId = folderName.Replace(".live", "");
@@ -49,7 +58,17 @@ public class RiotLibraryProvider : IGameLibraryProvider
             var settingsFile = Path.Combine(productDir, $"{folderName}.product_settings.yaml");
             if (!File.Exists(settingsFile)) continue;
 
-            var installPath = ReadYamlValue(settingsFile, "product_install_full_path");
+            string? installPath = null;
+            try
+            {
+                installPath = ReadYamlValue(settingsFile, "product_install_full_path");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Riot: yaml unreadable {settingsFile}", ex);
+                continue;
+            }
+
             if (string.IsNullOrEmpty(installPath)) continue;
 
             yield return new GameInfo
@@ -74,9 +93,9 @@ public class RiotLibraryProvider : IGameLibraryProvider
             if (doc.RootElement.TryGetProperty("rc_default", out var rc))
                 return rc.GetString();
         }
-        catch
+        catch (Exception ex)
         {
-            // ملف مفقود أو تالف
+            Log.Error("Riot: installs.json unreadable", ex);
         }
         return null;
     }

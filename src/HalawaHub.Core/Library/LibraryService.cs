@@ -4,7 +4,10 @@ using HalawaHub.Core.Plugins;
 namespace HalawaHub.Core.Library;
 
 /// <summary>
-/// تنفيذ ILibraryService — منطق فحص المكتبات.
+/// تنفيذ ILibraryService — منطق فحص المكتبات مع تحصين ضد:
+/// - provider يرمي exception (E3): لا يكسر بقية المسح
+/// - provider يرمي في منتصف الـ enumeration: نحتفظ بالنتائج الجزئية
+/// - منصات إضافات: PlatformCounts تُشتق من البيانات نفسها
 /// </summary>
 public class LibraryService : ILibraryService
 {
@@ -14,37 +17,37 @@ public class LibraryService : ILibraryService
     {
         var result = new LibraryScanResult();
         var seen = new HashSet<string>();
-        var toolsList = tools.ToList();
 
         foreach (var provider in providers)
         {
-            if (!provider.IsAvailable()) continue;
-
-            List<GameInfo> games;
+            var collected = new List<GameInfo>();
             try
             {
-                games = provider.ScanLibrary().ToList();
+                if (!provider.IsAvailable()) continue;
+
+                foreach (var game in provider.ScanLibrary())
+                {
+                    if (game is not null) collected.Add(game);
+                }
             }
             catch (Exception ex)
             {
+                // provider رمى — نحتفظ بما جُمع قبل الاستثناء ونكمّل للمنصات التالية
                 Log.Error($"فشل فحص مكتبة منصة {provider.PlatformName}", ex);
-                continue;
             }
 
-            foreach (var game in games)
+            foreach (var game in collected)
             {
-                // حماية من التكرار
+                if (string.IsNullOrEmpty(game.Platform) || string.IsNullOrEmpty(game.Id)) continue;
                 if (!seen.Add($"{game.Platform}|{game.Id}")) continue;
                 result.Games.Add(game);
             }
         }
 
-        // حساب أعداد المنصات
-        var supportedPlatforms = new[] { "Steam", "Epic Games", "Riot Games", "Xbox / Microsoft Store", "GOG" };
-        foreach (var platform in supportedPlatforms)
+        // PlatformCounts من البيانات نفسها (يدعم منصات الإضافات تلقائيًا)
+        foreach (var group in result.Games.GroupBy(g => g.Platform))
         {
-            var count = result.Games.Count(g => g.Platform == platform);
-            result.PlatformCounts[platform] = count;
+            result.PlatformCounts[group.Key] = group.Count();
         }
 
         return result;

@@ -16,21 +16,49 @@ public class GogLibraryProvider : IGameLibraryProvider
 
     public string PlatformName => "GOG";
 
-    public bool IsAvailable() => OpenGamesKey() != null;
+    public bool IsAvailable()
+    {
+        // إصلاح تسريب RegistryKey: using يضمن dispose فوري
+        using var key = OpenGamesKey();
+        return key != null;
+    }
 
     public IEnumerable<GameInfo> ScanLibrary()
     {
         using var gamesKey = OpenGamesKey();
         if (gamesKey == null) yield break;
 
-        foreach (var gameId in gamesKey.GetSubKeyNames())
+        string[] subKeyNames;
+        try
+        {
+            subKeyNames = gamesKey.GetSubKeyNames();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("GOG: cannot enumerate subkeys", ex);
+            yield break;
+        }
+
+        foreach (var gameId in subKeyNames)
         {
             using var gameKey = gamesKey.OpenSubKey(gameId);
             if (gameKey == null) continue;
 
-            var name = gameKey.GetValue("gameName") as string;
-            var path = gameKey.GetValue("path") as string;
-            var exe = gameKey.GetValue("exe") as string;
+            string? name = null;
+            string? path = null;
+            string? exe = null;
+            try
+            {
+                name = gameKey.GetValue("gameName") as string;
+                path = gameKey.GetValue("path") as string;
+                exe = gameKey.GetValue("exe") as string;
+            }
+            catch (Exception ex)
+            {
+                // subkey تالف أو غير قابل للقراءة — نتخطاه
+                Log.Error($"GOG: subkey unreadable {gameId}", ex);
+                continue;
+            }
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(path)) continue;
 

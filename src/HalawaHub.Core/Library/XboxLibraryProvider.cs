@@ -1,6 +1,7 @@
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using HalawaHub.Core.Models;
 using HalawaHub.Core.Plugins;
@@ -16,13 +17,26 @@ namespace HalawaHub.Core.Library;
 ///      الاسم الحقيقي يُقرأ من ShellVisuals داخل الـ config، والتشغيل عبر exe داخل Content
 ///   ج) استبعاد الإطارات/الموارد/الحزم تلقائيًا + إزالة تكرار الاسم بين المصدرين
 /// كل مرحلة تسجل أعدادها وعينة أسماء — أي جهاز يشخّص نفسه من السجل.
+///
+/// تحصين B06:
+///   - ReadToEndAsync + WaitForExit(60000) + Kill(entireProcessTree) عند Timeout
+///   - Cache successes only (القائمة الفارغة لا تُكاش — فشل عابر لا يخفي المكتبة)
+///   - InvalidateCache() public يستدعيه زر التحديث
+///   - StandardOutputEncoding = UTF8 + [Console]::OutputEncoding داخل السكربت
+///   - مسار powershell.exe مطلق من %SystemRoot%
+///   - stderr ملتقط ومُسجَّل
 /// </summary>
 public class XboxLibraryProvider : IGameLibraryProvider
 {
     private static List<AppxEntry>? _cachedEntries;
     private static DateTime _lastScan = DateTime.MinValue;
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
+    private static readonly object CacheLock = new();
+
+    // B06: UTF-8 داخل السكربت + مسار مطلق لـ powershell
     private const string PsScript = @"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
 $gameIds = @{}
 try {
     $regPath = 'Registry::HKEY_CLASSES_ROOT\Extensions\ContractId\Windows.Games\PackageId'
@@ -103,30 +117,40 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
 
     public bool IsAvailable() => OperatingSystem.IsWindows();
 
+    /// <summary>
+    /// يبطل الكاش — يُستدعى من زر التحديث حتى تظهر الألعاب المثبتة حديثًا فورًا
+    /// بدلاً من الانتظار 5 دقائق.
+    /// </summary>
+    public static void InvalidateCache()
+    {
+        lock (CacheLock)
+        {
+            _cachedEntries = null;
+            _lastScan = DateTime.MinValue;
+        }
+    }
+
     public IEnumerable<GameInfo> ScanLibrary()
     {
-
-        if (_cachedEntries != null && DateTime.UtcNow - _lastScan < CacheDuration)
+        List<AppxEntry>? cached;
+        lock (CacheLock)
         {
-            foreach (var entry in _cachedEntries)
+            cached = (_cachedEntries != null && DateTime.UtcNow - _lastScan < CacheDuration)
+                ? _cachedEntries
+                : null;
+        }
+
+        if (cached != null)
+        {
+            foreach (var entry in cached)
             {
                 if (string.IsNullOrEmpty(entry.Name)) continue;
                 if (string.IsNullOrEmpty(entry.InstallLocation) || !Directory.Exists(entry.InstallLocation)) continue;
-                var isPkg = entry.Source == "package";
-                var appId = string.IsNullOrEmpty(entry.AppId) ? "App" : entry.AppId;
-                yield return new GameInfo
-                {
-                    Id = isPkg ? entry.PackageFamilyName : "xg|" + entry.InstallLocation,
-                    Name = entry.Name,
-                    InstallPath = entry.InstallLocation,
-                    ExecutablePath = isPkg ? "explorer.exe" : entry.ExePath,
-                    LaunchArguments = isPkg ? $"shell:appsFolder\\{entry.PackageFamilyName}!{appId}" : "",
-                    Platform = "Xbox / Microsoft Store",
-                    IsInstalled = true
-                };
+                yield return ToGameInfo(entry);
             }
             yield break;
         }
+
         var contractCount = CountContractKeys();
         Log.Info($"Xbox: عقد Windows.Games فيه {contractCount} مفتاح مسجل");
 
@@ -134,13 +158,25 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
         try
         {
             entries = QueryInstalledPackages();
-        _cachedEntries = entries;
-        _lastScan = DateTime.UtcNow;
         }
-        catch
+        catch (Exception ex)
         {
-            Log.Error("Xbox: فشل تشغيل سكربت الفحص");
+            Log.Error("Xbox: فشل تشغيل سكربت الفحص", ex);
             yield break;
+        }
+
+        // B06: cache successes only — القائمة الفارغة (فشل عابر) لا تُكاش
+        if (entries.Count > 0)
+        {
+            lock (CacheLock)
+            {
+                _cachedEntries = entries;
+                _lastScan = DateTime.UtcNow;
+            }
+        }
+        else
+        {
+            Log.Info("Xbox: النتيجة فارغة — لم تُكاش (سيُعاد الفحص عند الطلب التالي)");
         }
 
         var pkgCount = entries.Count(e => e.Source == "package");
@@ -152,21 +188,24 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
         {
             if (string.IsNullOrEmpty(entry.Name)) continue;
             if (string.IsNullOrEmpty(entry.InstallLocation) || !Directory.Exists(entry.InstallLocation)) continue;
-
-            var isPkg = entry.Source == "package";
-            var appId = string.IsNullOrEmpty(entry.AppId) ? "App" : entry.AppId;
-
-            yield return new GameInfo
-            {
-                Id = isPkg ? entry.PackageFamilyName : "xg|" + entry.InstallLocation,
-                Name = entry.Name,
-                InstallPath = entry.InstallLocation,
-                ExecutablePath = isPkg ? "explorer.exe" : entry.ExePath,
-                LaunchArguments = isPkg ? $"shell:appsFolder\\{entry.PackageFamilyName}!{appId}" : "",
-                Platform = "Xbox / Microsoft Store",
-                IsInstalled = true
-            };
+            yield return ToGameInfo(entry);
         }
+    }
+
+    private static GameInfo ToGameInfo(AppxEntry entry)
+    {
+        var isPkg = entry.Source == "package";
+        var appId = string.IsNullOrEmpty(entry.AppId) ? "App" : entry.AppId;
+        return new GameInfo
+        {
+            Id = isPkg ? entry.PackageFamilyName : "xg|" + entry.InstallLocation,
+            Name = entry.Name,
+            InstallPath = entry.InstallLocation,
+            ExecutablePath = isPkg ? "explorer.exe" : entry.ExePath,
+            LaunchArguments = isPkg ? $"shell:appsFolder\\{entry.PackageFamilyName}!{appId}" : "",
+            Platform = "Xbox / Microsoft Store",
+            IsInstalled = true
+        };
     }
 
     private static int CountContractKeys()
@@ -185,29 +224,62 @@ ConvertTo-Json -InputObject @($results) -Compress -Depth 4
     private static List<AppxEntry> QueryInstalledPackages()
     {
         var scriptPath = Path.Combine(Path.GetTempPath(), $"halawahub_xbox_{Guid.NewGuid():N}.ps1");
-        File.WriteAllText(scriptPath, PsScript);
+        File.WriteAllText(scriptPath, PsScript, Encoding.UTF8);
 
         try
         {
-            var psi = new ProcessStartInfo("powershell.exe")
+            // B06: مسار مطلق لـ PowerShell من %SystemRoot%
+            var psExe = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.System),
+                "WindowsPowerShell", "v1.0", "powershell.exe");
+            if (!File.Exists(psExe)) psExe = "powershell.exe"; // fallback
+
+            var psi = new ProcessStartInfo(psExe)
             {
                 Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\"",
                 RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8
             };
 
             using var process = Process.Start(psi);
-            var output = process?.StandardOutput.ReadToEnd() ?? "";
-            process?.WaitForExit(60000);
+            if (process == null)
+            {
+                Log.Error("Xbox: Process.Start returned null");
+                return new List<AppxEntry>();
+            }
 
-            if (process != null && process.ExitCode != 0)
+            // B06: قراءة غير متزامنة + WaitForExit قبلها (timeout حقيقي)
+            var readOut = process.StandardOutput.ReadToEndAsync();
+            var readErr = process.StandardError.ReadToEndAsync();
+            var exited = process.WaitForExit(60_000);
+
+            if (!exited)
+            {
+                try { process.Kill(entireProcessTree: true); } catch { /* best effort */ }
+                Log.Error("Xbox: PowerShell timed out after 60s — killed entire process tree");
+                return new List<AppxEntry>();
+            }
+
+            var output = readOut.GetAwaiter().GetResult();
+            var errorOut = readErr.GetAwaiter().GetResult();
+            if (!string.IsNullOrWhiteSpace(errorOut))
+                Log.Error($"Xbox: PowerShell stderr: {errorOut.Trim()}");
+
+            if (process.ExitCode != 0)
             {
                 Log.Error($"Xbox: PowerShell exited with code {process.ExitCode}");
                 return new List<AppxEntry>();
             }
 
-            if (string.IsNullOrWhiteSpace(output)) return new List<AppxEntry>();
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                Log.Info("Xbox: PowerShell produced empty output");
+                return new List<AppxEntry>();
+            }
 
             using var doc = JsonDocument.Parse(output);
             var elements = doc.RootElement.ValueKind == JsonValueKind.Array

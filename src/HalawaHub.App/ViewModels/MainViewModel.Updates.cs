@@ -71,14 +71,17 @@ public partial class MainViewModel
 
         var changes = await ChangelogService.GetChangesForVersionAsync(AppInfo.GitHubOwner, AppInfo.GitHubRepo, AppInfo.Version);
 
-        _config.LastSeenVersion = AppInfo.Version;
-        ConfigService.Save(_config);
-
+        // B09a: لا نحفظ LastSeenVersion إلا بعد التأكد من أن المحتوى موجود وعُرض فعليًا
+        // (كان يُحفظ قبل ذلك حتى لو فشل الجلب → المستخدم لا يرى "ما الجديد" أبدًا)
         if (changes.Count == 0) return;
 
         ChangelogEntries.Clear();
         foreach (var change in changes) ChangelogEntries.Add(change);
         IsChangelogOpen = true;
+
+        // الآن فقط نحفظ أن المستخدم شاهد هذا الإصدار
+        _config.LastSeenVersion = AppInfo.Version;
+        ConfigService.Save(_config);
     }
 
     private void OpenUrl(object? param)

@@ -17,3 +17,6 @@ build-temp-plugin/
 
 # macOS
 .DS_Store
+
+# Linux publish output
+publish-linux/

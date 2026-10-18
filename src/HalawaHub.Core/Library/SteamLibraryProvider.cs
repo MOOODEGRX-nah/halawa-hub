@@ -6,6 +6,12 @@ using Microsoft.Win32;
 
 namespace HalawaHub.Core.Library;
 
+/// <summary>
+/// مزود مكتبة Steam — يعمل على Windows (عبر Registry) وعلى Linux
+/// (عبر المسارات القياسية ~/.local/share/Steam و ~/.steam/steam و Flatpak).
+/// صيغة libraryfolders.vdf و appmanifest_*.acf موحدة عبر المنصات،
+/// لذا المحلّل واحد والمسار فقط يختلف (B22).
+/// </summary>
 public class SteamLibraryProvider : IGameLibraryProvider
 {
     public string PlatformName => "Steam";
@@ -17,7 +23,54 @@ public class SteamLibraryProvider : IGameLibraryProvider
         var steamPath = GetSteamPath();
         if (steamPath == null) yield break;
 
+        foreach (var game in ScanFromSteamPath(steamPath))
+            yield return game;
+    }
+
+    /// <summary>
+    /// Windows: Registry. Linux: مسارات معروفة (native + Flatpak + snap).
+    /// </summary>
+    private static string? GetSteamPath()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(@"Software\Valve\Steam");
+                return key?.GetValue("SteamPath") as string;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        string[] candidates =
+        {
+            Path.Combine(home, ".local", "share", "Steam"),
+            Path.Combine(home, ".steam", "steam"),
+            Path.Combine(home, ".var", "app", "com.valvesoftware.Steam", ".local", "share", "Steam"),
+            Path.Combine(home, ".var", "app", "com.valvesoftware.Steam", ".steam", "steam"),
+            Path.Combine(home, "snap", "steam", "common", ".local", "share", "Steam")
+        };
+
+        foreach (var c in candidates)
+        {
+            if (Directory.Exists(Path.Combine(c, "steamapps"))) return c;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// مسح filesystem خالص — قابل للاختبار على أي نظام تشغيل (B22).
+    /// internal حتى تبني الاختبارات مكتبة مزيفة على القرص.
+    /// </summary>
+    internal static List<GameInfo> ScanFromSteamPath(string steamPath)
+    {
+        var games = new List<GameInfo>();
         var seenAppIds = new HashSet<string>();
+
         List<string> libraryFolders;
         try
         {
@@ -25,7 +78,6 @@ public class SteamLibraryProvider : IGameLibraryProvider
         }
         catch (Exception ex)
         {
-            // VDF مقفل أو تالف — نكتفي بمجلد Steam الرئيسي
             Log.Error("Steam: failed to read libraryfolders.vdf", ex);
             libraryFolders = new List<string> { NormalizePath(steamPath) };
         }
@@ -42,7 +94,6 @@ public class SteamLibraryProvider : IGameLibraryProvider
             }
             catch (Exception ex)
             {
-                // مجلد steamapps غير قابل للقراءة — نتخطاه
                 Log.Error($"Steam: cannot enumerate {steamAppsPath}", ex);
                 continue;
             }
@@ -56,28 +107,15 @@ public class SteamLibraryProvider : IGameLibraryProvider
                 }
                 catch (Exception ex)
                 {
-                    // manifest مقفل/تالف — نتخطاه ولا نكسر بقية المكتبة
                     Log.Error($"Steam: manifest failed {Path.GetFileName(manifestFile)}", ex);
                 }
 
                 if (game == null) continue;
                 if (!seenAppIds.Add(game.Id)) continue;
-                yield return game;
+                games.Add(game);
             }
         }
-    }
-
-    private static string? GetSteamPath()
-    {
-        try
-        {
-            using var key = Registry.CurrentUser.OpenSubKey(@"Software\Valve\Steam");
-            return key?.GetValue("SteamPath") as string;
-        }
-        catch
-        {
-            return null;
-        }
+        return games;
     }
 
     private static List<string> GetLibraryFolders(string steamPath)
@@ -127,8 +165,7 @@ public class SteamLibraryProvider : IGameLibraryProvider
 
         if (!nameMatch.Success || !installDirMatch.Success) return null;
 
-        // معرف حتمي من اسم الملف (بدل Guid.NewGuid الذي يكسر المفضلة وساعات اللعب)
-        // appmanifest_228980.acf → 228980
+        // معرف حتمي من اسم الملف بدل Guid.NewGuid (ثبات المفضلة وساعات اللعب)
         var appId = idMatch.Success
             ? idMatch.Groups[1].Value
             : Path.GetFileNameWithoutExtension(manifestPath).Replace("appmanifest_", "");
@@ -138,8 +175,8 @@ public class SteamLibraryProvider : IGameLibraryProvider
         var name = nameMatch.Groups[1].Value;
 
         // حزم دعم وأدوات ستيم — نخفيها من المكتبة
-        if (appId == "228980"                                          // Steamworks Common Redistributables
-            || appId == "1070560"                                       // Steam Linux Runtime (scout)
+        if (appId == "228980"
+            || appId == "1070560"
             || name.Contains("Steam Linux Runtime", StringComparison.OrdinalIgnoreCase)
             || name.Contains("Steamworks Common", StringComparison.OrdinalIgnoreCase)
             || name.Contains("Redistributables", StringComparison.OrdinalIgnoreCase)
@@ -157,6 +194,9 @@ public class SteamLibraryProvider : IGameLibraryProvider
             Platform = "Steam",
             CoverImageUrl = idMatch.Success
                 ? $"https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/library_600x900.jpg"
+                : null,
+            CoverImageUrlFallback = idMatch.Success
+                ? $"https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/header.jpg"
                 : null,
             IsInstalled = Directory.Exists(installPath)
         };

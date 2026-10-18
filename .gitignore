@@ -18,5 +18,8 @@ build-temp-plugin/
 # macOS
 .DS_Store
 
-# Linux publish output
+# Build artifacts
 publish-linux/
+publish/
+bin/
+obj/

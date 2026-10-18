@@ -1,4 +1,7 @@
 {
+  "0.0.10.59": [
+    "تنظيف: منع دخول build artifacts إلى git وإلغاء تتبع مجلد publish-linux"
+  ],
   "0.0.10.58": [
     "B22: دعم Steam على Linux — GetSteamPath يفحص مسارات ~/.local/share/Steam و~/.steam/steam وFlatpak وsnap (ويندوز يبقى عبر Registry بدون تغيير)، واستخراج ScanFromSteamPath كـ seam داخلي مع 5 اختبارات مكتبة مزيفة على القرص تعمل على CI لينكس وويندوز معًا (B22)",
   ],

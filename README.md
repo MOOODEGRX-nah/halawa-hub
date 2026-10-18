@@ -14,9 +14,8 @@
 - Xbox / Microsoft Store (كشف تقريبي)
 
 ## تحميل البرنامج
-1. تبويب **Actions** بالمستودع
-2. آخر بناء ناجح (علامة صح خضراء) → قسم **Artifacts** → **Halawa-Hub**
-3. فك الضغط وشغّل `Halawa-Hub.exe` مباشرة (ما يحتاج أي تثبيت)
+من الرابط الموقع ادناه (https://mooodegrx-nah.github.io/halawa-hub-web/)
+
 
 ## أغلفة لمنصات غير Steam (اختياري)
 Steam يجيب غلافه تلقائيًا بدون إعداد. لباقي المنصات (GOG, Epic, Riot, Xbox):

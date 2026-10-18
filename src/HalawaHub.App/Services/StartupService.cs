@@ -3,7 +3,14 @@ using Microsoft.Win32;
 
 namespace HalawaHub.App.Services;
 
-/// يفعّل/يعطّل تشغيل البرنامج تلقائيًا مع بدء تشغيل ويندوز
+/// <summary>
+/// يفعّل/يعطّل تشغيل البرنامج تلقائيًا مع بدء تشغيل ويندوز.
+/// الميزة خاصة بويندوز (مفتاح Registry Run). على غير ويندوز:
+///   IsEnabled() -> false، SetEnabled() -> no-op صامت.
+/// الحراس (B28a) تُزيل تحذيرات CA1416 وتجعل السلوك عبر المنصات صريحًا
+/// بدل الاعتماد على try/catch يبتلع الاستثناء بصمت (وثيقة CA1416:
+/// المحلّل يتعرّف على حراس OperatingSystem class).
+/// </summary>
 public static class StartupService
 {
     private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
@@ -11,6 +18,8 @@ public static class StartupService
 
     public static bool IsEnabled()
     {
+        if (!OperatingSystem.IsWindows()) return false;
+
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, false);
@@ -24,6 +33,8 @@ public static class StartupService
 
     public static void SetEnabled(bool enabled)
     {
+        if (!OperatingSystem.IsWindows()) return;
+
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, true)
@@ -42,7 +53,7 @@ public static class StartupService
         }
         catch
         {
-            // فشل التعديل (صلاحيات مثلاً)، نتجاهل بهدوء
+            // فشل التعديل (صلاحيات مثلًا)، نتجاهل بهدوء
         }
     }
 }

@@ -57,8 +57,10 @@ public class SlidersIcon : Control
         Property = property,
         Duration = TimeSpan.FromSeconds(0.55),
         Delay = TimeSpan.FromSeconds(delay),
-        Easing = new SplineEasing(0.34, 1.35, 0.5, 1)
+        Easing = new CssBezierEasing(0.34, 1.35, 0.5, 1)
     };
+
+    internal double FirstKnob => GetValue(Knob1Property);
 
     public bool IsFlipped { get => GetValue(IsFlippedProperty); set => SetValue(IsFlippedProperty, value); }
     public bool Small { get => GetValue(SmallProperty); set => SetValue(SmallProperty, value); }

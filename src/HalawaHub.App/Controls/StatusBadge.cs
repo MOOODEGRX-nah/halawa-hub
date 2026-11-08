@@ -35,6 +35,7 @@ public class StatusBadge : Panel
     private readonly Border _fill;
     private readonly Path _check;
     private readonly Path _cross;
+    private System.Threading.CancellationTokenSource? _pendingLoops;
 
     public StatusBadge()
     {
@@ -121,14 +122,17 @@ public class StatusBadge : Panel
         if (pending)
         {
             StartPendingLoops();
+            if (animate && MotionSettings.Enabled) RunWindAnimation();
             return;
         }
+
+        StopPendingLoops();
 
         if (!animate || !MotionSettings.Enabled) return;
 
         if (done)
         {
-            _ = MotionSettings.AnimateAsync(_fill, TimeSpan.FromSeconds(0.5), new SplineEasing(0.34, 1.6, 0.64, 1), 0, 0.6, 0);
+            _ = MotionSettings.AnimateAsync(_fill, TimeSpan.FromSeconds(0.5), new CssBezierEasing(0.34, 1.6, 0.64, 1), 0, 0.6, 0);
             _ = DrawAsync(_check, 6);
         }
         else if (error)
@@ -139,25 +143,65 @@ public class StatusBadge : Panel
         }
     }
 
-    private void StartPendingLoops()
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
-        if (!MotionSettings.Enabled || !_ring.IsVisible || VisualRoot == null) return;
+        base.OnDetachedFromVisualTree(e);
+        StopPendingLoops();
+    }
+
+    private void StopPendingLoops()
+    {
+        _pendingLoops?.Cancel();
+        _pendingLoops = null;
+    }
+
+    /// انضغاط خفيف عند العودة لحالة الانتظار (pdbWind في التصميم)
+    private void RunWindAnimation()
+    {
+        MotionSettings.PrepareTransform(this);
 
         new Avalonia.Animation.Animation
         {
+            Duration = TimeSpan.FromSeconds(0.35),
+            Easing = new CubicEaseOut(),
+            Children =
+            {
+                Wind(0, 1), Wind(0.5, 0.9), Wind(1, 1),
+            }
+        }.RunAsync(this);
+    }
+
+    private static KeyFrame Wind(double cue, double scale) => new()
+    {
+        Cue = new Cue(cue),
+        Setters =
+        {
+            new Setter(ScaleTransform.ScaleXProperty, scale),
+            new Setter(ScaleTransform.ScaleYProperty, scale),
+        }
+    };
+
+    private void StartPendingLoops()
+    {
+        StopPendingLoops();
+        if (!MotionSettings.Enabled || !_ring.IsVisible || VisualRoot == null) return;
+
+        _pendingLoops = new System.Threading.CancellationTokenSource();
+        var token = _pendingLoops.Token;
+
+        _ = MotionSettings.RunLoopAsync(new Avalonia.Animation.Animation
+        {
             Duration = TimeSpan.FromSeconds(4),
-            IterationCount = IterationCount.Infinite,
             Children =
             {
                 new KeyFrame { Cue = new Cue(0), Setters = { new Setter(RotateTransform.AngleProperty, 0d) } },
                 new KeyFrame { Cue = new Cue(1), Setters = { new Setter(RotateTransform.AngleProperty, 360d) } },
             }
-        }.RunAsync(_ring);
+        }, _ring, token);
 
-        new Avalonia.Animation.Animation
+        _ = MotionSettings.RunLoopAsync(new Avalonia.Animation.Animation
         {
             Duration = TimeSpan.FromSeconds(1),
-            IterationCount = IterationCount.Infinite,
             Easing = new SineEaseInOut(),
             Children =
             {
@@ -165,7 +209,7 @@ public class StatusBadge : Panel
                 Breath(0.5, 0.9, 1.3),
                 Breath(1, 0.35, 0.8),
             }
-        }.RunAsync(_dot);
+        }, _dot, token);
     }
 
     private static KeyFrame Breath(double cue, double opacity, double scale) => new()

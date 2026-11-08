@@ -49,9 +49,10 @@ internal sealed class UiHarness : IDisposable
         Id = id, Name = name, Platform = platform, InstallPath = path, ExecutablePath = path + @"\game.exe"
     };
 
-    public UiHarness(string language = Loc.Arabic, IUpdateService? updates = null, GameInfo[]? games = null)
+    public UiHarness(string language = Loc.Arabic, IUpdateService? updates = null, GameInfo[]? games = null, bool motion = false, ManualResetEventSlim? scanGate = null)
     {
-        MotionSettings.Enabled = false;
+        // قبل إنشاء النافذة: بعض العناصر تقرأها مرة واحدة عند إنشائها
+        MotionSettings.Enabled = motion;
 
         var cfg = ConfigService.Load();
         cfg.Language = language;
@@ -63,6 +64,7 @@ internal sealed class UiHarness : IDisposable
         library.Setup(l => l.ScanAllLibraries(It.IsAny<IEnumerable<IGameLibraryProvider>>(), It.IsAny<IEnumerable<IGameTool>>()))
             .Returns(() =>
             {
+                scanGate?.Wait(TimeSpan.FromSeconds(30));
                 var result = new LibraryScanResult();
                 result.Games.AddRange((games ?? SampleGames).Select(Clone));
                 return result;
@@ -149,6 +151,7 @@ internal sealed class UiHarness : IDisposable
         Settle();
 
         // لا نترك اللغة لبقية الاختبارات، لا في الذاكرة ولا في config.json المؤقت
+        MotionSettings.Enabled = false;
         Loc.Instance.Language = Loc.Arabic;
         var cfg = ConfigService.Load();
         cfg.Language = Loc.Arabic;

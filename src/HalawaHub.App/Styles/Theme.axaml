@@ -4,6 +4,7 @@
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="using:HalawaHub.App.Services"
                     xmlns:controls="using:HalawaHub.App.Controls">
 
     <SolidColorBrush x:Key="PageBrush" Color="#0A0404"/>
@@ -102,7 +103,7 @@
             <Setter Property="RenderTransform" Value="scale(1)"/>
             <Setter Property="Transitions">
                 <Transitions>
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" Easing="0.3,1.8,0.5,1"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" Easing="{x:Static l:Springs.Press}"/>
                     <BrushTransition Property="Background" Duration="0:0:0.2"/>
                 </Transitions>
             </Setter>
@@ -149,7 +150,7 @@
             <Setter Property="RenderTransform" Value="scale(1)"/>
             <Setter Property="Transitions">
                 <Transitions>
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" Easing="0.3,1.8,0.5,1"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" Easing="{x:Static l:Springs.Press}"/>
                     <BrushTransition Property="Background" Duration="0:0:0.2"/>
                 </Transitions>
             </Setter>
@@ -170,6 +171,12 @@
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrushControl}"/>
             <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
             <Setter Property="Foreground" Value="#E8D8D8"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.3"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.3"/>
+                </Transitions>
+            </Setter>
         </Style>
         <Style Selector="^.ib:pointerover">
             <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
@@ -181,6 +188,12 @@
             <Setter Property="Height" Value="44"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
         </Style>
         <Style Selector="^.x:pointerover">
             <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
@@ -189,13 +202,18 @@
         <!-- .si: عنصر الشريط الجانبي في النوافذ -->
         <Style Selector="^.si">
             <Setter Property="Height" Value="44"/>
-            <Setter Property="Margin" Value="0,0,0,4"/>
             <Setter Property="Padding" Value="14,0"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.3"/>
+                </Transitions>
+            </Setter>
         </Style>
         <Style Selector="^.si:pointerover">
             <Setter Property="Background" Value="#0AFFFFFF"/>
@@ -228,7 +246,7 @@
                              HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3,0,0,0">
                         <Ellipse.Transitions>
                             <Transitions>
-                                <ThicknessTransition Property="Margin" Duration="0:0:0.38" Easing="0.34,1.6,0.64,1"/>
+                                <ThicknessTransition Property="Margin" Duration="0:0:0.38" Easing="{x:Static l:Springs.Switch}"/>
                                 <DoubleTransition Property="Width" Duration="0:0:0.2"/>
                             </Transitions>
                         </Ellipse.Transitions>

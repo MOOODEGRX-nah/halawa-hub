@@ -21,6 +21,9 @@
                 <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.25"/></Transitions>
             </Setter>
         </Style>
+        <Style Selector="Button.tstab TextBlock">
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
         <Style Selector="Button.tstab:pointerover">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
         </Style>
@@ -49,6 +52,9 @@
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Padding" Value="8,1"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Transitions">
+                <Transitions><BrushTransition Property="Background" Duration="0:0:0.3"/></Transitions>
+            </Setter>
         </Style>
         <Style Selector="Button.chip.on Border.count">
             <Setter Property="Background" Value="#4D000000"/>
@@ -56,6 +62,38 @@
 
         <Style Selector="Button.rfb.ok">
             <Setter Property="BorderBrush" Value="#804ADE80"/>
+        </Style>
+        <Style Selector="Button.rfb /template/ Border#PART_Root">
+            <Setter Property="Transitions">
+                <Transitions><BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/></Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.rfb.ok /template/ Border#PART_Root">
+            <Setter Property="BoxShadow" Value="0 0 14 0 #594ADE80"/>
+        </Style>
+        <Style Selector="Button.rfb Panel.rf-a, Button.rfb c|VectorIcon.rf-b">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="{x:Static l:Springs.Pop}"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.rfb Panel.rf-a">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+        </Style>
+        <Style Selector="Button.rfb.ok Panel.rf-a">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="RenderTransform" Value="scale(0.4)"/>
+        </Style>
+        <Style Selector="Button.rfb c|VectorIcon.rf-b">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="RenderTransform" Value="scale(0.4)"/>
+        </Style>
+        <Style Selector="Button.rfb.ok c|VectorIcon.rf-b">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
         </Style>
     </UserControl.Styles>
 
@@ -105,10 +143,11 @@
                         Classes.ok="{Binding IsRefreshDone}" Command="{Binding RefreshCommand}"
                         ToolTip.Tip="{l:Loc refresh}" AutomationProperties.Name="{l:Loc refresh}">
                     <Panel>
-                        <c:VectorIcon Name="RefreshIcon" Data="{StaticResource IconRefresh}" Size="18"
-                                      IsVisible="{Binding !IsRefreshDone}"/>
-                        <c:VectorIcon Data="{StaticResource IconCheck}" Size="18" StrokeWidth="2.6"
-                                      Foreground="#4ADE80" IsVisible="{Binding IsRefreshDone}"/>
+                        <Panel Classes="rf-a" RenderTransformOrigin="50%,50%">
+                            <c:VectorIcon Name="RefreshIcon" Data="{StaticResource IconRefresh}" Size="18"/>
+                        </Panel>
+                        <c:VectorIcon Classes="rf-b" Data="{StaticResource IconCheck}" Size="18" StrokeWidth="2.6"
+                                      Foreground="#4ADE80"/>
                     </Panel>
                 </Button>
             </Grid>

@@ -34,8 +34,17 @@
             <Setter Property="BorderBrush" Value="#4A2A12"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.3"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.3"/>
+                </Transitions>
+            </Setter>
         </Style>
         <Style Selector="Border.bdg TextBlock">
+            <Setter Property="Transitions">
+                <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions>
+            </Setter>
             <Setter Property="Foreground" Value="{StaticResource AmberBrush}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -48,6 +57,11 @@
             <Setter Property="Foreground" Value="#FFE2B0"/>
         </Style>
 
+        <Style Selector="Button.slb /template/ Border#PART_Root">
+            <Setter Property="Transitions">
+                <Transitions><BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.35"/></Transitions>
+            </Setter>
+        </Style>
         <Style Selector="Button.slb:pointerover /template/ Border#PART_Root, Button.slb.on /template/ Border#PART_Root">
             <Setter Property="BoxShadow" Value="0 0 18 0 #80EF4444"/>
         </Style>

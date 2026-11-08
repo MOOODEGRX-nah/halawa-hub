@@ -46,7 +46,7 @@ public partial class GameCard : UserControl
         {
             var menu = this.FindControl<Border>("Menu")!;
             _ = MotionSettings.AnimateAsync(menu, TimeSpan.FromSeconds(0.24),
-                new SplineEasing(0.34, 1.56, 0.64, 1), 0, 0.88, -4);
+                new CssBezierEasing(0.34, 1.56, 0.64, 1), 0, 0.88, -4);
         }
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace HalawaHub.App.Services;
@@ -57,6 +58,26 @@ internal static class LinuxDesktopEntry
             }
         }
         return quoted.Append('"').ToString();
+    }
+
+    /// <summary>
+    /// عكس QuoteExec: المسار المكتوب في مفتاح Exec، أو null إذا لم يوجد.
+    /// قيمة بلا اقتباس (ملف عدّله المستخدم) تُؤخذ حتى أول مسافة.
+    /// </summary>
+    internal static string? ReadExecPath(string entry)
+    {
+        var line = entry.Split('\n').FirstOrDefault(l => l.StartsWith("Exec=", StringComparison.Ordinal));
+        if (line == null) return null;
+
+        var value = line["Exec=".Length..].Trim();
+        if (value.Length < 2 || value[0] != '"' || value[^1] != '"')
+            return value.Split(' ', 2)[0] is { Length: > 0 } plain ? plain : null;
+
+        return value[1..^1]
+            .Replace("\\\\\\\\", "\u0000")
+            .Replace("\\\\", "")
+            .Replace("\u0000", "\\")
+            .Replace("%%", "%");
     }
 
     /// كتابة ذرية: لا يبقى سطح المكتب أمام ملف نصفه مكتوب

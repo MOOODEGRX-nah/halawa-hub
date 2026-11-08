@@ -8,15 +8,16 @@ namespace HalawaHub.App.Services;
 /// <summary>
 /// مدخل قائمة التطبيقات لمن يشغّل ملف AppImage. سكربت tar.gz وحزمة AUR يكتبانه بأنفسهما،
 /// أما AppImage فملف واحد بلا تثبيت، والكتابة في قائمة المستخدم تكون بطلبه لا تلقائيًا.
+/// له ملف مدخل مستقل: من ثبّت الصيغتين معًا لا يخسر مدخل tar.gz عند إيقاف هذا الخيار.
 /// </summary>
 public static class AppMenuService
 {
-    private const string MarkerLine = "X-Halawa-Hub-AppImage=true";
+    internal const string EntryFileName = "halawa-hub-appimage.desktop";
     private static readonly int[] IconSizes = { 16, 32, 48, 64, 128, 256 };
 
     public static bool IsSupported => InstallInfo.CurrentAppImage != null;
 
-    public static bool IsEnabled() => IsSupported && IsOwnEntry(EntryPath());
+    public static bool IsEnabled() => IsSupported && File.Exists(EntryPath());
 
     public static void SetEnabled(bool enabled)
     {
@@ -27,12 +28,11 @@ public static class AppMenuService
         {
             if (enabled)
             {
-                LinuxDesktopEntry.WriteAtomically(EntryPath(), BuildEntry(appImage));
+                LinuxDesktopEntry.WriteAtomically(EntryPath(), LinuxDesktopEntry.Build(appImage));
                 CopyIcons();
             }
-            else if (IsOwnEntry(EntryPath()))
+            else
             {
-                // مدخل كتبه install.sh لتثبيت tar.gz ليس ملكًا لهذا الزر
                 File.Delete(EntryPath());
             }
         }
@@ -50,7 +50,7 @@ public static class AppMenuService
 
         try
         {
-            var expected = BuildEntry(appImage);
+            var expected = LinuxDesktopEntry.Build(appImage);
             if (File.ReadAllText(EntryPath()) != expected)
                 LinuxDesktopEntry.WriteAtomically(EntryPath(), expected);
         }
@@ -60,25 +60,10 @@ public static class AppMenuService
         }
     }
 
-    internal static string BuildEntry(string appImagePath) =>
-        LinuxDesktopEntry.Build(appImagePath) + MarkerLine + "\n";
-
-    internal static bool IsOwnEntry(string path)
-    {
-        try
-        {
-            return File.Exists(path) && File.ReadAllText(path).Contains(MarkerLine, StringComparison.Ordinal);
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     private static string DataHome() => LinuxDesktopEntry.DataHome(
         Environment.GetEnvironmentVariable("XDG_DATA_HOME"), LinuxDesktopEntry.Home);
 
-    private static string EntryPath() => Path.Combine(DataHome(), "applications", LinuxDesktopEntry.FileName);
+    private static string EntryPath() => Path.Combine(DataHome(), "applications", EntryFileName);
 
     // الأيقونات داخل AppImage بجانب الملف التنفيذي؛ نسخها يبقيها متاحة والملف غير مركّب
     private static void CopyIcons()

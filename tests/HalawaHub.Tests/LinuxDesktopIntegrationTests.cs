@@ -25,6 +25,28 @@ public class LinuxDesktopEntryTests
         LinuxDesktopEntry.QuoteExec(path).Should().Be(expected);
     }
 
+    [Theory]
+    [InlineData("/home/u/app/Halawa-Hub")]
+    [InlineData("/home/u/My Games/Halawa-Hub")]
+    [InlineData("/home/u/100%/Hub")]
+    [InlineData("/home/u/a$b/Hub")]
+    [InlineData("/home/u/a\"b/Hub")]
+    [InlineData("/home/u/a`b/Hub")]
+    [InlineData("/home/u/a\\b/Hub")]
+    public void ExecPath_RoundTrips(string path)
+    {
+        LinuxDesktopEntry.ReadExecPath(LinuxDesktopEntry.Build(path)).Should().Be(path);
+    }
+
+    [Theory]
+    [InlineData("[Desktop Entry]\nExec=/usr/bin/hub --flag\n", "/usr/bin/hub")]
+    [InlineData("[Desktop Entry]\nName=x\n", null)]
+    [InlineData("Exec=\n", null)]
+    public void ExecPath_HandlesEntriesWeDidNotWrite(string entry, string? expected)
+    {
+        LinuxDesktopEntry.ReadExecPath(entry).Should().Be(expected);
+    }
+
     [Fact]
     public void Entry_HasEverythingTheMenuAndTaskbarNeed()
     {
@@ -131,6 +153,20 @@ public sealed class LinuxAutostartTests : IDisposable
     }
 
     [Fact]
+    public void RunningAnotherInstall_DoesNotStealTheAutostartEntry()
+    {
+        // انحدار: تشغيل AppImage مرة واحدة كان يبدّل مسار تثبيت tar.gz الصالح
+        var tarballBinary = Path.Combine(_root, "tarball", "Halawa-Hub");
+        Directory.CreateDirectory(Path.GetDirectoryName(tarballBinary)!);
+        File.WriteAllText(tarballBinary, "");
+        StartupService.SetAutostart(_path, true, tarballBinary);
+
+        StartupService.RefreshAutostart(_path, "/somewhere/else/Hub.AppImage");
+
+        LinuxDesktopEntry.ReadExecPath(File.ReadAllText(_path)).Should().Be(tarballBinary);
+    }
+
+    [Fact]
     public void Refresh_DoesNotEnableADisabledEntry()
     {
         StartupService.RefreshAutostart(_path, "/new/Hub.AppImage");
@@ -151,32 +187,10 @@ public sealed class LinuxAutostartTests : IDisposable
 public class AppMenuEntryTests
 {
     [Fact]
-    public void Entry_PointsAtTheAppImage_AndIsMarkedAsOurs()
+    public void AppImageEntry_HasItsOwnFile_SoItNeverReplacesTheTarballEntry()
     {
-        var entry = AppMenuService.BuildEntry("/apps/Hub.AppImage");
-
-        entry.Should().Contain("Exec=\"/apps/Hub.AppImage\"\n");
-        entry.Should().EndWith("X-Halawa-Hub-AppImage=true\n");
-    }
-
-    [Fact]
-    public void EntryFromTheTarballInstaller_IsNotOurs()
-    {
-        var path = Path.Combine(Path.GetTempPath(), $"menu-{Guid.NewGuid():N}.desktop");
-        try
-        {
-            File.WriteAllText(path, LinuxDesktopEntry.Build("/home/u/.local/opt/halawa-hub/Halawa-Hub"));
-            AppMenuService.IsOwnEntry(path).Should().BeFalse("the toggle must not delete what install.sh wrote");
-
-            File.WriteAllText(path, AppMenuService.BuildEntry("/apps/Hub.AppImage"));
-            AppMenuService.IsOwnEntry(path).Should().BeTrue();
-        }
-        finally
-        {
-            File.Delete(path);
-        }
-
-        AppMenuService.IsOwnEntry(path).Should().BeFalse();
+        // انحدار: كان الملفان بنفس الاسم، فمفتاح AppImage يكتب فوق مدخل install.sh
+        AppMenuService.EntryFileName.Should().NotBe(LinuxDesktopEntry.FileName);
     }
 }
 

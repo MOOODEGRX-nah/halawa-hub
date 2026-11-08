@@ -72,8 +72,9 @@ public static class StartupService
     }
 
     /// <summary>
-    /// ملف AppImage يُنقل بسهولة بين المجلدات، فنصحح المسار عند كل تشغيل
-    /// وإلا يفشل التشغيل التلقائي بصمت في الجلسة القادمة.
+    /// ملف AppImage يُنقل بسهولة بين المجلدات، فنصحح المسار إذا اختفى الملف الذي يشير
+    /// إليه، وإلا يفشل التشغيل التلقائي بصمت في الجلسة القادمة. لا نغيّره وهو صالح:
+    /// تشغيل AppImage مرة للتجربة لا يسرق التشغيل التلقائي من تثبيت tar.gz.
     /// </summary>
     public static void RefreshPathIfEnabled()
     {
@@ -128,9 +129,9 @@ public static class StartupService
 
         try
         {
-            var expected = LinuxDesktopEntry.Build(launcherPath);
-            if (File.ReadAllText(path) != expected)
-                LinuxDesktopEntry.WriteAtomically(path, expected);
+            var current = LinuxDesktopEntry.ReadExecPath(File.ReadAllText(path));
+            if (current == null || !File.Exists(current))
+                LinuxDesktopEntry.WriteAtomically(path, LinuxDesktopEntry.Build(launcherPath));
         }
         catch (Exception ex)
         {

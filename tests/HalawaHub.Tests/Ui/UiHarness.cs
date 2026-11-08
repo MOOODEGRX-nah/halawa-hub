@@ -147,6 +147,11 @@ internal sealed class UiHarness : IDisposable
     {
         Window.Close();
         Settle();
+
+        // لا نترك اللغة لبقية الاختبارات، لا في الذاكرة ولا في config.json المؤقت
         Loc.Instance.Language = Loc.Arabic;
+        var cfg = ConfigService.Load();
+        cfg.Language = Loc.Arabic;
+        ConfigService.Save(cfg);
     }
 }

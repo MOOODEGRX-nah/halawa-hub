@@ -12,6 +12,9 @@ namespace HalawaHub.Tests;
 /// </summary>
 public class UpdateServiceTests
 {
+    // الرسائل مترجمة، وهذه الاختبارات تتحقق من النص العربي
+    public UpdateServiceTests() => Loc.Instance.Language = Loc.Arabic;
+
     [Fact]
     public async Task CheckForUpdate_NoUpdate_ReturnsHasUpdateFalse()
     {

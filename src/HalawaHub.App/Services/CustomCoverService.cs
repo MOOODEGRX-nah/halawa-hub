@@ -55,4 +55,10 @@ public static class CustomCoverService
         Covers[Key(platform, id)] = localFilePath;
         Save();
     }
+
+    public static void Remove(string platform, string id)
+    {
+        if (Covers.Remove(Key(platform, id)))
+            Save();
+    }
 }

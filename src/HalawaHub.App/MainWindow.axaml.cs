@@ -1,6 +1,8 @@
+using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using HalawaHub.App.Services;
 using HalawaHub.App.ViewModels;
 
@@ -34,24 +36,63 @@ public partial class MainWindow : Window
                 IsMaximized = WindowState == WindowState.Maximized
             });
         };
+
+        // Tunnel: يصل قبل أن يستهلك أي زر الضغطة
+        AddHandler(PointerPressedEvent, OnAnyPointerPressed, RoutingStrategies.Tunnel);
+        AddHandler(KeyDownEvent, OnAnyKeyDown, RoutingStrategies.Tunnel);
+
+        Loc.Instance.LanguageChanged += (_, _) => _ = FadeContentAsync();
     }
 
-    // يفتح منتقي ملفات عشان يختار المستخدم صورة غلاف مخصصة — تفاعل مع نظام
-    // الملفات هذا أنسب مكان له بطبقة الواجهة نفسها بدل الـ ViewModel
-    private async void ChangeCoverButton_Click(object? sender, RoutedEventArgs e)
+    private async System.Threading.Tasks.Task FadeContentAsync()
     {
-        if (DataContext is not MainViewModel vm || vm.DetailsGame == null) return;
+        var page = this.FindControl<Grid>("PageContent");
+        if (page != null)
+            await MotionSettings.AnimateAsync(page, System.TimeSpan.FromSeconds(0.35),
+                new Avalonia.Animation.Easings.CubicEaseOut(), 0.35, 1, 0);
+    }
 
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
-            Title = "اختر صورة الغلاف",
-            AllowMultiple = false,
-            FileTypeFilter = new[] { FilePickerFileTypes.ImageAll }
-        });
+    /// قائمة البطاقة تُغلق عند الضغط في أي مكان خارجها
+    private void OnAnyPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is not MainViewModel vm) return;
 
-        if (files.Count > 0)
+        var insideMenu = (e.Source as Control)?.GetSelfAndVisualAncestors()
+            .OfType<Control>()
+            .Any(c => c.Classes.Contains("card-menu") || c.Classes.Contains("eb")) == true;
+
+        if (!insideMenu)
+            vm.CloseAllCardMenus();
+    }
+
+    /// Esc يغلق الأقرب: القائمة، ثم البحث، ثم النافذة المفتوحة
+    private void OnAnyKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape || DataContext is not MainViewModel vm) return;
+
+        if (vm.CloseAllCardMenus())
         {
-            vm.DetailsGame.SetCustomCover(files[0].Path.LocalPath);
+            e.Handled = true;
+        }
+        else if (vm.IsChangelogOpen)
+        {
+            vm.CloseChangelogCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (vm.IsDetailsOpen)
+        {
+            vm.CloseDetailsCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (vm.IsSettingsOpen)
+        {
+            vm.CloseSettingsCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (vm.IsSearchOpen)
+        {
+            vm.CloseSearch();
+            e.Handled = true;
         }
     }
 }

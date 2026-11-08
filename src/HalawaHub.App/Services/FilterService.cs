@@ -20,9 +20,15 @@ public class FilterService : IFilterService
         string navAll,
         string navFavorite,
         string navInstalled,
-        string navRecent)
+        string navRecent,
+        string? platform = null,
+        bool includeHidden = false)
     {
-        IEnumerable<GameCardViewModel> query = games;
+        // الألعاب المخفية لا تظهر في أي تبويب ما لم يطلب المستخدم إظهارها
+        IEnumerable<GameCardViewModel> query = includeHidden ? games : games.Where(c => !c.IsHidden);
+
+        if (!string.IsNullOrEmpty(platform))
+            query = query.Where(c => c.Platform == platform);
 
         if (!string.IsNullOrWhiteSpace(searchQuery))
             query = query.Where(c => c.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));

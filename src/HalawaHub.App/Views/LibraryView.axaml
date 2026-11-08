@@ -1,0 +1,210 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:c="using:HalawaHub.App.Controls"
+             xmlns:conv="using:HalawaHub.App.Converters"
+             xmlns:views="using:HalawaHub.App.Views"
+             x:Class="HalawaHub.App.Views.LibraryView"
+             x:Name="Root"
+             x:DataType="vm:MainViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="Button.tstab">
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Padding" Value="6,0"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Transitions">
+                <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.25"/></Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.tstab TextBlock">
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+        <Style Selector="Button.tstab:pointerover">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        </Style>
+        <Style Selector="Button.tstab.on, Button.tstab.on:pointerover">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.chip">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Transitions">
+                <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.chip:pointerover">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        </Style>
+        <Style Selector="Button.chip.on, Button.chip.on:pointerover">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Border.count">
+            <Setter Property="Background" Value="#2A1313"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="8,1"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Transitions">
+                <Transitions><BrushTransition Property="Background" Duration="0:0:0.3"/></Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.chip.on Border.count">
+            <Setter Property="Background" Value="#4D000000"/>
+        </Style>
+
+        <Style Selector="Button.rfb.ok">
+            <Setter Property="BorderBrush" Value="#804ADE80"/>
+        </Style>
+        <Style Selector="Button.rfb /template/ Border#PART_Root">
+            <Setter Property="Transitions">
+                <Transitions><BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/></Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.rfb.ok /template/ Border#PART_Root">
+            <Setter Property="BoxShadow" Value="0 0 14 0 #594ADE80"/>
+        </Style>
+        <Style Selector="Button.rfb Panel.rf-a, Button.rfb c|VectorIcon.rf-b">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="{x:Static l:Springs.Pop}"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.rfb Panel.rf-a">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+        </Style>
+        <Style Selector="Button.rfb.ok Panel.rf-a">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="RenderTransform" Value="scale(0.4)"/>
+        </Style>
+        <Style Selector="Button.rfb c|VectorIcon.rf-b">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="RenderTransform" Value="scale(0.4)"/>
+        </Style>
+        <Style Selector="Button.rfb.ok c|VectorIcon.rf-b">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- التبويبات والبحث والتحديث -->
+        <Border Grid.Row="0" ZIndex="10" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,6,0,0">
+            <Grid>
+                <!-- التبويبات حتى 600، وتنكمش في النوافذ الضيقة (flex: 0 1 600px) ليبقى مكان للبحث -->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1000*" MaxWidth="600"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Panel Grid.Column="0" Height="49.5" Margin="0,0,16,0">
+                    <Border BorderBrush="#12FFFFFF" BorderThickness="0,0,0,1.5"/>
+                    <UniformGrid Columns="4" VerticalAlignment="Top">
+                        <Button Classes="tstab" Tag="0" Classes.on="{Binding LibraryTabIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}" Click="Tab_Click" Content="{l:Loc home}"/>
+                        <Button Classes="tstab" Tag="1" Classes.on="{Binding LibraryTabIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}" Click="Tab_Click" Content="{l:Loc favorites}"/>
+                        <Button Classes="tstab" Tag="2" Classes.on="{Binding LibraryTabIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}" Click="Tab_Click" Content="{l:Loc installed}"/>
+                        <Button Classes="tstab" Tag="3" Classes.on="{Binding LibraryTabIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}" Click="Tab_Click" Content="{l:Loc recent}"/>
+                    </UniformGrid>
+                    <c:SlidingPill ItemCount="4" SelectedIndex="{Binding LibraryTabIndex}" EdgeInset="14" Motion="Underline"
+                                   Height="5" VerticalAlignment="Bottom" Margin="0,0,0,-1.5" IsHitTestVisible="False">
+                        <Border CornerRadius="2.5" Background="{StaticResource UnderlineGradient}"
+                                BoxShadow="0 0 12 0 #B3EF4444"/>
+                    </c:SlidingPill>
+                </Panel>
+
+                <!-- الترتيب: ليس في التصميم، باقٍ كقائمة صغيرة بجانب البحث -->
+                <Button Grid.Column="2" Classes="ib" Margin="0,0,16,0" VerticalAlignment="Center"
+                        ToolTip.Tip="{l:Loc sortBy}" AutomationProperties.Name="{l:Loc sortBy}">
+                    <c:VectorIcon Data="{StaticResource IconSort}" Size="18"/>
+                    <Button.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                            <MenuItem Header="{l:Loc sortName}" Tag="name" Click="Sort_Click"/>
+                            <MenuItem Header="{l:Loc sortLastPlayed}" Tag="lastplayed" Click="Sort_Click"/>
+                            <MenuItem Header="{l:Loc sortPlatform}" Tag="platform" Click="Sort_Click"/>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+
+                <views:SearchBox Grid.Column="3" VerticalAlignment="Center" Margin="0,0,16,0"/>
+
+                <Button Name="RefreshButton" Grid.Column="4" Classes="ib rfb" VerticalAlignment="Center"
+                        Classes.ok="{Binding IsRefreshDone}" Command="{Binding RefreshCommand}"
+                        ToolTip.Tip="{l:Loc refresh}" AutomationProperties.Name="{l:Loc refresh}">
+                    <Panel>
+                        <Panel Classes="rf-a" RenderTransformOrigin="50%,50%">
+                            <c:VectorIcon Name="RefreshIcon" Data="{StaticResource IconRefresh}" Size="18"/>
+                        </Panel>
+                        <c:VectorIcon Classes="rf-b" Data="{StaticResource IconCheck}" Size="18" StrokeWidth="2.6"
+                                      Foreground="#4ADE80"/>
+                    </Panel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- شريط المنصات -->
+        <Border Grid.Row="1" Margin="0,18,0,22" CornerRadius="22" HorizontalAlignment="Left"
+                Width="{Binding PlatformBarWidth}"
+                Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1">
+            <Panel>
+                <c:SlidingPill ItemCount="{Binding PlatformChips.Count}" SelectedIndex="{Binding PlatformChipIndex}"
+                               Inset="4" Margin="0,4" IsHitTestVisible="False">
+                    <Border CornerRadius="18" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #80EF4444"/>
+                </c:SlidingPill>
+                <ItemsControl ItemsSource="{Binding PlatformChips}" Margin="4">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PlatformChip">
+                            <Button Classes="chip" Classes.on="{Binding IsSelected}"
+                                    Command="{Binding #Root.((vm:MainViewModel)DataContext).SelectPlatformCommand}"
+                                    CommandParameter="{Binding}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Label}" VerticalAlignment="Center"/>
+                                    <Border Classes="count">
+                                        <TextBlock Text="{Binding Count}" FontSize="12" FontWeight="SemiBold"/>
+                                    </Border>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Panel>
+        </Border>
+
+        <!-- صفحات المكتبة -->
+        <Panel Name="PageHost" Grid.Row="2" ClipToBounds="True" Margin="0,-6,0,0">
+            <ScrollViewer Name="PageScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <Panel Margin="0,6,0,40">
+                    <ItemsControl Name="GamesList" ItemsSource="{Binding FilteredGames}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><c:AutoFillGrid/></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:GameCardViewModel">
+                                <views:GameCard/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{l:Loc emptyPage}" IsVisible="{Binding IsPageEmpty}" FontSize="15"
+                               Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center" Margin="0,60"/>
+                </Panel>
+            </ScrollViewer>
+            <!-- لقطة الصفحة السابقة أثناء الانزلاق بين التبويبات -->
+            <Image Name="PageSnapshot" IsVisible="False" IsHitTestVisible="False" Stretch="None"
+                   HorizontalAlignment="Left" VerticalAlignment="Top" FlowDirection="LeftToRight"/>
+        </Panel>
+    </Grid>
+</UserControl>

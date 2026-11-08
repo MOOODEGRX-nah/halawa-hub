@@ -1,3 +1,4 @@
+using HalawaHub.Core;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -16,9 +17,7 @@ public static class CoverDiskCache
     private const int MaxFiles = 400;
     private static int _writeCount;
 
-    private static string Dir => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "HalawaHub", "cache", "covers");
+    private static string Dir => AppPaths.InData("cache", "covers");
 
     public static byte[]? TryRead(string cacheKey)
     {

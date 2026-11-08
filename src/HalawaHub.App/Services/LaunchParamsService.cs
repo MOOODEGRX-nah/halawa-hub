@@ -1,3 +1,4 @@
+using HalawaHub.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,9 +9,7 @@ namespace HalawaHub.App.Services;
 /// يحفظ معاملات تشغيل مخصصة يضيفها المستخدم لكل لعبة (زي Launch Options بـ Steam)
 public static class LaunchParamsService
 {
-    private static readonly string FilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "HalawaHub", "launch-params.json");
+    private static readonly string FilePath = AppPaths.InData("launch-params.json");
 
     private static readonly Dictionary<string, string> Params = Load();
 

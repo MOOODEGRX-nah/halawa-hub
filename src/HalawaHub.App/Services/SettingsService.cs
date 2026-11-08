@@ -1,3 +1,4 @@
+using HalawaHub.Core;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -10,9 +11,7 @@ namespace HalawaHub.App.Services;
 /// </summary>
 public static class SettingsService
 {
-    private static readonly string SettingsPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "HalawaHub", "window-settings.json");
+    private static readonly string SettingsPath = AppPaths.InData("window-settings.json");
 
     public static WindowSettings Load()
     {

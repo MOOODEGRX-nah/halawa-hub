@@ -30,8 +30,9 @@ public class XboxCacheInvalidationTests : IDisposable
     [Fact]
     public void InvalidateCache_ClearsCachedEntries()
     {
-        // Arrange: املأ الكاش بقيمة وهمية
-        SetCachedEntries(new List<object> { new { Name = "Fake Game" } });
+        // Arrange: املأ الكاش بقائمة من نوعه الحقيقي (AppxEntry نوع خاص)
+        SetCachedEntries(NewEmptyCacheList());
+        GetCachedEntries().Should().NotBeNull();
 
         // Act
         XboxLibraryProvider.InvalidateCache();
@@ -44,7 +45,7 @@ public class XboxCacheInvalidationTests : IDisposable
     public void InvalidateCache_ResetsLastScan()
     {
         // Arrange
-        SetCachedEntries(new List<object> { new { Name = "Fake" } });
+        SetCachedEntries(NewEmptyCacheList());
         SetLastScan(DateTime.UtcNow);
 
         // Act
@@ -76,6 +77,13 @@ public class XboxCacheInvalidationTests : IDisposable
             "CacheLock", BindingFlags.NonPublic | BindingFlags.Static);
         lockField.Should().NotBeNull("CacheLock must exist for thread-safe cache access");
         lockField!.IsStatic.Should().BeTrue();
+    }
+
+    private static object NewEmptyCacheList()
+    {
+        var field = typeof(XboxLibraryProvider).GetField(
+            "_cachedEntries", BindingFlags.NonPublic | BindingFlags.Static);
+        return Activator.CreateInstance(field!.FieldType)!;
     }
 
     private static object? GetCachedEntries()

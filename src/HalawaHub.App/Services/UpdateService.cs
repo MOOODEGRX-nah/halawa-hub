@@ -42,11 +42,11 @@ public class UpdateService : IUpdateService
     // SelfUpdater في Core لا يعرف الترجمة: رسائله ثابتة نترجمها هنا
     internal static string LocalizeStatus(string status) => status switch
     {
-        "downloading update..." => Loc.Instance["updDownloading"],
-        "extracting files..." => Loc.Instance["updExtracting"],
-        "restarting..." => Loc.Instance["updRestarting"],
-        "SHA256 verification failed - install aborted." => Loc.Instance["updChecksum"],
-        "automatic update is only available on Windows." => Loc.Instance["updUnsupported"],
+        SelfUpdater.StatusDownloading => Loc.Instance["updDownloading"],
+        SelfUpdater.StatusExtracting => Loc.Instance["updExtracting"],
+        SelfUpdater.StatusRestarting => Loc.Instance["updRestarting"],
+        SelfUpdater.StatusChecksumFailed => Loc.Instance["updChecksum"],
+        SelfUpdater.StatusUnsupported => Loc.Instance["updUnsupported"],
         _ => status
     };
 

@@ -11,12 +11,30 @@ namespace HalawaHub.Core.Updates;
 /// true يعني أن DownloadUrl صفحة الإصدار وليس ملفًا قابلًا للتثبيت التلقائي
 /// (لا يوجد ملف مناسب لهذا النظام)، فيُفتح في المتصفح بدل تنزيله.
 /// </param>
-public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer, string? Sha256 = null, bool IsReleasePage = false);
+/// <param name="ChecksumsUrl">رابط SHA256SUMS.txt في الإصدار، احتياطي لو لم يذكر GitHub هاش الملف.</param>
+/// <param name="ReleasePageUrl">صفحة الإصدار، نرجع إليها إذا تعذر التحقق من الملف.</param>
+public record UpdateInfo(
+    string LatestVersion,
+    string DownloadUrl,
+    bool IsNewer,
+    string? Sha256 = null,
+    bool IsReleasePage = false,
+    string? ChecksumsUrl = null,
+    string? ReleasePageUrl = null);
 
 public class UpdateChecker
 {
     /// <summary>اسم ملف التحديث على ويندوز كما ينشره build.yml.</summary>
     public const string WindowsAssetName = "Halawa-Hub.zip";
+
+    /// <summary>ملف الهاشات الموحّد لكل ملفات الإصدار.</summary>
+    public const string ChecksumsAssetName = "SHA256SUMS.txt";
+
+    /// <summary>
+    /// يوجّه الفحص لمصدر آخر بدل GitHub، لتجربة التحديث من إصدار اختباري محلي
+    /// (مثل HALAWAHUB_DATA_DIR: من يتحكم ببيئة العملية يتحكم بها كلها أصلًا).
+    /// </summary>
+    public const string FeedOverrideVariable = "HALAWAHUB_UPDATE_API_URL";
 
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
 
@@ -25,7 +43,13 @@ public class UpdateChecker
     {
         try
         {
-            var url = $"https://api.github.com/repos/{AppInfo.GitHubOwner}/{AppInfo.GitHubRepo}/releases/latest";
+            var feedOverride = Environment.GetEnvironmentVariable(FeedOverrideVariable);
+            if (!string.IsNullOrWhiteSpace(feedOverride))
+                Log.Info($"update feed overridden: {feedOverride}");
+
+            var url = !string.IsNullOrWhiteSpace(feedOverride)
+                ? feedOverride
+                : $"https://api.github.com/repos/{AppInfo.GitHubOwner}/{AppInfo.GitHubRepo}/releases/latest";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Halawa-Hub", AppInfo.Version));
@@ -35,7 +59,14 @@ public class UpdateChecker
             if (!response.IsSuccessStatusCode) return null;
 
             var json = await response.Content.ReadAsStringAsync();
-            return ParseRelease(json, AppInfo.Version, GetAssetNameForCurrentOs());
+            var assetName = GetAssetNameForCurrentOs();
+            var info = ParseRelease(json, AppInfo.Version, assetName);
+
+            // ويندوز يبقى على سلوكه، أما لينكس فلا يثبّت ملفًا بلا هاش
+            if (info != null && !OperatingSystem.IsWindows())
+                info = await ResolveChecksumAsync(info, assetName);
+
+            return info;
         }
         catch (Exception ex)
         {
@@ -45,8 +76,55 @@ public class UpdateChecker
     }
 
     /// <summary>null يعني أن هذا النظام لا يملك ملف تحديث تلقائي بعد.</summary>
-    internal static string? GetAssetNameForCurrentOs() =>
-        OperatingSystem.IsWindows() ? WindowsAssetName : null;
+    internal static string? GetAssetNameForCurrentOs() => InstallInfo.AssetNameFor(InstallInfo.Current);
+
+    private static async Task<UpdateInfo> ResolveChecksumAsync(UpdateInfo info, string? assetName)
+    {
+        if (info.IsReleasePage || !string.IsNullOrEmpty(info.Sha256)) return info;
+
+        string? sums = null;
+        if (!string.IsNullOrEmpty(info.ChecksumsUrl))
+        {
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, info.ChecksumsUrl);
+                request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Halawa-Hub", AppInfo.Version));
+                using var response = await Http.SendAsync(request);
+                if (response.IsSuccessStatusCode) sums = await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("could not download SHA256SUMS.txt", ex);
+            }
+        }
+
+        return ApplyChecksums(info, sums, assetName);
+    }
+
+    /// <summary>الهاش من SHA256SUMS.txt، وإذا لم يوجد فالتحديث إشعار وصفحة الإصدار فقط.</summary>
+    internal static UpdateInfo ApplyChecksums(UpdateInfo info, string? sumsFile, string? assetName)
+    {
+        var hash = FindChecksum(sumsFile, assetName);
+        if (!string.IsNullOrEmpty(hash)) return info with { Sha256 = hash };
+
+        return info with { DownloadUrl = info.ReleasePageUrl ?? "", IsReleasePage = true };
+    }
+
+    /// <summary>يقرأ صيغة sha256sum: "hash  name" أو "hash *name".</summary>
+    internal static string? FindChecksum(string? sumsFile, string? assetName)
+    {
+        if (string.IsNullOrEmpty(sumsFile) || string.IsNullOrEmpty(assetName)) return null;
+
+        foreach (var line in sumsFile.Split('\n'))
+        {
+            var parts = line.Trim().Split((char[]?)null, 2, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 2) continue;
+
+            if (string.Equals(parts[1].TrimStart('*'), assetName, StringComparison.OrdinalIgnoreCase))
+                return parts[0];
+        }
+        return null;
+    }
 
     /// <summary>
     /// يقرأ رد GitHub ويختار الملف بالاسم لا بالترتيب: الإصدار يحتوي ملفات أخرى
@@ -64,28 +142,33 @@ public class UpdateChecker
 
         string? downloadUrl = null;
         string? sha256 = null;
+        string? checksumsUrl = null;
 
-        if (assetName != null
-            && root.TryGetProperty("assets", out var assets)
+        if (root.TryGetProperty("assets", out var assets)
             && assets.ValueKind == JsonValueKind.Array)
         {
             foreach (var asset in assets.EnumerateArray())
             {
                 var name = asset.TryGetProperty("name", out var n) ? n.GetString() : null;
-                if (!string.Equals(name, assetName, StringComparison.OrdinalIgnoreCase)) continue;
                 if (!asset.TryGetProperty("browser_download_url", out var u)) continue;
+
+                if (string.Equals(name, ChecksumsAssetName, StringComparison.OrdinalIgnoreCase))
+                    checksumsUrl = u.GetString();
+
+                if (assetName == null || downloadUrl != null) continue;
+                if (!string.Equals(name, assetName, StringComparison.OrdinalIgnoreCase)) continue;
 
                 downloadUrl = u.GetString();
                 if (asset.TryGetProperty("digest", out var digest))
                     sha256 = digest.GetString()?.Replace("sha256:", "");
-                break;
             }
         }
 
+        var releasePage = root.TryGetProperty("html_url", out var h) ? h.GetString() : null;
         var isReleasePage = string.IsNullOrEmpty(downloadUrl);
         if (isReleasePage)
         {
-            downloadUrl = root.TryGetProperty("html_url", out var h) ? h.GetString() : null;
+            downloadUrl = releasePage;
             sha256 = null;
         }
 
@@ -94,7 +177,9 @@ public class UpdateChecker
             downloadUrl ?? "",
             IsVersionNewer(latestVersion, currentVersion),
             sha256,
-            isReleasePage);
+            isReleasePage,
+            checksumsUrl,
+            releasePage);
     }
 
     private static bool IsVersionNewer(string latest, string current)

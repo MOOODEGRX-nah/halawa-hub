@@ -1,0 +1,59 @@
+# Maintainer: MOOODEGRX-nah <https://github.com/MOOODEGRX-nah>
+#
+# قبل النشر على AUR: حدّث الإصدار والهاش بالأمر
+#   bash packaging/aur/update-pkgbuild.sh <version>
+# ثم ولّد .SRCINFO بالأمر: makepkg --printsrcinfo > .SRCINFO
+pkgname=halawa-hub-bin
+pkgver=0.0.10.63
+pkgrel=1
+pkgdesc="Game library launcher for Steam, Heroic and Lutris with an Arabic RTL interface"
+arch=('x86_64')
+url="https://github.com/MOOODEGRX-nah/halawa-hub"
+license=('MIT')
+depends=('fontconfig' 'freetype2' 'gcc-libs' 'glibc' 'libice' 'libsm' 'libx11' 'openssl' 'xdg-utils' 'zlib')
+optdepends=(
+  'steam: Steam games'
+  'heroic-games-launcher: Epic, GOG and Amazon games'
+  'lutris: Lutris games'
+)
+provides=('halawa-hub')
+conflicts=('halawa-hub')
+# strip يكسر الملف التنفيذي: كود .NET مدمج داخل ملف ELF نفسه
+options=('!strip' '!debug')
+source=("halawa-hub-${pkgver}-linux-x64.tar.gz::${url}/releases/download/v${pkgver}/Halawa-Hub-linux-x64.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/Halawa-Hub"
+
+  install -d "${pkgdir}/opt/halawa-hub" "${pkgdir}/usr/bin"
+  cp -a . "${pkgdir}/opt/halawa-hub/"
+
+  # غياب علامة tar.gz يجعل البرنامج يكتفي بالإشعار: التحديث هنا مسؤولية pacman
+  rm -f "${pkgdir}/opt/halawa-hub/.halawa-hub-tarball"
+  rm -f "${pkgdir}/opt/halawa-hub/install.sh" "${pkgdir}/opt/halawa-hub/uninstall.sh"
+  rm -r "${pkgdir}/opt/halawa-hub/share"
+
+  ln -s /opt/halawa-hub/Halawa-Hub "${pkgdir}/usr/bin/halawa-hub"
+
+  install -Dm644 /dev/stdin "${pkgdir}/usr/share/applications/halawa-hub.desktop" <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Halawa-Hub
+Comment=Game library launcher
+Comment[ar]=مشغّل مكتبة الألعاب
+Exec=/opt/halawa-hub/Halawa-Hub
+Icon=halawa-hub
+Terminal=false
+Categories=Game;
+StartupWMClass=Halawa-Hub
+EOF
+
+  local size
+  for size in 16 32 48 64 128 256; do
+    install -Dm644 "share/icons/hicolor/${size}x${size}/apps/halawa-hub.png" \
+      "${pkgdir}/usr/share/icons/hicolor/${size}x${size}/apps/halawa-hub.png"
+  done
+
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

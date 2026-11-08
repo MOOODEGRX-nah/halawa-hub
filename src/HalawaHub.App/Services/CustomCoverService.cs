@@ -1,3 +1,4 @@
+using HalawaHub.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,9 +9,7 @@ namespace HalawaHub.App.Services;
 /// يحفظ مسار غلاف مخصص (صورة محلية اختارها المستخدم يدويًا) لكل لعبة
 public static class CustomCoverService
 {
-    private static readonly string FilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "HalawaHub", "custom-covers.json");
+    private static readonly string FilePath = AppPaths.InData("custom-covers.json");
 
     private static readonly Dictionary<string, string> Covers = Load();
 

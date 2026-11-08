@@ -27,7 +27,9 @@ public partial class MainViewModel : INotifyPropertyChanged
 
     private readonly PluginLoader _pluginLoader;
     private readonly List<IGameLibraryProvider> _builtInProviders;
-    private readonly SteamGridDbClient _coverClient;
+    private SteamGridDbClient _coverClient;
+    private readonly Debouncer _apiKeySaveDebouncer;
+    private readonly Task _initialScan;
     private readonly SteamNewsClient _newsClient = new();
     private readonly ILibraryService _libraryService;
     private readonly IFilterService _filterService;
@@ -146,6 +148,33 @@ public partial class MainViewModel : INotifyPropertyChanged
 
     private string? _updateDownloadUrl;
     private string? _updateSha256;
+    private bool _updateIsReleasePage;
+
+    private string? _updateCheckMessage;
+    /// نتيجة آخر فحص يدوي بصفحة الإعدادات (محدّث / فشل الفحص)
+    public string? UpdateCheckMessage
+    {
+        get => _updateCheckMessage;
+        private set
+        {
+            _updateCheckMessage = value;
+            OnPropertyChanged(nameof(UpdateCheckMessage));
+            OnPropertyChanged(nameof(HasUpdateCheckMessage));
+        }
+    }
+
+    public bool HasUpdateCheckMessage => !string.IsNullOrEmpty(UpdateCheckMessage);
+
+    private bool _updateCheckFailed;
+    public bool UpdateCheckFailed
+    {
+        get => _updateCheckFailed;
+        private set
+        {
+            _updateCheckFailed = value;
+            OnPropertyChanged(nameof(UpdateCheckFailed));
+        }
+    }
 
     private string _sortMode = "name";
     public string SortMode
@@ -179,13 +208,21 @@ public partial class MainViewModel : INotifyPropertyChanged
         get => _steamGridDbApiKey;
         set
         {
-            _steamGridDbApiKey = value ?? "";
-            _config.SteamGridDbApiKey = _steamGridDbApiKey;
-            ConfigService.Save(_config);
+            var newKey = value ?? "";
+            if (newKey == _steamGridDbApiKey) return;
+
+            _steamGridDbApiKey = newKey;
+            _config.SteamGridDbApiKey = newKey;
+
+            // الحفظ وإنشاء عميل الأغلفة بعد توقف الكتابة، لا عند كل حرف
+            _apiKeySaveDebouncer.Schedule();
             OnPropertyChanged(nameof(SteamGridDbApiKey));
 
             // أي تعديل بالمفتاح يلغي نتيجة التحقق السابقة، لين يتحقق من جديد
             ApiKeyStatus = ApiKeyCheckState.Unknown;
+
+            // زر "تحقق" يعتمد على وجود مفتاح (كان يبقى معطلًا في أول تشغيل)
+            VerifyApiKeyCommand.RaiseCanExecuteChanged();
         }
     }
 
@@ -259,6 +296,12 @@ public partial class MainViewModel : INotifyPropertyChanged
     public RelayCommand CloseChangelogCommand { get; }
 
     public MainViewModel(ILibraryService libraryService, IFilterService filterService, IUpdateService updateService)
+        : this(libraryService, filterService, updateService, startBackgroundTasks: true)
+    {
+    }
+
+    /// startBackgroundTasks=false للاختبارات: بدون اتصال بالشبكة ولا كتابة من مهام خلفية
+    internal MainViewModel(ILibraryService libraryService, IFilterService filterService, IUpdateService updateService, bool startBackgroundTasks)
     {
         // النواة تبحث عن أي DLL داخل مجلد Plugins بجانب الملف التنفيذي
         _libraryService = libraryService;
@@ -281,9 +324,10 @@ public partial class MainViewModel : INotifyPropertyChanged
         _config = ConfigService.Load();
         _coverClient = new SteamGridDbClient(_config.SteamGridDbApiKey);
         _steamGridDbApiKey = _config.SteamGridDbApiKey;
+        _apiKeySaveDebouncer = new Debouncer(TimeSpan.FromMilliseconds(800), ApplyApiKeyChange);
         _launchOnStartup = StartupService.IsEnabled();
 
-        RefreshCommand = new RelayCommand(_ => RefreshLibrary());
+        RefreshCommand = new RelayCommand(_ => { _ = RefreshLibraryAsync(); });
         LaunchGameCommand = new RelayCommand(param => LaunchGame(param as GameCardViewModel));
         InstallUpdateCommand = new RelayCommand(_ => { _ = InstallUpdateAsync(); }, _ => _updateDownloadUrl != null && !_isUpdating);
         SelectNavCommand = new RelayCommand(param => SelectedNavItem = param as string ?? NavAll);
@@ -291,17 +335,19 @@ public partial class MainViewModel : INotifyPropertyChanged
         CloseDetailsCommand = new RelayCommand(_ => DetailsGame = null);
         DeleteGameCommand = new RelayCommand(_ => DeleteGame());
         OpenSettingsCommand = new RelayCommand(_ => IsSettingsOpen = true);
-        CloseSettingsCommand = new RelayCommand(_ => IsSettingsOpen = false);
+        CloseSettingsCommand = new RelayCommand(_ => CloseSettings());
         CheckForUpdatesNowCommand = new RelayCommand(_ => { _ = CheckForUpdateAsync(manualCheck: true); });
         OpenUrlCommand = new RelayCommand(OpenUrl);
         VerifyApiKeyCommand = new RelayCommand(_ => { _ = VerifyApiKeyAsync(); }, _ => !string.IsNullOrWhiteSpace(SteamGridDbApiKey));
         CloseChangelogCommand = new RelayCommand(_ => IsChangelogOpen = false);
 
-        RefreshLibrary();
+        // لا ننتظر الفحص هنا: النافذة تُفتح فورًا والمكتبة تمتلئ بعد ذلك
+        _initialScan = RefreshLibraryAsync();
 
         // مهام الخلفية عند فتح البرنامج، بالترتيب الصح (فحص التحديث أول عشان
         // خبر "تحديث متوفر" يظهر صح بقائمة الأخبار)
-        _ = InitializeBackgroundTasksAsync();
+        if (startBackgroundTasks)
+            _ = InitializeBackgroundTasksAsync();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

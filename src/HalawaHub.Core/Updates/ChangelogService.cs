@@ -19,6 +19,17 @@ public static class ChangelogService
 {
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
 
+    // الملف يُقرأ من tag الإصدار ولا يمكن تعديله بعد النشر، فلا يجوز أن تُسقط
+    // فاصلة زائدة نافذة "ما الجديد" بالكامل
+    private static readonly JsonSerializerOptions ParseOptions = new()
+    {
+        AllowTrailingCommas = true,
+        ReadCommentHandling = JsonCommentHandling.Skip
+    };
+
+    internal static Dictionary<string, List<string>>? ParseChangelog(string json) =>
+        JsonSerializer.Deserialize<Dictionary<string, List<string>>>(json, ParseOptions);
+
     /// <summary>
     /// يبني URL للـ CHANGELOG من tag الإصدار (لا من main المتحرك).
     /// internal للاختبار.
@@ -45,7 +56,7 @@ public static class ChangelogService
             }
 
             var json = await response.Content.ReadAsStringAsync();
-            var dict = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(json);
+            var dict = ParseChangelog(json);
 
             if (dict != null && dict.TryGetValue(version, out var changes))
                 return changes;

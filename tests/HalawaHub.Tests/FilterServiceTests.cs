@@ -4,6 +4,7 @@ using FluentAssertions;
 using HalawaHub.App.Services;
 using HalawaHub.App.ViewModels;
 using HalawaHub.Core.Models;
+using HalawaHub.Core.Plugins;
 using Moq;
 using Xunit;
 
@@ -53,7 +54,7 @@ public class FilterServiceTests
     public void ApplyFilter_SearchQuery_CaseInsensitive()
     {
         // Act
-        var result = _service.ApplyFilter(_games, "COUNTER", "", "name", "الكل", "المفضلة", "المثبتة", "المضافة حديثًا");
+        var result = _service.ApplyFilter(_games, "COUNTER", "الكل", "name", "الكل", "المفضلة", "المثبتة", "المضافة حديثًا");
 
         // Assert
         result.Should().HaveCount(1);

@@ -6,12 +6,16 @@ namespace HalawaHub.App.Services;
 /// <summary>
 /// نتيجة فحص التحديث.
 /// </summary>
+/// <param name="Failed">true يعني أن الفحص نفسه فشل، فلا نعرف هل يوجد تحديث أم لا.</param>
+/// <param name="IsReleasePage">DownloadUrl صفحة إصدار تُفتح في المتصفح، وليس ملفًا للتثبيت.</param>
 public record UpdateCheckResult(
     bool HasUpdate,
     string? LatestVersion,
     string? DownloadUrl,
     string? Sha256,
-    string Message);
+    string Message,
+    bool Failed = false,
+    bool IsReleasePage = false);
 
 /// <summary>
 /// نتيجة تثبيت التحديث.

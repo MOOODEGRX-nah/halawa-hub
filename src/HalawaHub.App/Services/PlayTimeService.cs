@@ -1,3 +1,4 @@
+using HalawaHub.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,9 +15,7 @@ public static class PlayTimeService
     private static readonly object Lock = new();
     private static Dictionary<string, long>? _cache;
 
-    private static string FilePath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "HalawaHub", "playtime.json");
+    private static string FilePath => AppPaths.InData("playtime.json");
 
     private static Dictionary<string, long> Load()
     {

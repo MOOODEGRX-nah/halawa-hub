@@ -25,6 +25,19 @@ public partial class MainViewModel
         {
             _isRefreshing = value;
             OnPropertyChanged(nameof(IsRefreshing));
+            IsPageEmpty = !value && FilteredGames.Count == 0;
+        }
+    }
+
+    private bool _isRefreshDone;
+    /// علامة ✓ قصيرة على زر التحديث بعد انتهاء الفحص
+    public bool IsRefreshDone
+    {
+        get => _isRefreshDone;
+        private set
+        {
+            _isRefreshDone = value;
+            OnPropertyChanged(nameof(IsRefreshDone));
         }
     }
 
@@ -35,7 +48,8 @@ public partial class MainViewModel
     {
         if (_scanRunner.IsRunning) return;
 
-        StatusMessage = null;
+        ClearStatus();
+        IsRefreshDone = false;
         IsRefreshing = true;
 
         var allProviders = _builtInProviders.Concat(_pluginLoader.LibraryProviders).ToList();
@@ -51,17 +65,27 @@ public partial class MainViewModel
             });
 
             if (ran && result != null)
+            {
                 ApplyScanResult(result, allTools);
+                _ = FlashRefreshDoneAsync();
+            }
         }
         catch (Exception ex)
         {
             Log.Error("فشل فحص المكتبات", ex);
-            StatusMessage = $"تعذر فحص المكتبات: {ex.Message}";
+            ShowStatus(Loc.Instance.Format("scanFailed", ex.Message));
         }
         finally
         {
             IsRefreshing = false;
         }
+    }
+
+    private async Task FlashRefreshDoneAsync()
+    {
+        IsRefreshDone = true;
+        await Task.Delay(TimeSpan.FromSeconds(1.4));
+        IsRefreshDone = false;
     }
 
     private void ApplyScanResult(LibraryScanResult result, IEnumerable<IGameTool> allTools)
@@ -72,13 +96,19 @@ public partial class MainViewModel
         foreach (var game in result.Games)
         {
             var card = new GameCardViewModel(game, allTools);
-            card.FavoriteChanged += (_, _) => UpdateHomeViewCollections();
+            card.FavoriteChanged += (_, _) =>
+            {
+                UpdateHomeViewCollections();
+                if (SelectedNavItem == NavFavorite) ApplyFilter();
+            };
+            card.HiddenChanged += (_, _) => UpdatePlatformChips();
             Games.Add(card);
         }
 
-        UpdateAvailablePlatforms(result.PlatformCounts);
+        UpdatePlatformChips();
         UpdateHomeViewCollections();
         ApplyFilter();
+        RefreshSearchState();
 
         // لو فيه مفتاح SteamGridDB مُعد، نكمّل أغلفة المنصات اللي ما عندها مصدر مباشر
         if (_coverClient.IsConfigured)
@@ -104,7 +134,7 @@ public partial class MainViewModel
         {
             if (cts.IsCancellationRequested) return;
 
-            var url = await client.FindCoverUrlAsync(card.Name);
+            var url = await client.FindCoverUrlAsync(card.OriginalName);
             if (!cts.IsCancellationRequested && !string.IsNullOrEmpty(url))
                 card.SetCoverUrl(url);
         }
@@ -121,40 +151,21 @@ public partial class MainViewModel
         _coverClient = new SteamGridDbClient(_config.SteamGridDbApiKey);
     }
 
-    private void CloseSettings()
+    private async void CloseSettings()
     {
+        if (!IsSettingsOpen) return;
         IsSettingsOpen = false;
         FlushPendingSettings();
 
         // مفتاح جديد بدون ضغط "تحقق": نكمّل الأغلفة الناقصة به عند إغلاق الإعدادات
         if (_coverClient.IsConfigured && _coverLoadKey != SteamGridDbApiKey)
             _ = LoadMissingCoversAsync();
+
+        if (MotionSettings.Enabled)
+            await Task.Delay(230);
+
+        if (!IsSettingsOpen)
+            IsSettingsVisible = false;
     }
 
-    private void UpdateAvailablePlatforms(Dictionary<string, int> platformCounts)
-    {
-        AvailablePlatforms.Clear();
-        foreach (var kvp in platformCounts)
-        {
-            var label = kvp.Value > 0 ? $"{kvp.Key} ({kvp.Value})" : kvp.Key;
-            AvailablePlatforms.Add(label);
-        }
-
-        var fixedItems = new[] { NavAll, NavFavorite, NavInstalled, NavRecent };
-        if (!fixedItems.Contains(_selectedNavItem) && !AvailablePlatforms.Contains(_selectedNavItem))
-            _selectedNavItem = NavAll;
-
-        OnPropertyChanged(nameof(SelectedNavItem));
-    }
-
-    private bool _isListView;
-    public bool IsListView
-    {
-        get => _isListView;
-        set
-        {
-            _isListView = value;
-            OnPropertyChanged(nameof(IsListView));
-        }
-    }
 }

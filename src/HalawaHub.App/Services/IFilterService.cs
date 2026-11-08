@@ -18,5 +18,7 @@ public interface IFilterService
         string navAll,
         string navFavorite,
         string navInstalled,
-        string navRecent);
+        string navRecent,
+        string? platform = null,
+        bool includeHidden = false);
 }

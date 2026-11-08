@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:c="using:HalawaHub.App.Controls"
+             x:Class="HalawaHub.App.Views.WhatsNewDialog"
+             x:DataType="vm:MainViewModel"
+             IsVisible="{Binding IsChangelogOpen}">
+    <Panel Background="#C7060202">
+        <Border Width="520" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center"
+                CornerRadius="14" Padding="26,22" Background="{StaticResource DialogBrush}"
+                BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1" BoxShadow="0 30 80 0 #B3000000">
+            <Grid RowDefinitions="Auto,Auto,*,Auto">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Classes="h2" Text="{l:Loc whatsNew}" Foreground="{StaticResource RedHoverBrush}"/>
+                    <Button Grid.Column="1" Classes="x" Command="{Binding CloseChangelogCommand}"
+                            ToolTip.Tip="{l:Loc close}" AutomationProperties.Name="{l:Loc close}">
+                        <c:VectorIcon Data="{StaticResource IconX}" Size="18"/>
+                    </Button>
+                </Grid>
+                <TextBlock Grid.Row="1" Text="{Binding AppVersion}" FontSize="12" Foreground="#9C8A8A"
+                           HorizontalAlignment="Left" Margin="0,0,0,14"/>
+                <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding ChangelogEntries}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Grid ColumnDefinitions="Auto,*" Margin="0,0,0,10">
+                                    <TextBlock Text="•" Foreground="{StaticResource RedHoverBrush}" FontSize="14" Margin="0,0,8,0"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding}" Foreground="{StaticResource ChipTextBrush}" FontSize="14" TextWrapping="Wrap"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <Button Grid.Row="3" Classes="btn pri" HorizontalAlignment="Stretch" Margin="0,14,0,0"
+                        Command="{Binding CloseChangelogCommand}" Content="{l:Loc whatsNewClose}"/>
+            </Grid>
+        </Border>
+    </Panel>
+</UserControl>

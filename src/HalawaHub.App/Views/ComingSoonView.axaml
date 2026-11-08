@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             x:Class="HalawaHub.App.Views.ComingSoonView"
+             x:DataType="vm:MainViewModel">
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <Grid Height="700" VerticalAlignment="Top">
+            <StackPanel Orientation="Horizontal" Spacing="56" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel MaxWidth="420" Spacing="16" VerticalAlignment="Center">
+                    <TextBlock Text="{l:Loc soonTitle}" FontSize="44" FontWeight="Bold"/>
+                    <TextBlock Text="{l:Loc soonText}" FontSize="17" LineHeight="27"
+                               Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"/>
+                    <Border Name="Bar" Height="8" CornerRadius="4" Background="#2A1313" ClipToBounds="True">
+                        <Border Name="BarFill" CornerRadius="4" HorizontalAlignment="Left">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
+                                    <GradientStop Color="#B91C1C" Offset="0"/>
+                                    <GradientStop Color="#EF4444" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </Border>
+                    <TextBlock Classes="lbl" Text="{l:Loc inDev}"/>
+                    <Button Classes="btn pri" HorizontalAlignment="Left" Margin="0,8,0,0"
+                            Command="{Binding GoLibraryCommand}" Content="{l:Loc back}"/>
+                </StackPanel>
+
+                <Border Width="270" Height="414" CornerRadius="14" ClipToBounds="True" VerticalAlignment="Center">
+                    <Image Source="avares://Halawa-Hub/Assets/mascot-coming-soon.png" Stretch="UniformToFill"/>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

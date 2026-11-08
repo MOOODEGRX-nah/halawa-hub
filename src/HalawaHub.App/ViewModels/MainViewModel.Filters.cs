@@ -16,9 +16,12 @@ public partial class MainViewModel
         FilteredGames.Clear();
         var filtered = _filterService.ApplyFilter(
             Games, SearchQuery, SelectedNavItem, SortMode,
-            NavAll, NavFavorite, NavInstalled, NavRecent);
+            NavAll, NavFavorite, NavInstalled, NavRecent,
+            platform: SelectedPlatform, includeHidden: ShowHiddenGames);
         foreach (var card in filtered)
             FilteredGames.Add(card);
+
+        IsPageEmpty = !IsRefreshing && FilteredGames.Count == 0;
     }
 
     // مستدعاة من UpdateHomeViewCollections بـ Updates.cs — لا تحذفها أبدًا (حادث 0.0.10.41)

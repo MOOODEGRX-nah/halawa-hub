@@ -1,0 +1,250 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:c="using:HalawaHub.App.Controls"
+             xmlns:conv="using:HalawaHub.App.Converters"
+             xmlns:core="using:HalawaHub.Core.Covers"
+             xmlns:behaviors="using:HalawaHub.App.Behaviors"
+             xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+             x:Class="HalawaHub.App.Views.GameDialog"
+             x:Name="Root"
+             x:DataType="vm:MainViewModel"
+             IsVisible="{Binding IsGameDialogVisible}">
+
+    <UserControl.Styles>
+        <Style Selector="Border.cover">
+            <Setter Property="RenderTransform" Value="translateY(0px) rotate(0deg)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="0.34,1.5,0.64,1"/>
+                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.cover:pointerover">
+            <Setter Property="RenderTransform" Value="translateY(-4px) rotate(-1.5deg)"/>
+            <Setter Property="BoxShadow" Value="0 14 30 0 #4DEF4444"/>
+        </Style>
+        <Style Selector="Button.thumb">
+            <Setter Property="Width" Value="96"/>
+            <Setter Property="Height" Value="144"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="0,0,10,10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushCard}"/>
+            <Setter Property="Background" Value="{StaticResource PageBrush}"/>
+        </Style>
+        <Style Selector="Button.thumb:pointerover">
+            <Setter Property="BorderBrush" Value="{StaticResource RedHoverBrush}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Panel>
+        <Border Name="Scrim" Background="#C7060202" PointerPressed="Scrim_PointerPressed"/>
+
+        <Border Name="DialogBox" Width="760" Height="500" HorizontalAlignment="Center" VerticalAlignment="Top"
+                Margin="20,120,20,20" CornerRadius="14" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1" RenderTransformOrigin="50%,50%">
+            <Border CornerRadius="13" ClipToBounds="True">
+            <Grid ColumnDefinitions="210,*">
+                <!-- الشريط الجانبي -->
+                <Border Grid.Column="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrushCard}"
+                        BorderThickness="0,0,1,0" Padding="12,20">
+                    <StackPanel>
+                        <TextBlock Text="{Binding DetailsGame.Name, FallbackValue=''}" Foreground="{StaticResource RedHoverBrush}"
+                                   FontWeight="Bold" FontSize="17" Margin="10,0,10,16" TextTrimming="CharacterEllipsis"/>
+                        <Panel>
+                            <c:SlidingPill Orientation="Vertical" Pitch="48" Motion="Dialog" IsHitTestVisible="False"
+                                           ItemCount="{Binding GameDialogSectionCount}" SelectedIndex="{Binding GameDialogSection}">
+                                <Border CornerRadius="10" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #73EF4444"/>
+                            </c:SlidingPill>
+                            <StackPanel>
+                                <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                        Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="0" Content="{l:Loc general}"/>
+                                <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                        Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="1" Content="{l:Loc files}"/>
+                                <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
+                                        Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="2" Content="{l:Loc custom}"/>
+                                <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}"
+                                        Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="3" Content="{l:Loc launch}"/>
+                                <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}"
+                                        IsVisible="{Binding DetailsGame.HasTools, FallbackValue=False}"
+                                        Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="4" Content="{l:Loc tools}"/>
+                            </StackPanel>
+                        </Panel>
+                    </StackPanel>
+                </Border>
+
+                <!-- المحتوى -->
+                <Grid Grid.Column="1" Margin="26,22" RowDefinitions="Auto,*,Auto">
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                        <TextBlock Name="Title" Classes="h2" Text="{Binding GameDialogTitle}"/>
+                        <Button Grid.Column="1" Classes="x" Command="{Binding CloseDetailsCommand}"
+                                ToolTip.Tip="{l:Loc close}" AutomationProperties.Name="{l:Loc close}">
+                            <c:VectorIcon Data="{StaticResource IconX}" Size="18"/>
+                        </Button>
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1" Name="Body" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                        <Panel DataContext="{Binding DetailsGame}" x:DataType="vm:GameCardViewModel">
+
+                            <!-- عام -->
+                            <StackPanel Spacing="16" IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Classes="lbl" Text="{l:Loc gameName}"/>
+                                    <TextBox Classes="inp" Text="{Binding EditableName, Mode=TwoWay}"
+                                             Watermark="{Binding OriginalName}"
+                                             AutomationProperties.Name="{l:Loc gameName}"/>
+                                    <TextBlock Classes="lbl" Text="{l:Loc nameNote}"/>
+                                </StackPanel>
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+                                    <TextBlock Text="{l:Loc platform}" FontSize="16" VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Background="#2A1313" CornerRadius="8" Padding="10,3">
+                                        <TextBlock Text="{Binding PlatformShort}" FontSize="12" FlowDirection="LeftToRight"/>
+                                    </Border>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+                                    <TextBlock Text="{l:Loc addFav}" FontSize="16" VerticalAlignment="Center"/>
+                                    <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding IsFavorite, Mode=TwoWay}"
+                                                  AutomationProperties.Name="{l:Loc addFav}"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+                                    <TextBlock Text="{l:Loc hide}" FontSize="16" VerticalAlignment="Center"/>
+                                    <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding IsHidden, Mode=TwoWay}"
+                                                  AutomationProperties.Name="{l:Loc hide}"/>
+                                </Grid>
+                                <!-- يظهر فقط بعد اللعب: لا يضيف شيئًا لأول فتح -->
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,6" IsVisible="{Binding HasPlayTime}">
+                                    <TextBlock Text="{l:Loc playTime}" FontSize="16" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding PlayTimeText}" FontSize="14" VerticalAlignment="Center"
+                                               Foreground="{StaticResource AmberBrush}"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- الملفات المثبتة -->
+                            <StackPanel Spacing="16" IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Classes="lbl" Text="{l:Loc storage}"/>
+                                    <Border Classes="code">
+                                        <TextBlock Text="{Binding InstallPath}"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Button Classes="btn pri" Content="{l:Loc openLoc}" IsEnabled="{Binding HasInstallPath}"
+                                            Command="{Binding #Root.((vm:MainViewModel)DataContext).OpenInstallLocationCommand}"/>
+                                    <Button Classes="btn" Content="{l:Loc copyPath}" IsEnabled="{Binding HasInstallPath}" Click="CopyPath_Click"/>
+                                </StackPanel>
+                                <Border HorizontalAlignment="Left" Padding="16,10" CornerRadius="10"
+                                        Background="{StaticResource PageBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <TextBlock Classes="lbl" Text="{l:Loc sizeOnDisk}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding SizeOnDiskText}" FontSize="15" FontWeight="Bold" FlowDirection="LeftToRight" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding !IsInstalled}">
+                                    <TextBlock Classes="lbl" Text="{l:Loc statusLabel}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding StatusText}" VerticalAlignment="Center"/>
+                                </Grid>
+                                <Button Classes="btn" HorizontalAlignment="Left" Content="{l:Loc uninstall}"
+                                        Command="{Binding #Root.((vm:MainViewModel)DataContext).DeleteGameCommand}"/>
+                            </StackPanel>
+
+                            <!-- التخصيص -->
+                            <Panel IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}">
+                                <Grid ColumnDefinitions="150,*" IsVisible="{Binding !#Root.((vm:MainViewModel)DataContext).IsCoverSearchOpen}">
+                                    <Border Classes="cover" Width="150" Height="225" CornerRadius="12" VerticalAlignment="Top"
+                                            BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                                            Background="{Binding PaletteIndex, Converter={x:Static conv:CoverPaletteConverter.Instance}}">
+                                        <Border CornerRadius="11" ClipToBounds="True">
+                                            <Panel>
+                                                <TextBlock Text="{Binding Letter}" FontSize="64" FontWeight="ExtraBold" Foreground="#24FFFFFF"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="fonts:Inter#Inter"/>
+                                                <Image Stretch="UniformToFill" IsVisible="{Binding HasCoverImage}"
+                                                       behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
+                                                       behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"
+                                                       anim:ImageBehavior.AnimatedSource="{Binding AnimatedCoverSource}"/>
+                                            </Panel>
+                                        </Border>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Spacing="8" Margin="24,0,0,0">
+                                        <Button Classes="btn pri" HorizontalAlignment="Stretch" Content="{l:Loc changeImg}" Click="ChangeCover_Click"/>
+                                        <Button Classes="btn" HorizontalAlignment="Stretch" Content="{l:Loc searchSgdb}"
+                                                IsEnabled="{Binding #Root.((vm:MainViewModel)DataContext).CanSearchCovers}"
+                                                Command="{Binding #Root.((vm:MainViewModel)DataContext).SearchCoversCommand}"/>
+                                        <Button Classes="btn" HorizontalAlignment="Stretch" Content="{l:Loc restore}"
+                                                Command="{Binding #Root.((vm:MainViewModel)DataContext).RestoreCoverCommand}"/>
+                                        <TextBlock Classes="lbl" Text="{l:Loc imgNote}"/>
+                                        <TextBlock Classes="lbl" Text="{l:Loc sgdbNeedKey}" Foreground="{StaticResource AmberBrush}"
+                                                   IsVisible="{Binding !#Root.((vm:MainViewModel)DataContext).CanSearchCovers}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- نتائج SteamGridDB -->
+                                <StackPanel Spacing="12" IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).IsCoverSearchOpen}">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Classes="lbl" Text="{l:Loc sgdbPick}" VerticalAlignment="Center"/>
+                                        <Button Grid.Column="1" Classes="btn" Content="{l:Loc sgdbBack}"
+                                                Command="{Binding #Root.((vm:MainViewModel)DataContext).CloseCoverSearchCommand}"/>
+                                    </Grid>
+                                    <TextBlock Classes="lbl" Text="{l:Loc sgdbSearching}"
+                                               IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).IsCoverSearching}"/>
+                                    <TextBlock Classes="lbl" Text="{l:Loc sgdbNone}"
+                                               IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).HasNoCoverCandidates}"/>
+                                    <ItemsControl ItemsSource="{Binding #Root.((vm:MainViewModel)DataContext).CoverCandidates}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="core:CoverCandidate">
+                                                <Button Classes="thumb"
+                                                        Command="{Binding #Root.((vm:MainViewModel)DataContext).PickCoverCandidateCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <Image Stretch="UniformToFill" behaviors:AsyncImage.DecodeWidth="200"
+                                                           behaviors:AsyncImage.SourceUrl="{Binding ThumbUrl}"/>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Panel>
+
+                            <!-- خيارات التشغيل -->
+                            <StackPanel Spacing="8" IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}">
+                                <TextBlock Classes="lbl" Text="{l:Loc launch}"/>
+                                <TextBox Classes="inp" FlowDirection="LeftToRight" TextAlignment="Left"
+                                         Text="{Binding LaunchParameters, Mode=TwoWay}" Watermark="{l:Loc launchPh}"
+                                         AutomationProperties.Name="{l:Loc launch}"/>
+                                <TextBlock Classes="lbl" Text="{l:Loc launchNote}"/>
+                            </StackPanel>
+
+                            <!-- الأدوات: تظهر فقط إذا كانت للعبة أدوات من الإضافات -->
+                            <ItemsControl ItemsSource="{Binding Tools}"
+                                          IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:GameToolViewModel">
+                                        <Border Background="{StaticResource PageBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                                                CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <StackPanel Margin="0,0,10,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14"/>
+                                                    <TextBlock Classes="lbl" Text="{Binding Description}" FontSize="12" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Classes="btn" Content="{Binding ActionLabel}" Command="{Binding ToggleCommand}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Panel>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="2" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,16,0,0">
+                        <TextBlock Classes="lbl" Text="{l:Loc saved}"/>
+                    </Border>
+                </Grid>
+            </Grid>
+            </Border>
+        </Border>
+    </Panel>
+</UserControl>

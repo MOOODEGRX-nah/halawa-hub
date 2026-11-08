@@ -7,12 +7,20 @@ using HalawaHub.Core;
 
 namespace HalawaHub.Core.Updates;
 
-public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer, string? Sha256 = null);
+/// <param name="IsReleasePage">
+/// true يعني أن DownloadUrl صفحة الإصدار وليس ملفًا قابلًا للتثبيت التلقائي
+/// (لا يوجد ملف مناسب لهذا النظام)، فيُفتح في المتصفح بدل تنزيله.
+/// </param>
+public record UpdateInfo(string LatestVersion, string DownloadUrl, bool IsNewer, string? Sha256 = null, bool IsReleasePage = false);
 
 public class UpdateChecker
 {
+    /// <summary>اسم ملف التحديث على ويندوز كما ينشره build.yml.</summary>
+    public const string WindowsAssetName = "Halawa-Hub.zip";
+
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
 
+    /// <returns>null يعني فشل الفحص (لا إنترنت، خطأ GitHub...) وليس "لا يوجد تحديث".</returns>
     public virtual async Task<UpdateInfo?> CheckForUpdateAsync()
     {
         try
@@ -27,32 +35,66 @@ public class UpdateChecker
             if (!response.IsSuccessStatusCode) return null;
 
             var json = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            var tagName = root.TryGetProperty("tag_name", out var t) ? t.GetString() ?? "" : "";
-            var latestVersion = tagName.TrimStart('v', 'V');
-            if (string.IsNullOrEmpty(latestVersion)) return null;
-
-            string? downloadUrl = null;
-            string? sha256 = null;
-            if (root.TryGetProperty("assets", out var assets) && assets.GetArrayLength() > 0)
-            {
-                var asset = assets[0];
-                downloadUrl = asset.GetProperty("browser_download_url").GetString();
-                if (asset.TryGetProperty("digest", out var digest))
-                    sha256 = digest.GetString()?.Replace("sha256:", "");
-            }
-
-            downloadUrl ??= root.TryGetProperty("html_url", out var h) ? h.GetString() : null;
-
-            return new UpdateInfo(latestVersion, downloadUrl ?? "", IsVersionNewer(latestVersion, AppInfo.Version), sha256);
+            return ParseRelease(json, AppInfo.Version, GetAssetNameForCurrentOs());
         }
         catch (Exception ex)
         {
             Log.Error("failed to check updates", ex);
             return null;
         }
+    }
+
+    /// <summary>null يعني أن هذا النظام لا يملك ملف تحديث تلقائي بعد.</summary>
+    internal static string? GetAssetNameForCurrentOs() =>
+        OperatingSystem.IsWindows() ? WindowsAssetName : null;
+
+    /// <summary>
+    /// يقرأ رد GitHub ويختار الملف بالاسم لا بالترتيب: الإصدار يحتوي ملفات أخرى
+    /// (SHA256SUMS.txt مثلًا) وأي تغيير في ترتيبها كان سيُنزّل الملف الخطأ.
+    /// إذا لم يوجد الملف نرجع لصفحة الإصدار.
+    /// </summary>
+    internal static UpdateInfo? ParseRelease(string json, string currentVersion, string? assetName)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        var tagName = root.TryGetProperty("tag_name", out var t) ? t.GetString() ?? "" : "";
+        var latestVersion = tagName.TrimStart('v', 'V');
+        if (string.IsNullOrEmpty(latestVersion)) return null;
+
+        string? downloadUrl = null;
+        string? sha256 = null;
+
+        if (assetName != null
+            && root.TryGetProperty("assets", out var assets)
+            && assets.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var asset in assets.EnumerateArray())
+            {
+                var name = asset.TryGetProperty("name", out var n) ? n.GetString() : null;
+                if (!string.Equals(name, assetName, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!asset.TryGetProperty("browser_download_url", out var u)) continue;
+
+                downloadUrl = u.GetString();
+                if (asset.TryGetProperty("digest", out var digest))
+                    sha256 = digest.GetString()?.Replace("sha256:", "");
+                break;
+            }
+        }
+
+        var isReleasePage = string.IsNullOrEmpty(downloadUrl);
+        if (isReleasePage)
+        {
+            downloadUrl = root.TryGetProperty("html_url", out var h) ? h.GetString() : null;
+            sha256 = null;
+        }
+
+        return new UpdateInfo(
+            latestVersion,
+            downloadUrl ?? "",
+            IsVersionNewer(latestVersion, currentVersion),
+            sha256,
+            isReleasePage);
     }
 
     private static bool IsVersionNewer(string latest, string current)

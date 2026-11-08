@@ -2,7 +2,7 @@
 
 Project: C#/.NET 8 + Avalonia 11.1.3 game-library launcher, Arabic RTL UI.
 Repo: github.com/MOOODEGRX-nah/halawa-hub
-Current version: v0.0.10.58 (B22 merged — Steam works on Linux)
+Current version: see VERSION (Directory.Build.props is the single source)
 
 ## Hard rules
 - NEVER push to main. Branches only: fix/<task> or feat/<task>.

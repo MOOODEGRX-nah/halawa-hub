@@ -58,6 +58,11 @@ public sealed class Loc : INotifyPropertyChanged
 
     public string Format(string key, params object[] args) => string.Format(this[key], args);
 
+    /// للاختبارات: قراءة نص بلغة محددة بدون تغيير اللغة الحالية، فهي حالة عامة
+    /// تتشاركها كل النوافذ، وتغييرها من اختبار يعمل بالتوازي يكسر اختبارات الواجهة
+    internal static string? Lookup(string language, string key) =>
+        (language == English ? En : Ar).TryGetValue(key, out var value) ? value : null;
+
     public event EventHandler? LanguageChanged;
     public event PropertyChangedEventHandler? PropertyChanged;
 

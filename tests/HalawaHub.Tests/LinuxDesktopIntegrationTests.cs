@@ -306,39 +306,20 @@ public class LinuxPlatformUiTests
     [InlineData("updUnsupported")]
     public void NewStrings_ExistInBothLanguages(string key)
     {
-        var loc = Loc.Instance;
-        var previous = loc.Language;
-        try
-        {
-            loc.Language = Loc.Arabic;
-            var arabic = loc[key];
-            loc.Language = Loc.English;
-            var english = loc[key];
+        var arabic = Loc.Lookup(Loc.Arabic, key);
+        var english = Loc.Lookup(Loc.English, key);
 
-            arabic.Should().NotBe(key);
-            english.Should().NotBe(key);
-            arabic.Should().NotBe(english);
-        }
-        finally
-        {
-            loc.Language = previous;
-        }
+        arabic.Should().NotBeNullOrEmpty();
+        english.Should().NotBeNullOrEmpty();
+        arabic.Should().NotBe(english);
     }
 
     [Fact]
     public void Texts_NoLongerClaimWindowsOnly()
     {
-        var loc = Loc.Instance;
-        var previous = loc.Language;
-        try
-        {
-            loc.Language = Loc.English;
-            loc["startNote"].Should().NotContain("Windows");
-            loc["updUnsupported"].Should().NotContain("Windows");
-        }
-        finally
-        {
-            loc.Language = previous;
-        }
+        Loc.Lookup(Loc.English, "startNote").Should().NotContain("Windows");
+        Loc.Lookup(Loc.English, "updUnsupported").Should().NotContain("Windows");
+        Loc.Lookup(Loc.Arabic, "startNote").Should().NotContain("ويندوز");
+        Loc.Lookup(Loc.Arabic, "updUnsupported").Should().NotContain("ويندوز");
     }
 }

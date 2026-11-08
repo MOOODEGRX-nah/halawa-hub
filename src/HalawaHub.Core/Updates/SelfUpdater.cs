@@ -9,13 +9,33 @@ namespace HalawaHub.Core.Updates;
 
 public static class SelfUpdater
 {
+    // رسائل ثابتة تترجمها طبقة الواجهة (UpdateService.LocalizeStatus)
+    public const string StatusDownloading = "downloading update...";
+    public const string StatusExtracting = "extracting files...";
+    public const string StatusRestarting = "restarting...";
+    public const string StatusChecksumFailed = "SHA256 verification failed - install aborted.";
+    public const string StatusUnsupported = "automatic update is only available on Windows.";
+
+    /// <summary>وسيط تمرره نسخة لينكس القديمة للجديدة بعد الاستبدال.</summary>
+    public const string WaitForPidArgument = LinuxSelfUpdater.WaitForPidArgument;
+
+    /// <summary>حذف النسخة القديمة بعد تحديث لينكس، تستدعيها النسخة الجديدة.</summary>
+    public static void CleanLinuxLeftovers() => LinuxSelfUpdater.CleanLeftovers();
+
     public static async Task<bool> DownloadAndApplyAsync(string downloadUrl, Action<string>? onStatus = null, string? expectedSha256 = null)
     {
-        // آلية الاستبدال ملف .bat، فهي تعمل على ويندوز فقط
+        if (OperatingSystem.IsLinux())
+        {
+            var kind = InstallInfo.Current;
+            if (kind is InstallKind.LinuxTarball or InstallKind.LinuxAppImage)
+                return await LinuxSelfUpdater.ApplyAsync(kind, downloadUrl, expectedSha256, onStatus);
+        }
+
+        // آلية الاستبدال أدناه ملف .bat، فهي تعمل على ويندوز فقط
         if (!OperatingSystem.IsWindows())
         {
-            Log.Error("self-update is only supported on Windows");
-            onStatus?.Invoke("automatic update is only available on Windows.");
+            Log.Error("self-update is not available for this installation");
+            onStatus?.Invoke(StatusUnsupported);
             return false;
         }
 
@@ -28,7 +48,7 @@ public static class SelfUpdater
             var zipPath = Path.Combine(tempRoot, "update.zip");
             var extractPath = Path.Combine(tempRoot, "extracted");
 
-            onStatus?.Invoke("downloading update...");
+            onStatus?.Invoke(StatusDownloading);
             Log.Info($"download start from: {downloadUrl}");
 
             using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
@@ -42,7 +62,7 @@ public static class SelfUpdater
                     if (!string.Equals(actual, expectedSha256, StringComparison.OrdinalIgnoreCase))
                     {
                         Log.Error($"SHA256 mismatch: expected {expectedSha256} actual {actual}");
-                        onStatus?.Invoke("SHA256 verification failed - install aborted.");
+                        onStatus?.Invoke(StatusChecksumFailed);
                         return false;
                     }
                     Log.Info("SHA256 verification succeeded");
@@ -51,7 +71,7 @@ public static class SelfUpdater
                 await File.WriteAllBytesAsync(zipPath, bytes);
             }
 
-            onStatus?.Invoke("extracting files...");
+            onStatus?.Invoke(StatusExtracting);
             ZipFile.ExtractToDirectory(zipPath, extractPath, overwriteFiles: true);
 
             var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
@@ -63,7 +83,7 @@ public static class SelfUpdater
 
             await File.WriteAllTextAsync(scriptPath, scriptContent);
 
-            onStatus?.Invoke("restarting...");
+            onStatus?.Invoke(StatusRestarting);
             Log.Info("restarting to apply update");
             Process.Start(new ProcessStartInfo
             {

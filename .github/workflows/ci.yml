@@ -11,7 +11,11 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -20,3 +24,23 @@ jobs:
           dotnet-version: 8.0.x
       - run: dotnet build HalawaHub.sln -c Release --nologo -v q
       - run: dotnet test HalawaHub.sln -c Release --nologo --no-build
+
+  # نفس سكربت build.yml: أي كسر في حزم لينكس يظهر في الـ PR قبل الوصول لـ main
+  package-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build packages
+        run: bash packaging/linux/build-packages.sh dist
+      - name: Smoke test packages
+        run: bash packaging/linux/smoke-test.sh dist
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: Halawa-Hub-linux
+          path: dist/
+          retention-days: 14

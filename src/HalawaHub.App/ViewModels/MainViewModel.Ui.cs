@@ -52,7 +52,7 @@ public partial class MainViewModel
 
     // ترتيب شريط المنصات في التصميم، ومنصات الإضافات تأتي بعدها
     private static readonly string[] PlatformOrder =
-        { "Steam", "Epic Games", "GOG", "Riot Games", "Xbox / Microsoft Store" };
+        { "Steam", "Epic Games", "GOG", "Riot Games", "Xbox / Microsoft Store", "Heroic", "Lutris" };
 
     private const int ChipWidth = 150;
     private const int MaxRecentSearches = 5;
@@ -398,6 +398,13 @@ public partial class MainViewModel
         var path = DetailsGame?.InstallPath;
         if (string.IsNullOrWhiteSpace(path)) return;
 
+        // xdg-open لا يرمي خطأ لمسار غير موجود، ولا يرى المستخدم أي شيء يحدث
+        if (!OperatingSystem.IsWindows() && !Directory.Exists(path))
+        {
+            ShowStatus(Loc.Instance.Format("openLocFailed", path));
+            return;
+        }
+
         try
         {
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
@@ -536,7 +543,9 @@ public partial class MainViewModel
         _ => "sUpdates"
     }];
 
-    public bool IsStartupSupported => OperatingSystem.IsWindows();
+    public bool IsStartupSupported => StartupService.IsSupported;
+
+    public bool IsAppMenuSupported => AppMenuService.IsSupported;
 
     private void OpenSettings()
     {

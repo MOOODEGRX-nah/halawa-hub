@@ -1,0 +1,5 @@
+#!/bin/sh
+# نقطة دخول AppImage. لا نضبط LD_LIBRARY_PATH: البناء self-contained ويجد مكتباته
+# بجانب الملف التنفيذي، وأي تعديل هنا سترثه الألعاب والمشغّلات التي يفتحها البرنامج.
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "$HERE/usr/lib/halawa-hub/Halawa-Hub" "$@"

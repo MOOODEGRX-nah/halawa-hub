@@ -230,6 +230,18 @@ public partial class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private bool _showInAppMenu;
+    public bool ShowInAppMenu
+    {
+        get => _showInAppMenu;
+        set
+        {
+            _showInAppMenu = value;
+            AppMenuService.SetEnabled(value);
+            OnPropertyChanged(nameof(ShowInAppMenu));
+        }
+    }
+
     public string AppVersion => $"v{AppInfo.Version}";
     public string WindowTitleText => $"Halawa-Hub {AppVersion}";
 
@@ -294,7 +306,9 @@ public partial class MainViewModel : INotifyPropertyChanged
             new GogLibraryProvider(),
             new EpicLibraryProvider(),
             new RiotLibraryProvider(),
-            new XboxLibraryProvider()
+            new XboxLibraryProvider(),
+            new HeroicLibraryProvider(),
+            new LutrisLibraryProvider()
         };
 
         _config = ConfigService.Load();
@@ -309,6 +323,9 @@ public partial class MainViewModel : INotifyPropertyChanged
         _steamGridDbApiKey = _config.SteamGridDbApiKey;
         _apiKeySaveDebouncer = new Debouncer(TimeSpan.FromMilliseconds(800), ApplyApiKeyChange);
         _launchOnStartup = StartupService.IsEnabled();
+        StartupService.RefreshPathIfEnabled();
+        _showInAppMenu = AppMenuService.IsEnabled();
+        AppMenuService.RefreshPathIfEnabled();
 
         RefreshCommand = new RelayCommand(_ => { _ = RefreshLibraryAsync(); });
         LaunchGameCommand = new RelayCommand(param => LaunchGame(param as GameCardViewModel));

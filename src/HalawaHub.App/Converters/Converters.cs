@@ -20,6 +20,8 @@ public class PlatformColorConverter : IValueConverter
             "Epic Games" => "#B0B0B0",
             "Riot Games" => "#EF4444",
             "Xbox / Microsoft Store" => "#22C55E",
+            "Heroic" => "#38BDF8",
+            "Lutris" => "#F97316",
             _ => "#777777"
         }));
     }

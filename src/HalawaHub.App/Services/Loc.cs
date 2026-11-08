@@ -58,6 +58,11 @@ public sealed class Loc : INotifyPropertyChanged
 
     public string Format(string key, params object[] args) => string.Format(this[key], args);
 
+    /// للاختبارات: قراءة نص بلغة محددة بدون تغيير اللغة الحالية، فهي حالة عامة
+    /// تتشاركها كل النوافذ، وتغييرها من اختبار يعمل بالتوازي يكسر اختبارات الواجهة
+    internal static string? Lookup(string language, string key) =>
+        (language == English ? En : Ar).TryGetValue(key, out var value) ? value : null;
+
     public event EventHandler? LanguageChanged;
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -81,11 +86,11 @@ public sealed class Loc : INotifyPropertyChanged
         ["curVersion"] = "الإصدار الحالي", ["latest"] = "أنت على آخر إصدار", ["check"] = "تحقق من التحديثات",
         ["installNote"] = "يظهر زر \"تثبيت الآن\" عند وجود إصدار أحدث.",
         ["langNote"] = "يتغير اتجاه الواجهة تلقائيًا مع اللغة.",
-        ["sgdb"] = "SteamGridDB (أغلفة GOG/Epic/Riot/Xbox)", ["keyPh"] = "الصق المفتاح هنا...",
+        ["sgdb"] = "SteamGridDB (أغلفة GOG/Epic/Riot/Xbox/Heroic/Lutris)", ["keyPh"] = "الصق المفتاح هنا...",
         ["verify"] = "تحقق", ["getKey"] = "احصل على مفتاح", ["keyOk"] = "المفتاح صالح", ["keyBad"] = "المفتاح غير صالح",
         ["updFail"] = "تعذّر التحقق من التحديثات — تحقق من اتصالك", ["verifying"] = "جارٍ التحقق…",
         ["checking"] = "جارٍ البحث عن تحديثات…", ["moreThemes"] = "خيارات مظاهر إضافية — قريبًا",
-        ["startWith"] = "تشغيل مع بدء النظام", ["startNote"] = "يفتح Halawa-Hub تلقائيًا عند تشغيل الويندوز",
+        ["startWith"] = "تشغيل مع بدء النظام", ["startNote"] = "يفتح Halawa-Hub تلقائيًا عند بدء تشغيل النظام",
         ["version"] = "الإصدار", ["repo"] = "المستودع", ["openGh"] = "فتح GitHub",
 
         // ===== التصميم: GameDialog.dc.html =====
@@ -116,12 +121,14 @@ public sealed class Loc : INotifyPropertyChanged
         ["updDownloading"] = "جاري تحميل التحديث...", ["updExtracting"] = "جاري فك الملفات...",
         ["updRestarting"] = "جاري إعادة التشغيل...", ["updReady"] = "التحديث جاهز، البرنامج يعيد التشغيل الآن...",
         ["updChecksum"] = "فشل التحقق من سلامة الملف، أُلغي التثبيت.",
-        ["updUnsupported"] = "التحديث التلقائي متاح على ويندوز فقط.",
+        ["updUnsupported"] = "التحديث التلقائي غير متاح لهذا النوع من التثبيت.",
         ["updInstallFailed"] = "فشل التحديث التلقائي. جرّب لاحقًا أو حمّل من صفحة الإصدارات على GitHub يدويًا.",
         ["whatsNew"] = "ما الجديد", ["whatsNewClose"] = "حسنًا",
         ["trayShow"] = "إظهار Halawa-Hub", ["trayExit"] = "خروج", ["chooseCover"] = "اختر صورة الغلاف",
         ["showHidden"] = "إظهار الألعاب المخفية", ["showHiddenNote"] = "تعود الألعاب التي أخفيتها للظهور في كل الصفحات.",
-        ["startUnsupported"] = "هذه الميزة متاحة على ويندوز فقط",
+        ["startUnsupported"] = "هذه الميزة غير متاحة على هذا النظام",
+        ["appMenu"] = "إظهار في قائمة التطبيقات", ["appMenuNote"] = "يضيف Halawa-Hub وأيقونته إلى قائمة تطبيقات النظام",
+        ["launchUrlNote"] = "المشغّل يبدأ هذه اللعبة بنفسه، فالمعاملات تُضبط من إعدادات اللعبة في المشغّل",
         ["sgdbNeedKey"] = "أضف مفتاح SteamGridDB من الإعدادات أولًا.", ["sgdbSearching"] = "جارٍ البحث…",
         ["sgdbNone"] = "لم نجد صورًا لهذه اللعبة.", ["sgdbPick"] = "اختر صورة", ["sgdbBack"] = "رجوع",
         ["sgdbFailed"] = "تعذر تنزيل الصورة.",
@@ -144,11 +151,11 @@ public sealed class Loc : INotifyPropertyChanged
         ["curVersion"] = "Current version", ["latest"] = "You are on the latest version", ["check"] = "Check for updates",
         ["installNote"] = "\"Install now\" appears when a newer version exists.",
         ["langNote"] = "The interface direction follows the language.",
-        ["sgdb"] = "SteamGridDB (GOG/Epic/Riot/Xbox covers)", ["keyPh"] = "Paste key here...",
+        ["sgdb"] = "SteamGridDB (GOG/Epic/Riot/Xbox/Heroic/Lutris covers)", ["keyPh"] = "Paste key here...",
         ["verify"] = "Verify", ["getKey"] = "Get a key", ["keyOk"] = "Key is valid", ["keyBad"] = "Key is invalid",
         ["updFail"] = "Couldn't check for updates — check your connection", ["verifying"] = "Verifying…",
         ["checking"] = "Checking for updates…", ["moreThemes"] = "More themes — coming soon",
-        ["startWith"] = "Start with system", ["startNote"] = "Opens Halawa-Hub automatically when Windows starts",
+        ["startWith"] = "Start with system", ["startNote"] = "Opens Halawa-Hub automatically when the system starts",
         ["version"] = "Version", ["repo"] = "Repository", ["openGh"] = "Open GitHub",
 
         // ===== Design: GameDialog.dc.html =====
@@ -179,12 +186,14 @@ public sealed class Loc : INotifyPropertyChanged
         ["updDownloading"] = "Downloading update...", ["updExtracting"] = "Extracting files...",
         ["updRestarting"] = "Restarting...", ["updReady"] = "Update ready, restarting now...",
         ["updChecksum"] = "File verification failed, install cancelled.",
-        ["updUnsupported"] = "Automatic update is only available on Windows.",
+        ["updUnsupported"] = "Automatic update isn't available for this type of install.",
         ["updInstallFailed"] = "Automatic update failed. Try later or download it from the GitHub releases page.",
         ["whatsNew"] = "What's new", ["whatsNewClose"] = "Got it",
         ["trayShow"] = "Show Halawa-Hub", ["trayExit"] = "Exit", ["chooseCover"] = "Choose a cover image",
         ["showHidden"] = "Show hidden games", ["showHiddenNote"] = "Games you hid appear again on every page.",
-        ["startUnsupported"] = "This feature is only available on Windows",
+        ["startUnsupported"] = "This feature isn't available on this system",
+        ["appMenu"] = "Show in the applications menu", ["appMenuNote"] = "Adds Halawa-Hub and its icon to the system applications menu",
+        ["launchUrlNote"] = "This game is started by its launcher, so set launch options in the launcher's game settings",
         ["sgdbNeedKey"] = "Add a SteamGridDB key in Settings first.", ["sgdbSearching"] = "Searching…",
         ["sgdbNone"] = "No images found for this game.", ["sgdbPick"] = "Pick an image", ["sgdbBack"] = "Back",
         ["sgdbFailed"] = "Couldn't download the image.",

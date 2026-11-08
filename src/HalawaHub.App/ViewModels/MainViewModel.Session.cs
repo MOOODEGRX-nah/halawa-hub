@@ -85,12 +85,37 @@ public partial class MainViewModel
             var proc = Process.Start(psi);
             BeginPlaySession(card, proc);
 
+            if (OperatingSystem.IsLinux() && proc != null && GameCardViewModel.IsUrlLaunch(game.ExecutablePath))
+                _ = WatchLinuxOpenerAsync(card, proc);
+
             card.NotifyPlayed();
             UpdateHomeViewCollections();
         }
         catch (Exception ex)
         {
             ShowStatus(Loc.Instance.Format("launchFailed", card.Name, ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// xdg-open ينجح في البدء دائمًا، ويخبر عن المشغّل غير المثبت برمز خروج فقط.
+    /// بدون هذا يضغط المستخدم "تشغيل" ولا يحدث شيء، وتُحسب جلسة لعب وهمية.
+    /// </summary>
+    private async Task WatchLinuxOpenerAsync(GameCardViewModel card, Process opener)
+    {
+        try
+        {
+            var exited = opener.WaitForExitAsync();
+            if (await Task.WhenAny(exited, Task.Delay(TimeSpan.FromSeconds(5))) != exited) return;
+            if (opener.ExitCode == 0) return;
+
+            Log.Error($"launcher opener exited with {opener.ExitCode} for {card.Game.ExecutablePath}");
+            if (_sessionGame == card) _sessionGame = null;
+            ShowStatus(Loc.Instance.Format("launchFailed", card.Name, $"xdg-open: {opener.ExitCode}"));
+        }
+        catch (Exception ex)
+        {
+            Log.Error("could not watch the launcher opener", ex);
         }
     }
 

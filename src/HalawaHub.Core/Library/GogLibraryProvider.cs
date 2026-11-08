@@ -18,6 +18,9 @@ public class GogLibraryProvider : IGameLibraryProvider
 
     public bool IsAvailable()
     {
+        // السجل لا يوجد خارج ويندوز، وألعاب GOG على لينكس يقرأها مزود Heroic
+        if (!OperatingSystem.IsWindows()) return false;
+
         // إصلاح تسريب RegistryKey: using يضمن dispose فوري
         using var key = OpenGamesKey();
         return key != null;
@@ -25,6 +28,8 @@ public class GogLibraryProvider : IGameLibraryProvider
 
     public IEnumerable<GameInfo> ScanLibrary()
     {
+        if (!OperatingSystem.IsWindows()) yield break;
+
         using var gamesKey = OpenGamesKey();
         if (gamesKey == null) yield break;
 
@@ -74,6 +79,7 @@ public class GogLibraryProvider : IGameLibraryProvider
         }
     }
 
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private static RegistryKey? OpenGamesKey()
     {
         try

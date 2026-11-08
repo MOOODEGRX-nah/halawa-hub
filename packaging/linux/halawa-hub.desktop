@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Halawa-Hub
+Comment=Game library launcher
+Comment[ar]=مشغّل مكتبة الألعاب
+Exec=AppRun
+Icon=halawa-hub
+Terminal=false
+Categories=Game;
+StartupWMClass=Halawa-Hub

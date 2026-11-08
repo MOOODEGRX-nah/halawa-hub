@@ -112,4 +112,82 @@ public class SteamFakeLibraryTests : IDisposable
 
         games.Should().HaveCount(1, "same app in two library folders shows once");
     }
+
+    /// <summary>
+    /// انحدار من جهاز حقيقي: Steam كتب /mnt/nvme-game/game/Steam والمجلد على ext4 هو
+    /// /mnt/nvme-game/GAME/STEAM، فاختفت كل ألعاب تلك المكتبة من البرنامج بصمت.
+    /// </summary>
+    [Fact]
+    public void LibraryPath_WithDifferentCase_IsStillFound_OnLinux()
+    {
+        if (!OperatingSystem.IsLinux()) return;
+
+        var realLibrary = Path.Combine(_root, "GAME", "STEAM");
+        Directory.CreateDirectory(Path.Combine(realLibrary, "steamapps", "common", "The Finals"));
+        File.WriteAllText(Path.Combine(realLibrary, "steamapps", "appmanifest_2073850.acf"),
+            "\"AppState\"\n{\n\t\"appid\"\t\t\"2073850\"\n\t\"name\"\t\t\"THE FINALS\"\n\t\"installdir\"\t\t\"The Finals\"\n}\n");
+
+        File.WriteAllText(Path.Combine(_root, "steamapps", "libraryfolders.vdf"),
+            $"\"libraryfolders\"\n{{\n\t\"0\"\n\t{{\n\t\t\"path\"\t\t\"{_root}/game/Steam\"\n\t}}\n}}\n");
+
+        var game = SteamLibraryProvider.ScanFromSteamPath(_root).Should().ContainSingle().Subject;
+
+        game.Name.Should().Be("THE FINALS");
+        game.InstallPath.Should().Be(Path.Combine(realLibrary, "steamapps", "common", "The Finals"));
+        game.IsInstalled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void InstallDir_WithDifferentCase_IsStillInstalled_OnLinux()
+    {
+        if (!OperatingSystem.IsLinux()) return;
+
+        Directory.CreateDirectory(Path.Combine(_root, "steamapps", "common", "The Finals"));
+        WriteManifest("2073850", "THE FINALS", "the finals", createDir: false);
+
+        var game = SteamLibraryProvider.ScanFromSteamPath(_root).Should().ContainSingle().Subject;
+
+        game.IsInstalled.Should().BeTrue();
+        game.InstallPath.Should().EndWith("The Finals");
+    }
+
+    [Fact]
+    public void ResolveExistingDirectory_PrefersTheExactPath_AndLeavesMissingPathsAlone()
+    {
+        if (!OperatingSystem.IsLinux()) return;
+
+        var lower = Path.Combine(_root, "lib");
+        var upper = Path.Combine(_root, "LIB");
+        Directory.CreateDirectory(lower);
+        Directory.CreateDirectory(upper);
+
+        // مجلدان يختلفان بحالة الأحرف ممكنان على لينكس، والمطابق تمامًا هو الصحيح
+        SteamLibraryProvider.ResolveExistingDirectory(lower).Should().Be(lower);
+        SteamLibraryProvider.ResolveExistingDirectory(upper).Should().Be(upper);
+
+        var missing = Path.Combine(_root, "nowhere", "at", "all");
+        SteamLibraryProvider.ResolveExistingDirectory(missing).Should().Be(missing);
+    }
+
+    [Fact]
+    public void TwoLibraries_DifferingOnlyByCase_AreBothScanned_OnLinux()
+    {
+        if (!OperatingSystem.IsLinux()) return;
+
+        foreach (var (folder, id) in new[] { ("lib", "1"), ("LIB", "2") })
+        {
+            var steamApps = Path.Combine(_root, folder, "steamapps");
+            Directory.CreateDirectory(Path.Combine(steamApps, "common", "g" + id));
+            File.WriteAllText(Path.Combine(steamApps, $"appmanifest_{id}.acf"),
+                $"\"AppState\"\n{{\n\t\"appid\"\t\t\"{id}\"\n\t\"name\"\t\t\"Game {id}\"\n\t\"installdir\"\t\t\"g{id}\"\n}}\n");
+        }
+
+        File.WriteAllText(Path.Combine(_root, "steamapps", "libraryfolders.vdf"),
+            "\"libraryfolders\"\n{\n" +
+            $"\t\"0\"\n\t{{\n\t\t\"path\"\t\t\"{_root}/lib\"\n\t}}\n" +
+            $"\t\"1\"\n\t{{\n\t\t\"path\"\t\t\"{_root}/LIB\"\n\t}}\n" +
+            "}\n");
+
+        SteamLibraryProvider.ScanFromSteamPath(_root).Select(g => g.Id).Should().BeEquivalentTo(new[] { "1", "2" });
+    }
 }

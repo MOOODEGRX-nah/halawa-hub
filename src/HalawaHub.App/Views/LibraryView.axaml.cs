@@ -19,7 +19,7 @@ public partial class LibraryView : UserControl
 {
     private const int MaxStaggeredCards = 24;
     private static readonly TimeSpan PageSlide = TimeSpan.FromSeconds(0.6);
-    private static readonly Easing PageEasing = new SplineEasing(0.22, 1.18, 0.36, 1);
+    private static readonly Easing PageEasing = new CssBezierEasing(0.22, 1.18, 0.36, 1);
 
     private MainViewModel? _vm;
     private readonly ScrollViewer _scroll;

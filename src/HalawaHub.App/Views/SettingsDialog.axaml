@@ -20,6 +20,23 @@
                 <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions>
             </Setter>
         </Style>
+        <Style Selector="Panel.spin">
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Width" Duration="0:0:0.25"/>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                    <ThicknessTransition Property="Margin" Duration="0:0:0.25"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.busy Panel.spin">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
         <Style Selector="Button.seg.on, Button.seg.on:pointerover">
             <Setter Property="Foreground" Value="White"/>
         </Style>
@@ -71,7 +88,7 @@
                                                SelectedIndex="{Binding SettingsSection}">
                                     <Border CornerRadius="10" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #73EF4444"/>
                                 </c:SlidingPill>
-                                <StackPanel>
+                                <StackPanel Spacing="4">
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="0" Content="{l:Loc sUpdates}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
@@ -115,12 +132,23 @@
                                             Classes.wait="{Binding UpdateBadge, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=Pending}">
                                         <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                                             <c:StatusBadge State="{Binding UpdateBadge}" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Classes="stat-title" Text="{Binding UpdateStatusText}"
+                                            <TextBlock Name="UpdateStatusLabel" Grid.Column="1" Classes="stat-title" RenderTransformOrigin="50%,50%" Text="{Binding UpdateStatusText}"
                                                        VerticalAlignment="Center" Margin="14,0"/>
                                             <Button Grid.Column="2" Classes="btn pri" Margin="0,0,10,0" Content="{Binding InstallButtonText}"
                                                     IsVisible="{Binding IsUpdateAvailable}" Command="{Binding InstallUpdateCommand}"/>
-                                            <Button Grid.Column="3" Classes="btn" Content="{l:Loc check}"
-                                                    IsEnabled="{Binding !IsCheckingForUpdates}" Command="{Binding CheckForUpdatesNowCommand}"/>
+                                            <Button Grid.Column="3" Classes="btn" Classes.busy="{Binding IsCheckingForUpdates}"
+                                                    Command="{Binding CheckForUpdatesNowCommand}" AutomationProperties.Name="{l:Loc check}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Panel Classes="spin" Height="16" ClipToBounds="True" VerticalAlignment="Center">
+                                                        <Panel Name="SpinRing" Classes="spin-ring" Width="16" Height="16" HorizontalAlignment="Left">
+                                                            <Panel.RenderTransform><RotateTransform/></Panel.RenderTransform>
+                                                            <Ellipse Stroke="#40FFFFFF" StrokeThickness="2"/>
+                                                            <Arc Stroke="{StaticResource AmberBrush}" StrokeThickness="2" StartAngle="-90" SweepAngle="90"/>
+                                                        </Panel>
+                                                    </Panel>
+                                                    <TextBlock Text="{l:Loc check}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
                                         </Grid>
                                     </Border>
                                     <TextBlock Classes="lbl" Text="{Binding UpdateMessage}" IsVisible="{Binding IsInstallingUpdate}"

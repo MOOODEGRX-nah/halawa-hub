@@ -43,8 +43,8 @@ public partial class GameDialog : UserControl
             if (_vm!.IsDetailsOpen)
             {
                 _lastSection = 0;
-                _ = MotionSettings.AnimateAsync(_scrim, TimeSpan.FromSeconds(0.25), new CubicEaseOut(), 0, 1, 0);
-                _ = MotionSettings.AnimateAsync(_box, TimeSpan.FromSeconds(0.4), MotionSettings.DialogEasing, 0, 0.94, 16);
+                _ = MotionSettings.AnimateAfterLayoutAsync(_scrim, TimeSpan.FromSeconds(0.25), new CubicEaseOut(), 0, 1, 0);
+                _ = MotionSettings.AnimateAfterLayoutAsync(_box, TimeSpan.FromSeconds(0.4), MotionSettings.DialogEasing, 0, 0.94, 16);
             }
             else
             {

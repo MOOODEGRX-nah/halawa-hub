@@ -32,6 +32,19 @@
             </Style.Animations>
         </Style>
 
+        <Style Selector="TextBlock.bob">
+            <Setter Property="RenderTransform">
+                <TranslateTransform/>
+            </Setter>
+            <Style.Animations>
+                <Animation Duration="0:0:2" IterationCount="Infinite" Easing="SineEaseInOut">
+                    <KeyFrame Cue="0%"><Setter Property="TranslateTransform.Y" Value="0"/></KeyFrame>
+                    <KeyFrame Cue="50%"><Setter Property="TranslateTransform.Y" Value="-3"/></KeyFrame>
+                    <KeyFrame Cue="100%"><Setter Property="TranslateTransform.Y" Value="0"/></KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
         <Style Selector="Button.sb-chip">
             <Setter Property="Height" Value="36"/>
             <Setter Property="Padding" Value="16,0"/>
@@ -93,7 +106,11 @@
 
         <c:VectorIcon Name="SearchIcon" Data="{StaticResource IconSearch}" Size="20" StrokeWidth="2.4"
                       HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,12,0,0"
-                      Foreground="White" IsHitTestVisible="False"/>
+                      Foreground="White" IsHitTestVisible="False">
+            <c:VectorIcon.Transitions>
+                <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions>
+            </c:VectorIcon.Transitions>
+        </c:VectorIcon>
 
         <!-- علامة الاستفهام عند عدم وجود نتائج -->
         <Border Name="Bubble" Width="26" Height="26" CornerRadius="13" IsHitTestVisible="False"
@@ -105,7 +122,7 @@
                     <GradientStop Color="#F5A623" Offset="1"/>
                 </LinearGradientBrush>
             </Border.Background>
-            <TextBlock Text="?" Foreground="White" FontWeight="Bold" FontSize="16" FontFamily="fonts:Inter#Inter"
+            <TextBlock Classes="bob" Text="?" Foreground="White" FontWeight="Bold" FontSize="16" FontFamily="fonts:Inter#Inter"
                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Border>
 
@@ -114,7 +131,7 @@
                  IsVisible="{Binding IsSearchOpen}"
                  AutomationProperties.Name="{l:Loc search}"/>
 
-        <Button Width="34" Height="34" CornerRadius="17" Background="#2A1313" Foreground="#E8D8D8"
+        <Button Name="ClearButton" Width="34" Height="34" CornerRadius="17" Background="#2A1313" Foreground="#E8D8D8"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0"
                 IsVisible="{Binding HasSearchText}" Click="Clear_Click"
                 ToolTip.Tip="{l:Loc clear}" AutomationProperties.Name="{l:Loc clear}">
@@ -129,7 +146,7 @@
                 <StackPanel>
                     <StackPanel IsVisible="{Binding ShowRecentSearches}">
                         <TextBlock Text="{l:Loc recentLbl}" Foreground="#9C8A8A" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                        <ItemsControl ItemsSource="{Binding RecentSearches}">
+                        <ItemsControl Name="RecentList" ItemsSource="{Binding RecentSearches}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
@@ -141,7 +158,7 @@
                         </ItemsControl>
                     </StackPanel>
 
-                    <ItemsControl ItemsSource="{Binding SearchSuggestions}" IsVisible="{Binding ShowSearchResults}">
+                    <ItemsControl Name="SuggestionList" ItemsSource="{Binding SearchSuggestions}" IsVisible="{Binding ShowSearchResults}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:SearchSuggestion">
                                 <Button Classes="sb-row" Click="Suggestion_Click">
@@ -158,7 +175,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <StackPanel IsVisible="{Binding ShowSearchNoMatch}" Margin="0,14,0,8" Spacing="6">
+                    <StackPanel Name="NoMatchPanel" IsVisible="{Binding ShowSearchNoMatch}" Margin="0,14,0,8" Spacing="6">
                         <TextBlock Text="{Binding SearchNoMatchText}" Foreground="{StaticResource ChipTextBrush}"
                                    FontSize="16" FontWeight="Medium" HorizontalAlignment="Center" TextWrapping="Wrap"/>
                         <TextBlock Text="{l:Loc tryOther}" Foreground="#9C8A8A" FontSize="13" HorizontalAlignment="Center"/>

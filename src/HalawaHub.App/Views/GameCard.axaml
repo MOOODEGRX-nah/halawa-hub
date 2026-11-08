@@ -31,6 +31,25 @@
         <Style Selector="Button.eb.open /template/ Border#PART_Root">
             <Setter Property="BoxShadow" Value="0 0 18 0 #99EF4444"/>
         </Style>
+        <Style Selector="Button.eb">
+            <Setter Property="Transitions">
+                <Transitions><BrushTransition Property="Background" Duration="0:0:0.3"/></Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.eb /template/ Border#PART_Root">
+            <Setter Property="Transitions">
+                <Transitions><BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.3"/></Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Panel.mt">
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+            <Setter Property="Transitions">
+                <Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="{x:Static l:Springs.Pop}"/></Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.eb:pressed Panel.mt">
+            <Setter Property="RenderTransform" Value="scale(0.85)"/>
+        </Style>
         <Style Selector="Button.eb:pointerover c|MenuCloseIcon">
             <Setter Property="Foreground" Value="{StaticResource RedHoverBrush}"/>
         </Style>
@@ -104,7 +123,9 @@
         <Button Classes="eb" Classes.open="{Binding IsMenuOpen}"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,6,0"
                 Click="Menu_Click" ToolTip.Tip="{l:Loc more}" AutomationProperties.Name="{l:Loc more}">
-            <c:MenuCloseIcon IsOpen="{Binding IsMenuOpen}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Panel Classes="mt" Width="20" Height="20">
+                <c:MenuCloseIcon IsOpen="{Binding IsMenuOpen}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Panel>
         </Button>
 
         <Border Name="Menu" Classes="card-menu" IsVisible="{Binding IsMenuOpen}"

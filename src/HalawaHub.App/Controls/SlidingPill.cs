@@ -86,17 +86,17 @@ public class SlidingPill : Decorator
         var (lead, trail) = Motion switch
         {
             PillMotion.Underline => (
-                Edge(0.28, new SplineEasing(0.65, 0, 0.35, 1)),
-                Edge(0.30, new SplineEasing(0.65, 0, 0.35, 1), 0.12)),
+                Edge(0.28, new CssBezierEasing(0.65, 0, 0.35, 1)),
+                Edge(0.30, new CssBezierEasing(0.65, 0, 0.35, 1), 0.12)),
             PillMotion.Dialog => (
-                Edge(0.40, new SplineEasing(0.3, 1.6, 0.5, 1)),
-                Edge(0.60, new SplineEasing(0.3, 1.22, 0.5, 1))),
+                Edge(0.40, new CssBezierEasing(0.3, 1.6, 0.5, 1)),
+                Edge(0.60, new CssBezierEasing(0.3, 1.22, 0.5, 1))),
             PillMotion.Even => (
-                Edge(0.42, new SplineEasing(0.3, 1.5, 0.5, 1)),
-                Edge(0.42, new SplineEasing(0.3, 1.5, 0.5, 1))),
+                Edge(0.42, new CssBezierEasing(0.3, 1.5, 0.5, 1)),
+                Edge(0.42, new CssBezierEasing(0.3, 1.5, 0.5, 1))),
             _ => (
-                Edge(0.42, new SplineEasing(0.3, 1.6, 0.5, 1)),
-                Edge(0.62, new SplineEasing(0.3, 1.22, 0.5, 1))),
+                Edge(0.42, new CssBezierEasing(0.3, 1.6, 0.5, 1)),
+                Edge(0.62, new CssBezierEasing(0.3, 1.22, 0.5, 1))),
         };
 
         lead.Property = forward ? EndEdgeProperty : StartEdgeProperty;

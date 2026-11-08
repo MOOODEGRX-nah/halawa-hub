@@ -41,16 +41,15 @@ public partial class ComingSoonView : UserControl
 
         _loop = new System.Threading.CancellationTokenSource();
 
-        new Animation
+        _ = MotionSettings.RunLoopAsync(new Animation
         {
             Duration = TimeSpan.FromSeconds(1.6),
-            IterationCount = IterationCount.Infinite,
             Children =
             {
                 new KeyFrame { Cue = new Cue(0), Setters = { new Setter(TranslateTransform.XProperty, -width * FillRatio) } },
                 new KeyFrame { Cue = new Cue(1), Setters = { new Setter(TranslateTransform.XProperty, width) } },
             }
-        }.RunAsync(_fill, _loop.Token);
+        }, _fill, _loop.Token);
     }
 
     private sealed class VisibilityObserver : IObserver<bool>

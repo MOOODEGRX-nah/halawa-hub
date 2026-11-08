@@ -17,7 +17,7 @@
             <Setter Property="RenderTransform" Value="translateY(0px) rotate(0deg)"/>
             <Setter Property="Transitions">
                 <Transitions>
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="0.34,1.5,0.64,1"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="{x:Static l:Springs.Tilt}"/>
                     <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.35"/>
                 </Transitions>
             </Setter>
@@ -59,7 +59,7 @@
                                            ItemCount="{Binding GameDialogSectionCount}" SelectedIndex="{Binding GameDialogSection}">
                                 <Border CornerRadius="10" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #73EF4444"/>
                             </c:SlidingPill>
-                            <StackPanel>
+                            <StackPanel Spacing="4">
                                 <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
                                         Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="0" Content="{l:Loc general}"/>
                                 <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"

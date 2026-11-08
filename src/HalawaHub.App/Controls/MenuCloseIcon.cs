@@ -38,11 +38,13 @@ public class MenuCloseIcon : Control
                 {
                     Property = ProgressProperty,
                     Duration = TimeSpan.FromSeconds(0.5),
-                    Easing = new SplineEasing(0.34, 1.56, 0.64, 1)
+                    Easing = new CssBezierEasing(0.34, 1.56, 0.64, 1)
                 }
             };
         }
     }
+
+    internal double Progress => GetValue(ProgressProperty);
 
     public bool IsOpen { get => GetValue(IsOpenProperty); set => SetValue(IsOpenProperty, value); }
     public IBrush? Foreground { get => GetValue(ForegroundProperty); set => SetValue(ForegroundProperty, value); }

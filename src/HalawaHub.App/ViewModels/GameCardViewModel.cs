@@ -179,6 +179,21 @@ public class GameCardViewModel : INotifyPropertyChanged
 
     // ===== الملفات =====
 
+    /// <summary>
+    /// على لينكس نطلب إلغاء التثبيت من Steam فقط: Heroic وLutris لا يوفران بروتوكولًا
+    /// له، فلا نعرض زرًا لا يعمل. سلوك ويندوز كما هو (رسالة توضيحية).
+    /// </summary>
+    public bool CanUninstall => !OperatingSystem.IsLinux() || Game.Platform == "Steam";
+
+    /// <summary>
+    /// الألعاب التي تبدأ برابط (steam:// وheroic:// وlutris:) لا تأخذ وسائط على لينكس:
+    /// xdg-open يفتح الرابط فقط، فالحقل هنا لا أثر له.
+    /// </summary>
+    public bool SupportsLaunchParameters => !OperatingSystem.IsLinux() || !IsUrlLaunch(Game.ExecutablePath);
+
+    internal static bool IsUrlLaunch(string executablePath) =>
+        Uri.TryCreate(executablePath, UriKind.Absolute, out var uri) && !uri.IsFile;
+
     public string InstallPath => Game.InstallPath;
     public bool HasInstallPath => !string.IsNullOrWhiteSpace(Game.InstallPath);
 

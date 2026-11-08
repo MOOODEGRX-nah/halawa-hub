@@ -85,7 +85,7 @@ public sealed class Loc : INotifyPropertyChanged
         ["verify"] = "تحقق", ["getKey"] = "احصل على مفتاح", ["keyOk"] = "المفتاح صالح", ["keyBad"] = "المفتاح غير صالح",
         ["updFail"] = "تعذّر التحقق من التحديثات — تحقق من اتصالك", ["verifying"] = "جارٍ التحقق…",
         ["checking"] = "جارٍ البحث عن تحديثات…", ["moreThemes"] = "خيارات مظاهر إضافية — قريبًا",
-        ["startWith"] = "تشغيل مع بدء النظام", ["startNote"] = "يفتح Halawa-Hub تلقائيًا عند تشغيل الويندوز",
+        ["startWith"] = "تشغيل مع بدء النظام", ["startNote"] = "يفتح Halawa-Hub تلقائيًا عند بدء تشغيل النظام",
         ["version"] = "الإصدار", ["repo"] = "المستودع", ["openGh"] = "فتح GitHub",
 
         // ===== التصميم: GameDialog.dc.html =====
@@ -121,7 +121,9 @@ public sealed class Loc : INotifyPropertyChanged
         ["whatsNew"] = "ما الجديد", ["whatsNewClose"] = "حسنًا",
         ["trayShow"] = "إظهار Halawa-Hub", ["trayExit"] = "خروج", ["chooseCover"] = "اختر صورة الغلاف",
         ["showHidden"] = "إظهار الألعاب المخفية", ["showHiddenNote"] = "تعود الألعاب التي أخفيتها للظهور في كل الصفحات.",
-        ["startUnsupported"] = "هذه الميزة متاحة على ويندوز فقط",
+        ["startUnsupported"] = "هذه الميزة غير متاحة على هذا النظام",
+        ["appMenu"] = "إظهار في قائمة التطبيقات", ["appMenuNote"] = "يضيف Halawa-Hub وأيقونته إلى قائمة تطبيقات النظام",
+        ["launchUrlNote"] = "المشغّل يبدأ هذه اللعبة بنفسه، فالمعاملات تُضبط من إعدادات اللعبة في المشغّل",
         ["sgdbNeedKey"] = "أضف مفتاح SteamGridDB من الإعدادات أولًا.", ["sgdbSearching"] = "جارٍ البحث…",
         ["sgdbNone"] = "لم نجد صورًا لهذه اللعبة.", ["sgdbPick"] = "اختر صورة", ["sgdbBack"] = "رجوع",
         ["sgdbFailed"] = "تعذر تنزيل الصورة.",
@@ -148,7 +150,7 @@ public sealed class Loc : INotifyPropertyChanged
         ["verify"] = "Verify", ["getKey"] = "Get a key", ["keyOk"] = "Key is valid", ["keyBad"] = "Key is invalid",
         ["updFail"] = "Couldn't check for updates — check your connection", ["verifying"] = "Verifying…",
         ["checking"] = "Checking for updates…", ["moreThemes"] = "More themes — coming soon",
-        ["startWith"] = "Start with system", ["startNote"] = "Opens Halawa-Hub automatically when Windows starts",
+        ["startWith"] = "Start with system", ["startNote"] = "Opens Halawa-Hub automatically when the system starts",
         ["version"] = "Version", ["repo"] = "Repository", ["openGh"] = "Open GitHub",
 
         // ===== Design: GameDialog.dc.html =====
@@ -184,7 +186,9 @@ public sealed class Loc : INotifyPropertyChanged
         ["whatsNew"] = "What's new", ["whatsNewClose"] = "Got it",
         ["trayShow"] = "Show Halawa-Hub", ["trayExit"] = "Exit", ["chooseCover"] = "Choose a cover image",
         ["showHidden"] = "Show hidden games", ["showHiddenNote"] = "Games you hid appear again on every page.",
-        ["startUnsupported"] = "This feature is only available on Windows",
+        ["startUnsupported"] = "This feature isn't available on this system",
+        ["appMenu"] = "Show in the applications menu", ["appMenuNote"] = "Adds Halawa-Hub and its icon to the system applications menu",
+        ["launchUrlNote"] = "This game is started by its launcher, so set launch options in the launcher's game settings",
         ["sgdbNeedKey"] = "Add a SteamGridDB key in Settings first.", ["sgdbSearching"] = "Searching…",
         ["sgdbNone"] = "No images found for this game.", ["sgdbPick"] = "Pick an image", ["sgdbBack"] = "Back",
         ["sgdbFailed"] = "Couldn't download the image.",

@@ -228,6 +228,14 @@
                                         <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding LaunchOnStartup, Mode=TwoWay}"
                                                       IsEnabled="{Binding IsStartupSupported}" AutomationProperties.Name="{l:Loc startWith}"/>
                                     </Grid>
+                                    <Grid ColumnDefinitions="*,Auto" MaxWidth="480" Margin="0,4" IsVisible="{Binding IsAppMenuSupported}">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Text="{l:Loc appMenu}" FontSize="15"/>
+                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc appMenuNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowInAppMenu, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc appMenu}"/>
+                                    </Grid>
                                 </StackPanel>
 
                                 <!-- معلومات النسخة -->

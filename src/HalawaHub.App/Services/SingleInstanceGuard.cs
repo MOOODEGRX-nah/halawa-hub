@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.IO.Pipes;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,25 +12,29 @@ namespace HalawaHub.App.Services;
 /// <summary>
 /// يضمن نسخة واحدة من البرنامج لكل مستخدم. بما أن زر الإغلاق يخفي النافذة للصينية،
 /// تشغيل الملف مرة ثانية كان يفتح نسخة ثانية؛ الآن النسخة الجديدة تطلب من الأولى
-/// إظهار نافذتها ثم تخرج.
+/// إظهار نافذتها ثم تخرج. الإشارة عبر Named Pipe لأن EventWaitHandle المسمى لا يعمل على لينكس.
 ///
-/// Mutex للكشف، وNamed Pipe للإشارة لأن EventWaitHandle المسمى لا يعمل على لينكس.
-/// لا نمتلك الـ Mutex (initiallyOwned=false): يكفي وجوده، وهكذا لا يوجد ارتباط بخيط
-/// محدد. إذا انتهت النسخة الأولى أو قتلها سكربت التحديث يزول الـ Mutex تلقائيًا.
+/// الكشف على ويندوز Mutex: لا نمتلكه (initiallyOwned=false) فيكفي وجوده، وإذا انتهت
+/// النسخة الأولى أو قتلها سكربت التحديث يزول تلقائيًا.
+///
+/// الكشف على لينكس قفل ملف (flock عبر FileShare.None) وليس Mutex: الـ Mutex المسمى في
+/// .NET على لينكس محصور في جلسة العملية (setsid)، والتشغيل من قائمة التطبيقات ثم من
+/// الطرفية جلستان مختلفتان، فكانت تفتح نسختان. النواة تحرر القفل عند موت العملية بأي
+/// طريقة، فلا يوجد قفل عالق بعد crash أو kill -9.
 /// </summary>
 public sealed class SingleInstanceGuard : IDisposable
 {
     public const string DefaultId = "HalawaHub";
 
-    private readonly Mutex _mutex;
+    private readonly IDisposable _instanceLock;
     private readonly string _pipeName;
     private CancellationTokenSource? _listenCts;
 
     public bool IsPrimary { get; }
 
-    private SingleInstanceGuard(Mutex mutex, bool isPrimary, string pipeName)
+    private SingleInstanceGuard(IDisposable instanceLock, bool isPrimary, string pipeName)
     {
-        _mutex = mutex;
+        _instanceLock = instanceLock;
         IsPrimary = isPrimary;
         _pipeName = pipeName;
     }
@@ -37,8 +42,51 @@ public sealed class SingleInstanceGuard : IDisposable
     public static SingleInstanceGuard Acquire(string id = DefaultId)
     {
         var suffix = UserScopedSuffix();
-        var mutex = new Mutex(false, $"{id}-SingleInstance-{suffix}", out var createdNew);
-        return new SingleInstanceGuard(mutex, createdNew, $"{id}-Activate-{suffix}");
+        var pipeName = $"{id}-Activate-{suffix}";
+
+        if (OperatingSystem.IsWindows())
+        {
+            var mutex = new Mutex(false, $"{id}-SingleInstance-{suffix}", out var createdNew);
+            return new SingleInstanceGuard(mutex, createdNew, pipeName);
+        }
+
+        var lockFile = TryLockFile(LockFilePath(id, suffix, Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR")));
+        return new SingleInstanceGuard(lockFile ?? (IDisposable)new NoLock(), lockFile != null, pipeName);
+    }
+
+    /// مجلد التشغيل الخاص بالمستخدم في الذاكرة، وإلا مجلد البيانات
+    internal static string LockFilePath(string id, string suffix, string? runtimeDirectory) => Path.Combine(
+        !string.IsNullOrWhiteSpace(runtimeDirectory) && Directory.Exists(runtimeDirectory)
+            ? runtimeDirectory
+            : AppPaths.DataDirectory,
+        $"{id}-SingleInstance-{suffix}.lock");
+
+    /// null يعني أن نسخة أخرى تمسك القفل
+    private static FileStream? TryLockFile(string path)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            // الملف يبقى في مكانه عمدًا: حذفه يفتح سباقًا بين نسختين تبدآن معًا
+            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            // لا نمنع المستخدم من فتح البرنامج بسبب مشكلة صلاحيات في ملف القفل
+            Log.Error("single-instance: lock file is not accessible, continuing without it", ex);
+            return new FileStream(Path.GetTempFileName(), FileMode.Open, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
+        }
+    }
+
+    private sealed class NoLock : IDisposable
+    {
+        public void Dispose()
+        {
+        }
     }
 
     /// <summary>تستدعيها النسخة الأولى، و onActivate يعمل على خيط خلفي.</summary>
@@ -107,6 +155,6 @@ public sealed class SingleInstanceGuard : IDisposable
     public void Dispose()
     {
         _listenCts?.Cancel();
-        _mutex.Dispose();
+        _instanceLock.Dispose();
     }
 }

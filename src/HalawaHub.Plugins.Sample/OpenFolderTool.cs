@@ -25,8 +25,13 @@ public class OpenFolderTool : IGameTool
 
     public void Apply(GameInfo game)
     {
-        if (Directory.Exists(game.InstallPath))
+        if (!Directory.Exists(game.InstallPath)) return;
+
+        if (OperatingSystem.IsWindows())
             Process.Start("explorer.exe", game.InstallPath);
+        else
+            // UseShellExecute يفتح المجلد عبر xdg-open في مدير ملفات المستخدم
+            Process.Start(new ProcessStartInfo(game.InstallPath) { UseShellExecute = true });
     }
 
     public void Remove(GameInfo game)

@@ -146,7 +146,7 @@
                                     <TextBlock Classes="lbl" Text="{l:Loc statusLabel}" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Column="1" Text="{Binding StatusText}" VerticalAlignment="Center"/>
                                 </Grid>
-                                <Button Classes="btn" HorizontalAlignment="Left" Content="{l:Loc uninstall}"
+                                <Button Classes="btn" HorizontalAlignment="Left" Content="{l:Loc uninstall}" IsVisible="{Binding CanUninstall}"
                                         Command="{Binding #Root.((vm:MainViewModel)DataContext).DeleteGameCommand}"/>
                             </StackPanel>
 
@@ -214,8 +214,10 @@
                                 <TextBlock Classes="lbl" Text="{l:Loc launch}"/>
                                 <TextBox Classes="inp" FlowDirection="LeftToRight" TextAlignment="Left"
                                          Text="{Binding LaunchParameters, Mode=TwoWay}" Watermark="{l:Loc launchPh}"
+                                         IsEnabled="{Binding SupportsLaunchParameters}"
                                          AutomationProperties.Name="{l:Loc launch}"/>
-                                <TextBlock Classes="lbl" Text="{l:Loc launchNote}"/>
+                                <TextBlock Classes="lbl" Text="{l:Loc launchNote}" IsVisible="{Binding SupportsLaunchParameters}"/>
+                                <TextBlock Classes="lbl" Text="{l:Loc launchUrlNote}" TextWrapping="Wrap" IsVisible="{Binding !SupportsLaunchParameters}"/>
                             </StackPanel>
 
                             <!-- الأدوات: تظهر فقط إذا كانت للعبة أدوات من الإضافات -->

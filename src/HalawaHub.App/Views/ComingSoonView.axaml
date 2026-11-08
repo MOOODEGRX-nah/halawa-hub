@@ -5,8 +5,13 @@
              x:Class="HalawaHub.App.Views.ComingSoonView"
              x:DataType="vm:MainViewModel">
 
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-        <Grid Height="700" VerticalAlignment="Top">
+    <!-- المحتوى في منتصف مساحة أقصاها 700 كما في التصميم، وفي النوافذ الأقصر في منتصف المتاح -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1000*" MaxHeight="700"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
             <StackPanel Orientation="Horizontal" Spacing="56" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel MaxWidth="420" Spacing="16" VerticalAlignment="Center">
                     <TextBlock Text="{l:Loc soonTitle}" FontSize="44" FontWeight="Bold"/>
@@ -32,5 +37,5 @@
                 </Border>
             </StackPanel>
         </Grid>
-    </ScrollViewer>
+    </Grid>
 </UserControl>

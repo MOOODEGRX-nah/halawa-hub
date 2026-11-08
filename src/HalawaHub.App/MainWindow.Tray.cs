@@ -21,13 +21,19 @@ public partial class MainWindow
     /// النافذة مخفية بلا أي طريق للرجوع إليها
     internal static bool ShouldHideToTray(bool allowExit, bool trayAvailable) => !allowExit && trayAvailable;
 
+    private static readonly TimeSpan TrayProbeTimeout = TimeSpan.FromMilliseconds(800);
+
+    /// على لينكس إنشاء الأيقونة ينجح حتى بدون مضيف يعرضها، فنسأل عنه وقت الإغلاق
+    private bool IsTrayUsable() =>
+        _trayAvailable && (!OperatingSystem.IsLinux() || LinuxTrayProbe.IsHostAvailable(TrayProbeTimeout));
+
     private void SetupTrayAndCloseBehavior()
     {
         Closing += (_, e) =>
         {
             (DataContext as MainViewModel)?.FlushPendingSettings();
 
-            if (ShouldHideToTray(_allowExit, _trayAvailable))
+            if (ShouldHideToTray(_allowExit, !_allowExit && IsTrayUsable()))
             {
                 e.Cancel = true;
                 Hide();

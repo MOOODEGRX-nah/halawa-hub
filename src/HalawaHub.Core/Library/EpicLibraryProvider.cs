@@ -17,11 +17,12 @@ public class EpicLibraryProvider : IGameLibraryProvider
 
     public string PlatformName => "Epic Games";
 
-    public bool IsAvailable() => Directory.Exists(ManifestsPath);
+    // ملفات Epic Games Launcher على ويندوز فقط، وألعاب Epic على لينكس يقرأها مزود Heroic
+    public bool IsAvailable() => OperatingSystem.IsWindows() && Directory.Exists(ManifestsPath);
 
     public IEnumerable<GameInfo> ScanLibrary()
     {
-        if (!Directory.Exists(ManifestsPath)) yield break;
+        if (!IsAvailable()) yield break;
 
         string[] itemFiles;
         try

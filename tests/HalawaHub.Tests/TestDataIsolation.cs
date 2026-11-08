@@ -16,6 +16,16 @@ internal static class TestDataIsolation
     {
         var dir = Path.Combine(Path.GetTempPath(), "HalawaHub-Tests-" + Guid.NewGuid().ToString("N"));
         Environment.SetEnvironmentVariable(AppPaths.DataDirOverrideVariable, dir);
+
+        // نفس الشيء لملفات سطح المكتب: زر "تشغيل مع النظام" يكتب في ~/.config/autostart
+        // على لينكس، والاختبار لا يجوز أن يغيّر جلسة المطور الحقيقية
+        Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", Path.Combine(dir, "xdg-config"));
+        Environment.SetEnvironmentVariable("XDG_DATA_HOME", Path.Combine(dir, "xdg-data"));
+
+        // ملفات قفل اختبارات النسخة الواحدة لا تُترك في /run/user الحقيقي
+        var runtime = Path.Combine(dir, "xdg-runtime");
+        Directory.CreateDirectory(runtime);
+        Environment.SetEnvironmentVariable("XDG_RUNTIME_DIR", runtime);
     }
 }
 

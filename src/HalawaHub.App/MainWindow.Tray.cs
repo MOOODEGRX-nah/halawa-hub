@@ -14,12 +14,19 @@ namespace HalawaHub.App;
 public partial class MainWindow
 {
     private bool _allowExit;
+    private bool _trayAvailable;
+
+    /// الإخفاء مسموح فقط إذا كانت أيقونة الصينية موجودة فعلًا، وإلا تصبح
+    /// النافذة مخفية بلا أي طريق للرجوع إليها
+    internal static bool ShouldHideToTray(bool allowExit, bool trayAvailable) => !allowExit && trayAvailable;
 
     private void SetupTrayAndCloseBehavior()
     {
         Closing += (_, e) =>
         {
-            if (!_allowExit)
+            (DataContext as MainViewModel)?.FlushPendingSettings();
+
+            if (ShouldHideToTray(_allowExit, _trayAvailable))
             {
                 e.Cancel = true;
                 Hide();
@@ -47,14 +54,18 @@ public partial class MainWindow
             icon.Menu = menu;
 
             TrayIcon.SetIcons(Application.Current!, new TrayIcons { icon });
+            _trayAvailable = true;
         }
-        catch
+        catch (Exception ex)
         {
-            // الصينية تحسين إضافي — ما يصير تكراش البرنامج لو ما اشتغلت بجهاز ما
+            // الصينية تحسين إضافي — ما يصير تكراش البرنامج لو ما اشتغلت بجهاز ما،
+            // وزر الإغلاق حينها يغلق البرنامج فعليًا
+            _trayAvailable = false;
+            HalawaHub.Core.Log.Error("تعذر إنشاء أيقونة الصينية", ex);
         }
     }
 
-    private void ShowAndFocus()
+    internal void ShowAndFocus()
     {
         Show();
         WindowState = WindowState.Normal;

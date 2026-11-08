@@ -11,6 +11,14 @@ public static class SelfUpdater
 {
     public static async Task<bool> DownloadAndApplyAsync(string downloadUrl, Action<string>? onStatus = null, string? expectedSha256 = null)
     {
+        // آلية الاستبدال ملف .bat، فهي تعمل على ويندوز فقط
+        if (!OperatingSystem.IsWindows())
+        {
+            Log.Error("self-update is only supported on Windows");
+            onStatus?.Invoke("automatic update is only available on Windows.");
+            return false;
+        }
+
         try
         {
             var tempRoot = Path.Combine(Path.GetTempPath(), "HalawaHub-Update");
@@ -50,26 +58,8 @@ public static class SelfUpdater
             var exeName = Path.GetFileName(Environment.ProcessPath ?? "Halawa-Hub.exe");
             var logPath = Path.Combine(tempRoot, "update.log");
 
-            // bat script محسّن: taskkill + logging + retry
             var scriptPath = Path.Combine(tempRoot, "apply-update.bat");
-            var scriptContent =
-                "@echo off\r\n" +
-                $"echo Update started at %date% %time% > \"{logPath}\"\r\n" +
-                "timeout /t 3 /nobreak >nul\r\n" +
-                $"echo Killing old process... >> \"{logPath}\"\r\n" +
-                $"taskkill /F /IM \"{exeName}\" /FI \"STATUS eq RUNNING\" >> \"{logPath}\" 2>&1\r\n" +
-                "timeout /t 2 /nobreak >nul\r\n" +
-                $"echo Copying files from {extractPath} to {installDir} >> \"{logPath}\"\r\n" +
-                $"xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\\" >> \"{logPath}\" 2>&1\r\n" +
-                $"if errorlevel 1 (\r\n" +
-                $"  echo xcopy failed, retrying... >> \"{logPath}\"\r\n" +
-                "  timeout /t 3 /nobreak >nul\r\n" +
-                $"  xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\\" >> \"{logPath}\" 2>&1\r\n" +
-                ")\r\n" +
-                $"echo Starting {exeName} >> \"{logPath}\"\r\n" +
-                $"start \"\" \"{Path.Combine(installDir, exeName)}\"\r\n" +
-                "echo Update completed >> \"%logPath%\"\r\n" +
-                "del \"%~f0\"\r\n";
+            var scriptContent = BuildApplyScript(logPath, exeName, extractPath, installDir);
 
             await File.WriteAllTextAsync(scriptPath, scriptContent);
 
@@ -91,4 +81,24 @@ public static class SelfUpdater
             return false;
         }
     }
+
+    /// <summary>bat script محسّن: taskkill + logging + retry. internal للاختبار.</summary>
+    internal static string BuildApplyScript(string logPath, string exeName, string extractPath, string installDir) =>
+        "@echo off\r\n" +
+        $"echo Update started at %date% %time% > \"{logPath}\"\r\n" +
+        "timeout /t 3 /nobreak >nul\r\n" +
+        $"echo Killing old process... >> \"{logPath}\"\r\n" +
+        $"taskkill /F /IM \"{exeName}\" /FI \"STATUS eq RUNNING\" >> \"{logPath}\" 2>&1\r\n" +
+        "timeout /t 2 /nobreak >nul\r\n" +
+        $"echo Copying files from {extractPath} to {installDir} >> \"{logPath}\"\r\n" +
+        $"xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\\" >> \"{logPath}\" 2>&1\r\n" +
+        $"if errorlevel 1 (\r\n" +
+        $"  echo xcopy failed, retrying... >> \"{logPath}\"\r\n" +
+        "  timeout /t 3 /nobreak >nul\r\n" +
+        $"  xcopy /e /y /i \"{extractPath}\\*\" \"{installDir}\\\" >> \"{logPath}\" 2>&1\r\n" +
+        ")\r\n" +
+        $"echo Starting {exeName} >> \"{logPath}\"\r\n" +
+        $"start \"\" \"{Path.Combine(installDir, exeName)}\"\r\n" +
+        $"echo Update completed >> \"{logPath}\"\r\n" +
+        "del \"%~f0\"\r\n";
 }

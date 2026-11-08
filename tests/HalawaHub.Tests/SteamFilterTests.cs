@@ -15,9 +15,12 @@ public class SteamFilterTests
     private static bool IsRuntimeOrTool(string name, string appId)
     {
         return appId == "228980"
+            || appId == "1070560"
+            || name.Contains("Steam Linux Runtime", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Steamworks Common", StringComparison.OrdinalIgnoreCase)
             || name.Contains("Redistributables", StringComparison.OrdinalIgnoreCase)
             || name.Contains("DirectX Runtime", StringComparison.OrdinalIgnoreCase)
-            || name.Contains("Proton", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Proton ", StringComparison.OrdinalIgnoreCase)
             || name.Contains("Depot", StringComparison.OrdinalIgnoreCase);
     }
 

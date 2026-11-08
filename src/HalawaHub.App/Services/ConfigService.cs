@@ -7,9 +7,7 @@ namespace HalawaHub.App.Services;
 
 public static class ConfigService
 {
-    public static readonly string ConfigPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "HalawaHub", "config.json");
+    public static readonly string ConfigPath = AppPaths.InData("config.json");
 
     public static AppConfig Load() => LoadFrom(ConfigPath);
 

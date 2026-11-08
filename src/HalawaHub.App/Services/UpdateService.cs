@@ -21,7 +21,13 @@ public class UpdateService : IUpdateService
     {
         var update = await _updateChecker.CheckForUpdateAsync();
 
-        if (update is not { IsNewer: true })
+        if (update is null)
+        {
+            return new UpdateCheckResult(false, null, null, null,
+                "تعذّر التحقق من التحديثات. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.", Failed: true);
+        }
+
+        if (!update.IsNewer)
         {
             return new UpdateCheckResult(false, null, null, null, "البرنامج محدّث لآخر إصدار.");
         }
@@ -29,7 +35,8 @@ public class UpdateService : IUpdateService
         Log.Info("تحديث جديد متوفر: v" + update.LatestVersion);
         var message = $"يتوفر إصدار جديد: v{update.LatestVersion} (لديك v{AppInfo.Version})";
 
-        return new UpdateCheckResult(true, update.LatestVersion, update.DownloadUrl, update.Sha256, message);
+        return new UpdateCheckResult(true, update.LatestVersion, update.DownloadUrl, update.Sha256, message,
+            IsReleasePage: update.IsReleasePage);
     }
 
     public async Task<UpdateInstallResult> InstallUpdateAsync(

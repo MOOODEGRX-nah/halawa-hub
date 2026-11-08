@@ -1,3 +1,4 @@
+using HalawaHub.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,9 +13,7 @@ namespace HalawaHub.App.Services;
 /// </summary>
 public static class PlayHistoryService
 {
-    private static readonly string FilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "HalawaHub", "play-history.json");
+    private static readonly string FilePath = AppPaths.InData("play-history.json");
 
     private static readonly Dictionary<string, DateTime> History = Load();
 

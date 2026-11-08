@@ -1,3 +1,4 @@
+using HalawaHub.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,9 +12,7 @@ namespace HalawaHub.App.Services;
 /// </summary>
 public static class FavoritesService
 {
-    private static readonly string FilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "HalawaHub", "favorites.json");
+    private static readonly string FilePath = AppPaths.InData("favorites.json");
 
     private static readonly HashSet<string> Favorites = Load();
 

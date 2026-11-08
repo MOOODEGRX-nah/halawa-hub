@@ -1,27 +1,30 @@
 {
+  "0.0.10.61": [
+    "إصلاحات من المراجعة: نافذة «ما الجديد» تعمل من جديد، البرنامج يفتح فورًا والمكتبة تُفحص في الخلفية، زر التحقق من المفتاح يعمل والمفتاح الجديد يُستخدم بلا إعادة تشغيل، فشل فحص التحديث يظهر كفشل، التحديث يختار الملف الصحيح بالاسم، زر الإغلاق لا يخفي النافذة إذا لم تعمل أيقونة الصينية، ونسخة واحدة فقط من البرنامج تعمل. كما أصبحت الاختبارات تعمل فعليًا في CI لأول مرة"
+  ],
   "0.0.10.60": [
-    "B28a: تحصين StartupService بحراس OperatingSystem.IsWindows وفق وثيقة CA1416 - ميزة بدء التشغيل مع ويندوز صارت no-op صريحًا على Linux بدل الاعتماد على try/catch يبتلع الاستثناء بصمت - واختفت 10 تحذيرات CA1416 من البناء كدليل آلي على اكتمال التحصين",
+    "B28a: تحصين StartupService بحراس OperatingSystem.IsWindows وفق وثيقة CA1416 - ميزة بدء التشغيل مع ويندوز صارت no-op صريحًا على Linux بدل الاعتماد على try/catch يبتلع الاستثناء بصمت - واختفت 10 تحذيرات CA1416 من البناء كدليل آلي على اكتمال التحصين"
   ],
   "0.0.10.59": [
     "تنظيف: منع دخول build artifacts إلى git وإلغاء تتبع مجلد publish-linux"
   ],
   "0.0.10.58": [
-    "B22: دعم Steam على Linux — GetSteamPath يفحص مسارات ~/.local/share/Steam و~/.steam/steam وFlatpak وsnap (ويندوز يبقى عبر Registry بدون تغيير)، واستخراج ScanFromSteamPath كـ seam داخلي مع 5 اختبارات مكتبة مزيفة على القرص تعمل على CI لينكس وويندوز معًا (B22)",
+    "B22: دعم Steam على Linux — GetSteamPath يفحص مسارات ~/.local/share/Steam و~/.steam/steam وFlatpak وsnap (ويندوز يبقى عبر Registry بدون تغيير)، واستخراج ScanFromSteamPath كـ seam داخلي مع 5 اختبارات مكتبة مزيفة على القرص تعمل على CI لينكس وويندوز معًا (B22)"
   ],
   "0.0.10.57": [
-    "B09a: نافذة ما الجديد تقرأ من tag الإصدار (v{version}) بدل main المتحرك — مستخدم فتح البرنامج لحظة كسر الملف لن يفوته محتوى ذلك الإصدار بعد إصلاحه، وحفظ LastSeenVersion ينتقل بعد التأكد من وجود محتوى فعلي (كان يُحفظ حتى لو فشل الجلب فيخفي النافذة للأبد) + Log.Error عند فشل الجلب + 3 اختبارات انحدار (B09a/3.7.5)",
+    "B09a: نافذة ما الجديد تقرأ من tag الإصدار (v{version}) بدل main المتحرك — مستخدم فتح البرنامج لحظة كسر الملف لن يفوته محتوى ذلك الإصدار بعد إصلاحه، وحفظ LastSeenVersion ينتقل بعد التأكد من وجود محتوى فعلي (كان يُحفظ حتى لو فشل الجلب فيخفي النافذة للأبد) + Log.Error عند فشل الجلب + 3 اختبارات انحدار (B09a/3.7.5)"
   ],
   "0.0.10.56": [
-    "B06: تحصين Xbox provider — timeout حقيقي بـ ReadToEndAsync + WaitForExit(60s) + Kill(entireProcessTree) (E7 كان يقيس 4004ms لـ timeout مقداره 1000ms)، cache successes only (فشل عابر لم يعد يخفي كل ألعاب Xbox لـ 5 دقائق)، InvalidateCache() يستدعيه زر التحديث (لعبة Xbox جديدة تظهر فورًا بدل الانتظار 5 دقائق)، UTF-8 لكل من stdout و stderr + [Console]::OutputEncoding داخل السكربت (أسماء عربية/صينية)، مسار powershell.exe مطلق من %SystemRoot%، stderr ملتقط ومُسجَّل + 4 اختبارات انحدار (B06/E7)",
+    "B06: تحصين Xbox provider — timeout حقيقي بـ ReadToEndAsync + WaitForExit(60s) + Kill(entireProcessTree) (E7 كان يقيس 4004ms لـ timeout مقداره 1000ms)، cache successes only (فشل عابر لم يعد يخفي كل ألعاب Xbox لـ 5 دقائق)، InvalidateCache() يستدعيه زر التحديث (لعبة Xbox جديدة تظهر فورًا بدل الانتظار 5 دقائق)، UTF-8 لكل من stdout و stderr + [Console]::OutputEncoding داخل السكربت (أسماء عربية/صينية)، مسار powershell.exe مطلق من %SystemRoot%، stderr ملتقط ومُسجَّل + 4 اختبارات انحدار (B06/E7)"
   ],
   "0.0.10.55": [
-    "B07: تحصين مزودي المكتبات — try/catch حول كل manifest في Steam/Riot/GOG/Epic (ملف مقفل لم يعد يخفي مكتبتك)، معرف Steam حتمي من اسم الملف بدل Guid.NewGuid (المفضلة وساعات اللعب لا تنكسر)، IsAvailable() داخل try (provider فاشل لم يعد يكسر المسح)، PlatformCounts تُشتق من البيانات (منصات الإضافات تظهر بالسايدبار تلقائيًا)، إصلاح تسريب RegistryKey في GOG + 5 اختبارات انحدار (E3/E4)",
+    "B07: تحصين مزودي المكتبات — try/catch حول كل manifest في Steam/Riot/GOG/Epic (ملف مقفل لم يعد يخفي مكتبتك)، معرف Steam حتمي من اسم الملف بدل Guid.NewGuid (المفضلة وساعات اللعب لا تنكسر)، IsAvailable() داخل try (provider فاشل لم يعد يكسر المسح)، PlatformCounts تُشتق من البيانات (منصات الإضافات تظهر بالسايدبار تلقائيًا)، إصلاح تسريب RegistryKey في GOG + 5 اختبارات انحدار (E3/E4)"
   ],
   "0.0.10.54": [
-    "B04: تحصين ConfigService — ملف تالف JSON يُعزل في config.json.corrupt-<timestamp> (لم يعد يُمسح المفتاح)، وأعطال IO لا تُعيد كتابة الملف (كان سيناريو E5 يُفقد SteamGridDbApiKey عند أي فاصلة ناقصة) + كتابة ذرية عبر temp + File.Move + 5 اختبارات انحدار (B04/E5)",
+    "B04: تحصين ConfigService — ملف تالف JSON يُعزل في config.json.corrupt-<timestamp> (لم يعد يُمسح المفتاح)، وأعطال IO لا تُعيد كتابة الملف (كان سيناريو E5 يُفقد SteamGridDbApiKey عند أي فاصلة ناقصة) + كتابة ذرية عبر temp + File.Move + 5 اختبارات انحدار (B04/E5)"
   ],
   "0.0.10.53": [
-    "حذف tools/git-push.sh: كان يتجاوز CI ويقوم بـ push مباشر للـ main بدون تحقق (B03)",
+    "حذف tools/git-push.sh: كان يتجاوز CI ويقوم بـ push مباشر للـ main بدون تحقق (B03)"
   ],
   "0.0.10.52": [
     "fix: تصحيح XAML لزر المضافة حديثًا — double quotes داخل binding attribute كانت تكسر parser، استُبدلت بـ single quotes (قاعدة R44)"

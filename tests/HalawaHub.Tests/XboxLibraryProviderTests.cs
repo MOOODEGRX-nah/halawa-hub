@@ -53,9 +53,9 @@ public class XboxLibraryProviderTests
         var provider = new XboxLibraryProvider();
 
         // Act
-        var result = provider.IsAvailable();
+        var act = () => provider.IsAvailable();
 
-        // Assert
-        result.Should().BeOfType<bool>();
+        // Assert: لا يرمي استثناء على أي نظام
+        act.Should().NotThrow();
     }
 }

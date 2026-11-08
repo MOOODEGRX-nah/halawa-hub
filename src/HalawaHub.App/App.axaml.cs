@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using HalawaHub.App.ViewModels;
 using HalawaHub.Core.Library;
 using HalawaHub.Core.Updates;
@@ -22,10 +23,13 @@ public partial class App : Application
             var libraryService = new LibraryService();
             var filterService = new FilterService();
             var updateService = new UpdateService(new UpdateChecker());
-            desktop.MainWindow = new MainWindow
+            var window = new MainWindow
             {
                 DataContext = new MainViewModel(libraryService, filterService, updateService)
             };
+            desktop.MainWindow = window;
+
+            Program.InstanceGuard?.StartListening(() => Dispatcher.UIThread.Post(window.ShowAndFocus));
         }
 
         base.OnFrameworkInitializationCompleted();

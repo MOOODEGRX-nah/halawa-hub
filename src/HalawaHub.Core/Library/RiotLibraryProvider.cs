@@ -27,11 +27,12 @@ public class RiotLibraryProvider : IGameLibraryProvider
 
     public string PlatformName => "Riot Games";
 
-    public bool IsAvailable() => Directory.Exists(MetadataPath);
+    // Riot Client على ويندوز فقط
+    public bool IsAvailable() => OperatingSystem.IsWindows() && Directory.Exists(MetadataPath);
 
     public IEnumerable<GameInfo> ScanLibrary()
     {
-        if (!Directory.Exists(MetadataPath)) yield break;
+        if (!IsAvailable()) yield break;
 
         var riotClientPath = GetRiotClientPath();
 

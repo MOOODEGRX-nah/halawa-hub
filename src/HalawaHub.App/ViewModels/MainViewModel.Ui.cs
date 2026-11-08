@@ -52,7 +52,7 @@ public partial class MainViewModel
 
     // ترتيب شريط المنصات في التصميم، ومنصات الإضافات تأتي بعدها
     private static readonly string[] PlatformOrder =
-        { "Steam", "Epic Games", "GOG", "Riot Games", "Xbox / Microsoft Store" };
+        { "Steam", "Epic Games", "GOG", "Riot Games", "Xbox / Microsoft Store", "Heroic", "Lutris" };
 
     private const int ChipWidth = 150;
     private const int MaxRecentSearches = 5;

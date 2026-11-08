@@ -294,7 +294,9 @@ public partial class MainViewModel : INotifyPropertyChanged
             new GogLibraryProvider(),
             new EpicLibraryProvider(),
             new RiotLibraryProvider(),
-            new XboxLibraryProvider()
+            new XboxLibraryProvider(),
+            new HeroicLibraryProvider(),
+            new LutrisLibraryProvider()
         };
 
         _config = ConfigService.Load();

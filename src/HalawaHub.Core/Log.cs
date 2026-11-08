@@ -13,9 +13,7 @@ public static class Log
     private static string? _currentDay;
     private static string? _currentPath;
 
-    public static string LogDir => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "HalawaHub", "logs");
+    public static string LogDir => AppPaths.InData("logs");
 
     public static void Info(string message) => Write("INFO", message);
 

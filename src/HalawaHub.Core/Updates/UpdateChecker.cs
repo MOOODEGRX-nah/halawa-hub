@@ -13,7 +13,7 @@ public class UpdateChecker
 {
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
 
-    public async Task<UpdateInfo?> CheckForUpdateAsync()
+    public virtual async Task<UpdateInfo?> CheckForUpdateAsync()
     {
         try
         {

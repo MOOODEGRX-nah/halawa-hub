@@ -298,6 +298,9 @@
         <Style Selector="TabItem:selected">
             <Setter Property="Foreground" Value="#EF4444"/>
         </Style>
+        <Style Selector="TextBlock.update-check-failed">
+            <Setter Property="Foreground" Value="#EF4444"/>
+        </Style>
     </Window.Styles>
 
     <Grid Margin="20" ColumnDefinitions="*,220">
@@ -307,9 +310,14 @@
                 CornerRadius="10" Margin="12,0,0,0" Padding="12">
             <Grid RowDefinitions="Auto,Auto,Auto,Auto">
 
-                <Button Grid.Row="0" Classes="outline-btn" Content="تحديث القائمة"
-                        HorizontalAlignment="Stretch" Height="34" Margin="0,0,0,10"
-                        Command="{Binding RefreshCommand}"/>
+                <StackPanel Grid.Row="0" Margin="0,0,0,10" Spacing="4">
+                    <Button Classes="outline-btn" Content="تحديث القائمة"
+                            HorizontalAlignment="Stretch" Height="34"
+                            Command="{Binding RefreshCommand}"/>
+                    <!-- يظهر أثناء فحص المكتبات في الخلفية -->
+                    <ProgressBar IsIndeterminate="True" Height="3" MinHeight="3" Foreground="#DC2626"
+                                 Background="#2A1418" IsVisible="{Binding IsRefreshing}"/>
+                </StackPanel>
 
                 <TextBox Grid.Row="1" Watermark="ابحث..." Text="{Binding SearchQuery, Mode=TwoWay}"
                          Background="#150A0C" BorderBrush="#3A1518" BorderThickness="1"
@@ -891,6 +899,12 @@
                                 <Button Grid.Column="1" Classes="outline-btn" Content="تحقق من التحديثات"
                                         FontSize="11" Padding="12,6" Command="{Binding CheckForUpdatesNowCommand}"/>
                             </Grid>
+
+                            <!-- نتيجة الفحص اليدوي: محدّث، أو فشل الفحص باللون الأحمر -->
+                            <TextBlock Text="{Binding UpdateCheckMessage}" FontSize="11" FontWeight="SemiBold"
+                                       TextWrapping="Wrap" Foreground="#D1D5DB"
+                                       IsVisible="{Binding HasUpdateCheckMessage}"
+                                       Classes.update-check-failed="{Binding UpdateCheckFailed}"/>
 
                             <!-- يظهر بس لو فيه إصدار أحدث فعليًا -->
                             <Border Background="#1A0A0C" BorderBrush="#DC2626" BorderThickness="1"

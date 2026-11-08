@@ -15,19 +15,58 @@ namespace HalawaHub.App.ViewModels;
 public partial class MainViewModel
 {
 
-    private void RefreshLibrary()
-    {
-        StatusMessage = null;
-        Games.Clear();
+    private readonly SingleFlightRunner _scanRunner = new();
 
-        var allProviders = _builtInProviders.Concat(_pluginLoader.LibraryProviders);
+    private bool _isRefreshing;
+    public bool IsRefreshing
+    {
+        get => _isRefreshing;
+        private set
+        {
+            _isRefreshing = value;
+            OnPropertyChanged(nameof(IsRefreshing));
+        }
+    }
+
+    /// يفحص المكتبات على خيط خلفي (مزود Xbox قد يأخذ حتى 60 ثانية) ثم يملأ
+    /// الواجهة على خيطها. طلب تحديث أثناء فحص جارٍ يُتجاهل، والقائمة الحالية
+    /// تبقى ظاهرة حتى تصل النتائج.
+    private async Task RefreshLibraryAsync()
+    {
+        if (_scanRunner.IsRunning) return;
+
+        StatusMessage = null;
+        IsRefreshing = true;
+
+        var allProviders = _builtInProviders.Concat(_pluginLoader.LibraryProviders).ToList();
         var allTools = _pluginLoader.GameTools;
 
-        // استخدام الـ service
-        // B06: إبطال كاش Xbox حتى تظهر الألعاب المثبتة حديثًا فورًا
-        XboxLibraryProvider.InvalidateCache();
+        try
+        {
+            var (ran, result) = await _scanRunner.RunAsync(() =>
+            {
+                // B06: إبطال كاش Xbox حتى تظهر الألعاب المثبتة حديثًا فورًا
+                XboxLibraryProvider.InvalidateCache();
+                return _libraryService.ScanAllLibraries(allProviders, allTools);
+            });
 
-        var result = _libraryService.ScanAllLibraries(allProviders, allTools);
+            if (ran && result != null)
+                ApplyScanResult(result, allTools);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("فشل فحص المكتبات", ex);
+            StatusMessage = $"تعذر فحص المكتبات: {ex.Message}";
+        }
+        finally
+        {
+            IsRefreshing = false;
+        }
+    }
+
+    private void ApplyScanResult(LibraryScanResult result, IEnumerable<IGameTool> allTools)
+    {
+        Games.Clear();
 
         // بناء GameCardViewModels من النتائج
         foreach (var game in result.Games)
@@ -46,16 +85,50 @@ public partial class MainViewModel
             _ = LoadMissingCoversAsync();
     }
 
+    private CancellationTokenSource? _coverLoadCts;
+    private string? _coverLoadKey;
+
     private async Task LoadMissingCoversAsync()
     {
+        // طلب جديد (تحديث أو مفتاح جديد) يلغي الجولة السابقة
+        _coverLoadCts?.Cancel();
+        var cts = new CancellationTokenSource();
+        _coverLoadCts = cts;
+
+        var client = _coverClient;
+        _coverLoadKey = SteamGridDbApiKey;
+
         var targets = Games.Where(c => !c.HasCoverImage).ToList();
 
         foreach (var card in targets)
         {
-            var url = await _coverClient.FindCoverUrlAsync(card.Name);
-            if (!string.IsNullOrEmpty(url))
+            if (cts.IsCancellationRequested) return;
+
+            var url = await client.FindCoverUrlAsync(card.Name);
+            if (!cts.IsCancellationRequested && !string.IsNullOrEmpty(url))
                 card.SetCoverUrl(url);
         }
+    }
+
+    /// يحفظ أي تعديل معلق بالإعدادات ويطبق المفتاح الجديد فورًا
+    public void FlushPendingSettings() => _apiKeySaveDebouncer.Flush();
+
+    internal bool IsCoverClientConfigured => _coverClient.IsConfigured;
+
+    private void ApplyApiKeyChange()
+    {
+        ConfigService.Save(_config);
+        _coverClient = new SteamGridDbClient(_config.SteamGridDbApiKey);
+    }
+
+    private void CloseSettings()
+    {
+        IsSettingsOpen = false;
+        FlushPendingSettings();
+
+        // مفتاح جديد بدون ضغط "تحقق": نكمّل الأغلفة الناقصة به عند إغلاق الإعدادات
+        if (_coverClient.IsConfigured && _coverLoadKey != SteamGridDbApiKey)
+            _ = LoadMissingCoversAsync();
     }
 
     private void UpdateAvailablePlatforms(Dictionary<string, int> platformCounts)

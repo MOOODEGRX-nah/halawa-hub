@@ -20,8 +20,11 @@ public partial class MainViewModel
     private async Task InitializeBackgroundTasksAsync()
     {
         await CheckForUpdateAsync();
-        _ = LoadNewsAsync();
         _ = CheckChangelogAsync();
+
+        // الأخبار تحتاج قائمة الألعاب، فتنتظر انتهاء الفحص الأول
+        await _initialScan;
+        _ = LoadNewsAsync();
     }
 
     private async Task LoadNewsAsync()
@@ -103,12 +106,25 @@ public partial class MainViewModel
             return;
         }
 
+        FlushPendingSettings();
+
+        var key = SteamGridDbApiKey;
         ApiKeyStatus = ApiKeyCheckState.Checking;
 
-        var client = new SteamGridDbClient(SteamGridDbApiKey);
+        var client = new SteamGridDbClient(key);
         var valid = await client.ValidateApiKeyAsync();
 
+        // المستخدم عدّل المفتاح أثناء التحقق: النتيجة تخص مفتاحًا قديمًا
+        if (key != SteamGridDbApiKey) return;
+
         ApiKeyStatus = valid ? ApiKeyCheckState.Valid : ApiKeyCheckState.Invalid;
+
+        if (valid)
+        {
+            // المفتاح الجديد يعمل مباشرة بدون إعادة تشغيل
+            _coverClient = client;
+            _ = LoadMissingCoversAsync();
+        }
     }
 
     private async Task CheckForUpdateAsync(bool manualCheck = false)
@@ -117,19 +133,33 @@ public partial class MainViewModel
 
         if (!result.HasUpdate)
         {
-            if (manualCheck) StatusMessage = result.Message;
+            if (manualCheck)
+            {
+                UpdateCheckFailed = result.Failed;
+                UpdateCheckMessage = result.Message;
+            }
             return;
         }
 
+        UpdateCheckFailed = false;
+        UpdateCheckMessage = null;
         UpdateMessage = result.Message;
         _updateDownloadUrl = result.DownloadUrl;
         _updateSha256 = result.Sha256;
+        _updateIsReleasePage = result.IsReleasePage;
         InstallUpdateCommand.RaiseCanExecuteChanged();
     }
 
     private async Task InstallUpdateAsync()
     {
         if (string.IsNullOrEmpty(_updateDownloadUrl) || _isUpdating) return;
+
+        // لا يوجد ملف تثبيت لهذا النظام: نفتح صفحة الإصدار بدل تنزيل صفحة HTML
+        if (_updateIsReleasePage)
+        {
+            OpenUrl(_updateDownloadUrl);
+            return;
+        }
 
         _isUpdating = true;
         InstallUpdateCommand.RaiseCanExecuteChanged();

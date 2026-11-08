@@ -22,9 +22,6 @@ public partial class MainViewModel
         await CheckForUpdateAsync();
         _ = CheckChangelogAsync();
 
-        // الأخبار تحتاج قائمة الألعاب، فتنتظر انتهاء الفحص الأول
-        await _initialScan;
-        _ = LoadNewsAsync();
     }
 
     private async Task LoadNewsAsync()
@@ -127,27 +124,44 @@ public partial class MainViewModel
         }
     }
 
+    private bool _isCheckingUpdates;
+
     private async Task CheckForUpdateAsync(bool manualCheck = false)
     {
+        if (_isCheckingUpdates) return;
+        _isCheckingUpdates = true;
+        UpdateKind = UpdateCheckKind.Checking;
+
         var result = await _updateService.CheckForUpdateAsync();
+        _isCheckingUpdates = false;
 
         if (!result.HasUpdate)
         {
-            if (manualCheck)
-            {
-                UpdateCheckFailed = result.Failed;
-                UpdateCheckMessage = result.Message;
-            }
+            UpdateKind = result.Failed ? UpdateCheckKind.Failed : UpdateCheckKind.UpToDate;
             return;
         }
 
-        UpdateCheckFailed = false;
-        UpdateCheckMessage = null;
         UpdateMessage = result.Message;
+        _latestVersion = result.LatestVersion;
         _updateDownloadUrl = result.DownloadUrl;
         _updateSha256 = result.Sha256;
         _updateIsReleasePage = result.IsReleasePage;
+        UpdateKind = UpdateCheckKind.Available;
         InstallUpdateCommand.RaiseCanExecuteChanged();
+
+        // كان جرس الإشعارات يخبر بالتحديث: رسالة قصيرة ونقطة على زر الإعدادات
+        if (!manualCheck) ShowStatus(UpdateStatusText);
+    }
+
+    private bool _isInstallingUpdate;
+    public bool IsInstallingUpdate
+    {
+        get => _isInstallingUpdate;
+        private set
+        {
+            _isInstallingUpdate = value;
+            OnPropertyChanged(nameof(IsInstallingUpdate));
+        }
     }
 
     private async Task InstallUpdateAsync()
@@ -162,8 +176,9 @@ public partial class MainViewModel
         }
 
         _isUpdating = true;
+        IsInstallingUpdate = true;
         InstallUpdateCommand.RaiseCanExecuteChanged();
-        UpdateMessage = "جاري تحميل التحديث...";
+        UpdateMessage = Loc.Instance["updDownloading"];
 
         var result = await _updateService.InstallUpdateAsync(
             _updateDownloadUrl,
@@ -180,6 +195,8 @@ public partial class MainViewModel
         {
             UpdateMessage = result.Message;
             _isUpdating = false;
+            IsInstallingUpdate = false;
+            ShowStatus(result.Message);
             InstallUpdateCommand.RaiseCanExecuteChanged();
         }
     }

@@ -12,6 +12,8 @@ namespace HalawaHub.Core.Covers;
 /// (steamgriddb.com/profile/preferences) — بدون مفتاح، IsConfigured تكون
 /// false ولا يحاول يتصل بأي شيء.
 /// </summary>
+public sealed record CoverCandidate(string Url, string ThumbUrl);
+
 public class SteamGridDbClient
 {
     private readonly HttpClient _http;
@@ -56,6 +58,53 @@ public class SteamGridDbClient
             // فشل البحث (لعبة غير موجودة بقاعدة البيانات، مشكلة اتصال...) — تجاهل
             return null;
         }
+    }
+
+    /// <summary>كل الأغلفة المتاحة للعبة حتى يختار المستخدم منها.</summary>
+    public async Task<IReadOnlyList<CoverCandidate>> FindCoverCandidatesAsync(string gameName, int max = 12)
+    {
+        if (!IsConfigured) return Array.Empty<CoverCandidate>();
+
+        try
+        {
+            var searchUrl = $"https://www.steamgriddb.com/api/v2/search/autocomplete/{Uri.EscapeDataString(gameName)}";
+            using var searchDoc = JsonDocument.Parse(await _http.GetStringAsync(searchUrl));
+
+            if (!searchDoc.RootElement.TryGetProperty("data", out var results) || results.GetArrayLength() == 0)
+                return Array.Empty<CoverCandidate>();
+
+            var gameId = results[0].GetProperty("id").GetInt32();
+            var gridsJson = await _http.GetStringAsync($"https://www.steamgriddb.com/api/v2/grids/game/{gameId}?dimensions=600x900");
+            return ParseCandidates(gridsJson, max);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"SteamGridDB: search failed for {gameName}", ex);
+            return Array.Empty<CoverCandidate>();
+        }
+    }
+
+    internal static IReadOnlyList<CoverCandidate> ParseCandidates(string json, int max)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var list = new List<CoverCandidate>();
+
+        if (!doc.RootElement.TryGetProperty("data", out var grids) || grids.ValueKind != JsonValueKind.Array)
+            return list;
+
+        foreach (var grid in grids.EnumerateArray())
+        {
+            if (list.Count >= max) break;
+            if (!grid.TryGetProperty("url", out var urlProp)) continue;
+
+            var url = urlProp.GetString();
+            if (string.IsNullOrEmpty(url)) continue;
+
+            var thumb = grid.TryGetProperty("thumb", out var t) ? t.GetString() : null;
+            list.Add(new CoverCandidate(url, string.IsNullOrEmpty(thumb) ? url : thumb));
+        }
+
+        return list;
     }
 
     /// يتحقق إن المفتاح فعليًا صحيح ومقبول عند SteamGridDB.

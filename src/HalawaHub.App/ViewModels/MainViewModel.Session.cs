@@ -69,7 +69,7 @@ public partial class MainViewModel
         if (card == null) return;
 
         var game = card.Game;
-        StatusMessage = null;
+        ClearStatus();
 
         try
         {
@@ -90,7 +90,7 @@ public partial class MainViewModel
         }
         catch (Exception ex)
         {
-            StatusMessage = $"تعذر تشغيل {game.Name}: {ex.Message}";
+            ShowStatus(Loc.Instance.Format("launchFailed", card.Name, ex.Message));
         }
     }
 
@@ -109,15 +109,15 @@ public partial class MainViewModel
             }
             catch (Exception ex)
             {
-                StatusMessage = $"تعذر فتح نافذة الحذف: {ex.Message}";
+                ShowStatus(Loc.Instance.Format("uninstallFailed", ex.Message));
             }
         }
         else
         {
-            StatusMessage = "الحذف المباشر مو مدعوم بعد لهذي المنصة — احذفها من اللانشر الرسمي.";
+            ShowStatus(Loc.Instance["uninstallUnsupported"]);
         }
 
-        DetailsGame = null;
+        CloseDetails();
     }
 
 }

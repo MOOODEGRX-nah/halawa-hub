@@ -29,7 +29,6 @@ public partial class MainViewModel : INotifyPropertyChanged
     private readonly List<IGameLibraryProvider> _builtInProviders;
     private SteamGridDbClient _coverClient;
     private readonly Debouncer _apiKeySaveDebouncer;
-    private readonly Task _initialScan;
     private readonly SteamNewsClient _newsClient = new();
     private readonly ILibraryService _libraryService;
     private readonly IFilterService _filterService;
@@ -37,7 +36,6 @@ public partial class MainViewModel : INotifyPropertyChanged
 
     public ObservableCollection<GameCardViewModel> Games { get; } = new();
     public ObservableCollection<GameCardViewModel> FilteredGames { get; } = new();
-    public ObservableCollection<string> AvailablePlatforms { get; } = new();
 
     private string _searchQuery = "";
     public string SearchQuery
@@ -45,10 +43,10 @@ public partial class MainViewModel : INotifyPropertyChanged
         get => _searchQuery;
         set
         {
-            _searchQuery = value;
+            _searchQuery = value ?? "";
             OnPropertyChanged(nameof(SearchQuery));
-            OnPropertyChanged(nameof(IsHomeView));
             ApplyFilter();
+            RefreshSearchState();
         }
     }
 
@@ -59,14 +57,11 @@ public partial class MainViewModel : INotifyPropertyChanged
         set
         {
             _selectedNavItem = string.IsNullOrEmpty(value) ? NavAll : value;
-            OnPropertyChanged(nameof(IsHomeView));
+            OnPropertyChanged(nameof(SelectedNavItem));
+            OnPropertyChanged(nameof(LibraryTabIndex));
             ApplyFilter();
         }
     }
-
-    /// الصفحة الرئيسية (لوحة Bento) تظهر بس لما تكون على "الكل" وبدون بحث نشط —
-    /// أي فلترة ثانية (منصة، مفضلة، بحث...) تنقلك للقائمة العادية
-    public bool IsHomeView => SelectedNavItem == NavAll && string.IsNullOrWhiteSpace(SearchQuery);
 
     private GameCardViewModel? _continuePlayingGame;
     public GameCardViewModel? ContinuePlayingGame
@@ -111,11 +106,9 @@ public partial class MainViewModel : INotifyPropertyChanged
         {
             _detailsGame = value;
             OnPropertyChanged(nameof(DetailsGame));
-            OnPropertyChanged(nameof(IsDetailsOpen));
+            OnPropertyChanged(nameof(IsGameDialogVisible));
         }
     }
-
-    public bool IsDetailsOpen => DetailsGame != null;
 
     private string? _statusMessage;
     public string? StatusMessage
@@ -140,7 +133,6 @@ public partial class MainViewModel : INotifyPropertyChanged
             _updateMessage = value;
             OnPropertyChanged(nameof(UpdateMessage));
             OnPropertyChanged(nameof(HasUpdateMessage));
-            OnPropertyChanged(nameof(HasNotification));
         }
     }
 
@@ -150,31 +142,6 @@ public partial class MainViewModel : INotifyPropertyChanged
     private string? _updateSha256;
     private bool _updateIsReleasePage;
 
-    private string? _updateCheckMessage;
-    /// نتيجة آخر فحص يدوي بصفحة الإعدادات (محدّث / فشل الفحص)
-    public string? UpdateCheckMessage
-    {
-        get => _updateCheckMessage;
-        private set
-        {
-            _updateCheckMessage = value;
-            OnPropertyChanged(nameof(UpdateCheckMessage));
-            OnPropertyChanged(nameof(HasUpdateCheckMessage));
-        }
-    }
-
-    public bool HasUpdateCheckMessage => !string.IsNullOrEmpty(UpdateCheckMessage);
-
-    private bool _updateCheckFailed;
-    public bool UpdateCheckFailed
-    {
-        get => _updateCheckFailed;
-        private set
-        {
-            _updateCheckFailed = value;
-            OnPropertyChanged(nameof(UpdateCheckFailed));
-        }
-    }
 
     private string _sortMode = "name";
     public string SortMode
@@ -212,6 +179,7 @@ public partial class MainViewModel : INotifyPropertyChanged
             if (newKey == _steamGridDbApiKey) return;
 
             _steamGridDbApiKey = newKey;
+            OnPropertyChanged(nameof(CanSearchCovers));
             _config.SteamGridDbApiKey = newKey;
 
             // الحفظ وإنشاء عميل الأغلفة بعد توقف الكتابة، لا عند كل حرف
@@ -236,6 +204,7 @@ public partial class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(ApiKeyStatus));
             OnPropertyChanged(nameof(ApiKeyStatusText));
             OnPropertyChanged(nameof(HasApiKeyStatus));
+            OnPropertyChanged(nameof(ApiKeyBadge));
         }
     }
 
@@ -243,9 +212,9 @@ public partial class MainViewModel : INotifyPropertyChanged
 
     public string ApiKeyStatusText => ApiKeyStatus switch
     {
-        ApiKeyCheckState.Checking => "جاري التحقق...",
-        ApiKeyCheckState.Valid => "✅ المفتاح يعمل بشكل صحيح",
-        ApiKeyCheckState.Invalid => "❌ المفتاح غير صحيح أو فيه مشكلة اتصال",
+        ApiKeyCheckState.Checking => Loc.Instance["verifying"],
+        ApiKeyCheckState.Valid => Loc.Instance["keyOk"],
+        ApiKeyCheckState.Invalid => Loc.Instance["keyBad"],
         _ => ""
     };
 
@@ -277,10 +246,6 @@ public partial class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    /// يستخدمها جرس الإشعارات لعرض نقطة حمراء — حاليًا الإشعار الوحيد
-    /// عندنا هو توفر تحديث، وممكن نوسّعها لاحقًا لأنواع تانية
-    public bool HasNotification => HasUpdateMessage;
-
     public RelayCommand RefreshCommand { get; }
     public RelayCommand LaunchGameCommand { get; }
     public RelayCommand InstallUpdateCommand { get; }
@@ -294,6 +259,17 @@ public partial class MainViewModel : INotifyPropertyChanged
     public RelayCommand OpenUrlCommand { get; }
     public RelayCommand VerifyApiKeyCommand { get; }
     public RelayCommand CloseChangelogCommand { get; }
+    public RelayCommand GoLibraryCommand { get; }
+    public RelayCommand GoDeveloperCommand { get; }
+    public RelayCommand SelectPlatformCommand { get; }
+    public RelayCommand SelectGameDialogSectionCommand { get; }
+    public RelayCommand SelectSettingsSectionCommand { get; }
+    public RelayCommand SetLanguageCommand { get; }
+    public RelayCommand OpenInstallLocationCommand { get; }
+    public RelayCommand SearchCoversCommand { get; }
+    public RelayCommand CloseCoverSearchCommand { get; }
+    public RelayCommand PickCoverCandidateCommand { get; }
+    public RelayCommand RestoreCoverCommand { get; }
 
     public MainViewModel(ILibraryService libraryService, IFilterService filterService, IUpdateService updateService)
         : this(libraryService, filterService, updateService, startBackgroundTasks: true)
@@ -322,6 +298,13 @@ public partial class MainViewModel : INotifyPropertyChanged
         };
 
         _config = ConfigService.Load();
+
+        // قبل إنشاء أي نص: اللغة المحفوظة، والملفات القديمة بدون الحقل تفتح بالعربية
+        Loc.Instance.Language = _config.Language;
+        _showHiddenGames = _config.ShowHiddenGames;
+        foreach (var search in _config.RecentSearches ?? new List<string>())
+            RecentSearches.Add(search);
+
         _coverClient = new SteamGridDbClient(_config.SteamGridDbApiKey);
         _steamGridDbApiKey = _config.SteamGridDbApiKey;
         _apiKeySaveDebouncer = new Debouncer(TimeSpan.FromMilliseconds(800), ApplyApiKeyChange);
@@ -331,18 +314,29 @@ public partial class MainViewModel : INotifyPropertyChanged
         LaunchGameCommand = new RelayCommand(param => LaunchGame(param as GameCardViewModel));
         InstallUpdateCommand = new RelayCommand(_ => { _ = InstallUpdateAsync(); }, _ => _updateDownloadUrl != null && !_isUpdating);
         SelectNavCommand = new RelayCommand(param => SelectedNavItem = param as string ?? NavAll);
-        OpenDetailsCommand = new RelayCommand(param => DetailsGame = param as GameCardViewModel);
-        CloseDetailsCommand = new RelayCommand(_ => DetailsGame = null);
+        OpenDetailsCommand = new RelayCommand(param => OpenDetails(param as GameCardViewModel));
+        CloseDetailsCommand = new RelayCommand(_ => CloseDetails());
         DeleteGameCommand = new RelayCommand(_ => DeleteGame());
-        OpenSettingsCommand = new RelayCommand(_ => IsSettingsOpen = true);
+        OpenSettingsCommand = new RelayCommand(_ => OpenSettings());
         CloseSettingsCommand = new RelayCommand(_ => CloseSettings());
         CheckForUpdatesNowCommand = new RelayCommand(_ => { _ = CheckForUpdateAsync(manualCheck: true); });
         OpenUrlCommand = new RelayCommand(OpenUrl);
         VerifyApiKeyCommand = new RelayCommand(_ => { _ = VerifyApiKeyAsync(); }, _ => !string.IsNullOrWhiteSpace(SteamGridDbApiKey));
         CloseChangelogCommand = new RelayCommand(_ => IsChangelogOpen = false);
+        GoLibraryCommand = new RelayCommand(_ => TopNavIndex = 0);
+        GoDeveloperCommand = new RelayCommand(_ => TopNavIndex = 1);
+        SelectPlatformCommand = new RelayCommand(param => { if (param is PlatformChip chip) SelectedPlatform = chip.Key; });
+        SelectGameDialogSectionCommand = new RelayCommand(param => { if (int.TryParse(param as string, out var i)) { ResetCoverSearch(); GameDialogSection = i; } });
+        SelectSettingsSectionCommand = new RelayCommand(param => { if (int.TryParse(param as string, out var i)) SettingsSection = i; });
+        SetLanguageCommand = new RelayCommand(param => { if (param is string language) Language = language; });
+        OpenInstallLocationCommand = new RelayCommand(_ => OpenInstallLocation());
+        SearchCoversCommand = new RelayCommand(_ => { _ = SearchCoversAsync(); });
+        CloseCoverSearchCommand = new RelayCommand(_ => ResetCoverSearch());
+        PickCoverCandidateCommand = new RelayCommand(param => { _ = PickCoverCandidateAsync(param as CoverCandidate); });
+        RestoreCoverCommand = new RelayCommand(_ => DetailsGame?.RestoreOriginalCover());
 
         // لا ننتظر الفحص هنا: النافذة تُفتح فورًا والمكتبة تمتلئ بعد ذلك
-        _initialScan = RefreshLibraryAsync();
+        _ = RefreshLibraryAsync();
 
         // مهام الخلفية عند فتح البرنامج، بالترتيب الصح (فحص التحديث أول عشان
         // خبر "تحديث متوفر" يظهر صح بقائمة الأخبار)

@@ -1,4 +1,5 @@
 using Avalonia;
+using HalawaHub.App.Services;
 using HalawaHub.App.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Platform;
@@ -45,13 +46,19 @@ public partial class MainWindow
             icon.Clicked += (_, _) => ShowAndFocus();
 
             var menu = new NativeMenu();
-            var showItem = new NativeMenuItem("إظهار Halawa-Hub");
+            var showItem = new NativeMenuItem(Loc.Instance["trayShow"]);
             showItem.Click += (_, _) => ShowAndFocus();
-            var exitItem = new NativeMenuItem("خروج");
+            var exitItem = new NativeMenuItem(Loc.Instance["trayExit"]);
             exitItem.Click += (_, _) => { _allowExit = true; Close(); };
             menu.Add(showItem);
             menu.Add(exitItem);
             icon.Menu = menu;
+
+            Loc.Instance.LanguageChanged += (_, _) =>
+            {
+                showItem.Header = Loc.Instance["trayShow"];
+                exitItem.Header = Loc.Instance["trayExit"];
+            };
 
             TrayIcon.SetIcons(Application.Current!, new TrayIcons { icon });
             _trayAvailable = true;

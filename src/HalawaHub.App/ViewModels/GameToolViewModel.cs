@@ -28,7 +28,9 @@ public class GameToolViewModel : INotifyPropertyChanged
         }
     }
 
-    public string ActionLabel => IsApplied ? "إزالة" : "تطبيق";
+    public string ActionLabel => HalawaHub.App.Services.Loc.Instance[IsApplied ? "toolRemove" : "toolApply"];
+
+    public void NotifyLanguageChanged() => OnPropertyChanged(nameof(ActionLabel));
 
     public RelayCommand ToggleCommand { get; }
 

@@ -15,4 +15,13 @@ public class AppConfig
     /// آخر إصدار شافه المستخدم فعليًا — نستخدمه لمعرفة هل نعرض نافذة
     /// "ما الجديد" أو لا (نعرضها بس أول مرة يفتح فيها إصدار جديد)
     public string LastSeenVersion { get; set; } = "";
+
+    /// لغة الواجهة: "ar" أو "en". الملفات القديمة بدون هذا الحقل تفتح بالعربية
+    public string Language { get; set; } = "ar";
+
+    /// إظهار الألعاب التي أخفاها المستخدم من المكتبة
+    public bool ShowHiddenGames { get; set; }
+
+    /// آخر عمليات البحث، تظهر كاقتراحات عند فتح البحث
+    public List<string> RecentSearches { get; set; } = new();
 }

@@ -1,0 +1,276 @@
+<!--
+  ألوان التصميم وأشكال العناصر الأساسية. القيم من design-source (CSS).
+  ثيم Button هنا يستبدل ثيم Fluent لكل أزرار البرنامج، وكل زر يختار شكله بـ Classes.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="using:HalawaHub.App.Services"
+                    xmlns:controls="using:HalawaHub.App.Controls">
+
+    <SolidColorBrush x:Key="PageBrush" Color="#0A0404"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#140808"/>
+    <SolidColorBrush x:Key="PanelBrush" Color="#0F0607"/>
+    <SolidColorBrush x:Key="DialogBrush" Color="#0E0606"/>
+    <SolidColorBrush x:Key="HoverBrush" Color="#241010"/>
+    <SolidColorBrush x:Key="BorderBrushCard" Color="#2A1212"/>
+    <SolidColorBrush x:Key="BorderBrushControl" Color="#2E1616"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="#231010"/>
+    <SolidColorBrush x:Key="RedBrush" Color="#DC2626"/>
+    <SolidColorBrush x:Key="RedHoverBrush" Color="#EF4444"/>
+    <SolidColorBrush x:Key="AmberBrush" Color="#F5A623"/>
+    <SolidColorBrush x:Key="TextBrush" Color="#F5EDED"/>
+    <SolidColorBrush x:Key="MutedBrush" Color="#B8A4A4"/>
+    <SolidColorBrush x:Key="ChipTextBrush" Color="#D9C7C7"/>
+
+    <LinearGradientBrush x:Key="RedGradient" StartPoint="0%,50%" EndPoint="100%,50%">
+        <GradientStop Color="#991B1B" Offset="0"/>
+        <GradientStop Color="#DC2626" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="UnderlineGradient" StartPoint="0%,50%" EndPoint="100%,50%">
+        <GradientStop Color="#991B1B" Offset="0"/>
+        <GradientStop Color="#EF4444" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="SettingsHoverGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#991B1B" Offset="0"/>
+        <GradientStop Color="#EF4444" Offset="0.6"/>
+        <GradientStop Color="#F5A623" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="MenuOpenGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#991B1B" Offset="0"/>
+        <GradientStop Color="#EF4444" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- أيقونات Lucide/SVG من ملفات التصميم -->
+    <StreamGeometry x:Key="IconPlay">M6 4l14 8-14 8z</StreamGeometry>
+    <StreamGeometry x:Key="IconSearch">M18 11a7 7 0 1 1-14 0 7 7 0 0 1 14 0z M21 21l-4.3-4.3</StreamGeometry>
+    <StreamGeometry x:Key="IconRefresh">M21 12a9 9 0 1 1-3-6.7L21 8 M21 3v5h-5</StreamGeometry>
+    <StreamGeometry x:Key="IconCheck">M5 12.5l4.5 4.5L19 7.5</StreamGeometry>
+    <StreamGeometry x:Key="IconX">M6 6l12 12M18 6L6 18</StreamGeometry>
+    <StreamGeometry x:Key="IconHeart">M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z</StreamGeometry>
+    <StreamGeometry x:Key="IconSort">M3 6h18 M6 12h12 M10 18h4</StreamGeometry>
+
+    <!-- كل أزرار البرنامج -->
+    <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <Panel>
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Padding="{TemplateBinding Padding}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Foreground="{TemplateBinding Foreground}"/>
+                        <!-- وميض الضغط (::after في التصميم) -->
+                        <Ellipse Name="PART_Ripple" Width="12" Height="12" Fill="#73FFFFFF" Opacity="0"
+                                 IsHitTestVisible="False" IsVisible="False"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 RenderTransform="scale(30)"/>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.45"/>
+            <Setter Property="Cursor" Value="Arrow"/>
+        </Style>
+
+        <!-- .btn: زر عادي بحدود -->
+        <Style Selector="^.btn">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushControl}"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" Easing="{x:Static l:Springs.Press}"/>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="^.btn:pointerover">
+            <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
+        </Style>
+        <Style Selector="^.btn:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.95)"/>
+        </Style>
+        <Style Selector="^.pri">
+            <Setter Property="Background" Value="{StaticResource RedBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource RedBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="^.pri:pointerover">
+            <Setter Property="Background" Value="{StaticResource RedHoverBrush}"/>
+        </Style>
+        <Style Selector="^.btn /template/ Ellipse#PART_Ripple, ^.play /template/ Ellipse#PART_Ripple">
+            <Setter Property="IsVisible" Value="True"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.6" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.7" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="^:pressed /template/ Ellipse#PART_Ripple">
+            <Setter Property="Transitions" Value="{x:Null}"/>
+            <Setter Property="RenderTransform" Value="scale(0)"/>
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+
+        <!-- .play: زر تشغيل البطاقة -->
+        <Style Selector="^.play">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Background" Value="{StaticResource RedBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" Easing="{x:Static l:Springs.Press}"/>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="^.play:pointerover">
+            <Setter Property="Background" Value="{StaticResource RedHoverBrush}"/>
+        </Style>
+        <Style Selector="^.play:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.93)"/>
+        </Style>
+
+        <!-- .ib: زر دائري 44 -->
+        <Style Selector="^.ib">
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="CornerRadius" Value="22"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushControl}"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="#E8D8D8"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.3"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.3"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="^.ib:pointerover">
+            <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
+        </Style>
+
+        <!-- .x: زر إغلاق النوافذ، يدور عند المرور -->
+        <Style Selector="^.x">
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="^.x:pointerover">
+            <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        </Style>
+        <!-- .si: عنصر الشريط الجانبي في النوافذ -->
+        <Style Selector="^.si">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.3"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="^.si:pointerover">
+            <Setter Property="Background" Value="#0AFFFFFF"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        </Style>
+        <Style Selector="^.si.on, ^.si.on:pointerover">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </ControlTheme>
+
+    <!-- مفتاح التشغيل .sw: 44×26 -->
+    <ControlTheme x:Key="SwitchTheme" TargetType="ToggleButton">
+        <Setter Property="Width" Value="44"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Background" Value="#3A1518"/>
+        <Setter Property="CornerRadius" Value="13"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.25"/>
+            </Transitions>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+                    <Ellipse Name="PART_Thumb" Width="20" Height="20" Fill="#B8A4A4"
+                             HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3,0,0,0">
+                        <Ellipse.Transitions>
+                            <Transitions>
+                                <ThicknessTransition Property="Margin" Duration="0:0:0.38" Easing="{x:Static l:Springs.Switch}"/>
+                                <DoubleTransition Property="Width" Duration="0:0:0.2"/>
+                            </Transitions>
+                        </Ellipse.Transitions>
+                    </Ellipse>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:checked">
+            <Setter Property="Background" Value="#B91C1C"/>
+        </Style>
+        <Style Selector="^:checked /template/ Ellipse#PART_Thumb">
+            <Setter Property="Fill" Value="White"/>
+            <Setter Property="Margin" Value="21,0,0,0"/>
+        </Style>
+        <Style Selector="^:pressed /template/ Ellipse#PART_Thumb">
+            <Setter Property="Width" Value="26"/>
+        </Style>
+        <Style Selector="^:checked:pressed /template/ Ellipse#PART_Thumb">
+            <Setter Property="Margin" Value="15,0,0,0"/>
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.45"/>
+            <Setter Property="Cursor" Value="Arrow"/>
+        </Style>
+    </ControlTheme>
+
+</ResourceDictionary>

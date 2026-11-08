@@ -121,6 +121,9 @@ public class SteamLibraryProvider : IGameLibraryProvider
     private static List<string> GetLibraryFolders(string steamPath)
     {
         var result = new List<string> { NormalizePath(steamPath) };
+
+        // ويندوز كما كان. على لينكس مجلدان يختلفان بحالة الأحرف مكتبتان مختلفتان فعلًا
+        var comparer = OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
         var vdfPath = Path.Combine(steamPath, "steamapps", "libraryfolders.vdf");
         if (!File.Exists(vdfPath)) return result;
 
@@ -138,13 +141,51 @@ public class SteamLibraryProvider : IGameLibraryProvider
         var matches = Regex.Matches(content, "\"path\"\\s*\"([^\"]+)\"");
         foreach (Match m in matches)
         {
-            var path = NormalizePath(m.Groups[1].Value.Replace(@"\\", @"\"));
-            if (!result.Contains(path, StringComparer.OrdinalIgnoreCase)) result.Add(path);
+            var path = ResolveExistingDirectory(NormalizePath(m.Groups[1].Value.Replace(@"\\", @"\")));
+            if (!result.Contains(path, comparer)) result.Add(path);
         }
         return result;
     }
 
     private static string NormalizePath(string path) => path.TrimEnd('\\', '/');
+
+    /// <summary>
+    /// Steam على لينكس يتجاهل حالة الأحرف في مساراته، فقد يكتب في ملفاته game/Steam
+    /// والمجلد الحقيقي GAME/STEAM. القرص حساس لها، فبدون هذا تختفي مكتبة كاملة بصمت.
+    /// يرجع المسار كما هو إذا كان موجودًا أو لم يوجد له مقابل.
+    /// </summary>
+    internal static string ResolveExistingDirectory(string path)
+    {
+        if (OperatingSystem.IsWindows() || !Path.IsPathRooted(path) || Directory.Exists(path)) return path;
+
+        try
+        {
+            var current = "/";
+            foreach (var part in path.Split('/', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var exact = Path.Combine(current, part);
+                if (Directory.Exists(exact))
+                {
+                    current = exact;
+                    continue;
+                }
+
+                // الترتيب يجعل النتيجة ثابتة لو وُجد أكثر من مجلد مطابق
+                var match = Directory.EnumerateDirectories(current)
+                    .Where(d => string.Equals(Path.GetFileName(d), part, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(d => d, StringComparer.Ordinal)
+                    .FirstOrDefault();
+
+                if (match == null) return path;
+                current = match;
+            }
+            return current;
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            return path;
+        }
+    }
 
     private static GameInfo? ParseManifest(string manifestPath, string steamAppsPath)
     {
@@ -171,7 +212,7 @@ public class SteamLibraryProvider : IGameLibraryProvider
             : Path.GetFileNameWithoutExtension(manifestPath).Replace("appmanifest_", "");
         if (string.IsNullOrWhiteSpace(appId)) return null;
 
-        var installPath = Path.Combine(steamAppsPath, "common", installDirMatch.Groups[1].Value);
+        var installPath = ResolveExistingDirectory(Path.Combine(steamAppsPath, "common", installDirMatch.Groups[1].Value));
         var name = nameMatch.Groups[1].Value;
 
         // حزم دعم وأدوات ستيم — نخفيها من المكتبة

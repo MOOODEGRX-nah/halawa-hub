@@ -1,13 +1,26 @@
 using Avalonia;
+using HalawaHub.App.Services;
 using HalawaHub.Core;
 
 namespace HalawaHub.App;
 
 class Program
 {
+    /// تبدأ App الاستماع عليه بعد إنشاء النافذة
+    internal static SingleInstanceGuard? InstanceGuard { get; private set; }
+
     [STAThread]
         public static void Main(string[] args)
     {
+        // نسخة تعمل أصلًا (ربما مخفية بالصينية): نطلب منها إظهار نافذتها ونخرج
+        using var guard = SingleInstanceGuard.Acquire();
+        if (!guard.IsPrimary)
+        {
+            guard.SignalPrimary();
+            return;
+        }
+        InstanceGuard = guard;
+
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
             Log.Error("استثناء غير معالج أدى لخروج البرنامج", e.ExceptionObject as Exception);
 

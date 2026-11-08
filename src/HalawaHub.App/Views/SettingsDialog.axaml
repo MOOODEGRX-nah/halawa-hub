@@ -140,7 +140,7 @@
                                                     Command="{Binding CheckForUpdatesNowCommand}" AutomationProperties.Name="{l:Loc check}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Panel Classes="spin" Height="16" ClipToBounds="True" VerticalAlignment="Center">
-                                                        <Panel Name="SpinRing" Classes="spin-ring" Width="16" Height="16" HorizontalAlignment="Left">
+                                                        <Panel Name="SpinRing" Classes="spin-ring" FlowDirection="LeftToRight" Width="16" Height="16" HorizontalAlignment="Left">
                                                             <Panel.RenderTransform><RotateTransform/></Panel.RenderTransform>
                                                             <Ellipse Stroke="#40FFFFFF" StrokeThickness="2"/>
                                                             <Arc Stroke="{StaticResource AmberBrush}" StrokeThickness="2" StartAngle="-90" SweepAngle="90"/>

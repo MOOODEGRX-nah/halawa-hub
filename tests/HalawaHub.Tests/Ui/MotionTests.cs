@@ -446,6 +446,30 @@ public class MotionTests
     }
 
     [AvaloniaFact]
+    public void Rotations_DoNotMirror_InArabic()
+    {
+        // التدوير يتبع FlowDirection، والتصميم يدور مع عقارب الساعة باللغتين:
+        // القياس بالماوس الحقيقي وجد دائرة الانتظار تدور بالعكس في العربية
+        using var ui = new UiHarness(Loc.Arabic, motion: true);
+        var vm = ui.Vm;
+
+        vm.OpenSettingsCommand.Execute(null);
+        Sample(ui, 100, () => 0);
+        var ring = ui.Window.GetVisualDescendants().OfType<Panel>().First(p => p.Name == "SpinRing");
+        ring.FlowDirection.Should().Be(FlowDirection.LeftToRight);
+        vm.CloseSettingsCommand.Execute(null);
+        Sample(ui, 350, () => 0);
+
+        Named<VectorIcon>(ui, "RefreshIcon").FlowDirection.Should().Be(FlowDirection.LeftToRight);
+
+        vm.OpenDetailsCommand.Execute(vm.Games.First());
+        Sample(ui, 100, () => 0);
+        vm.SelectGameDialogSectionCommand.Execute("2");
+        Sample(ui, 100, () => 0);
+        ui.All<Border>().First(b => b.Classes.Contains("cover")).FlowDirection.Should().Be(FlowDirection.LeftToRight);
+    }
+
+    [AvaloniaFact]
     public void SmallerDetails_AllMove()
     {
         var pending = new TaskCompletionSource<UpdateCheckResult>();

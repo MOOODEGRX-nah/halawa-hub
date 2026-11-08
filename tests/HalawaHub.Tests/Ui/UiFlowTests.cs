@@ -24,29 +24,27 @@ public class UiFlowTests
     [AvaloniaFact]
     public void Language_FlipsTextAndDirection_Instantly_AndSurvivesRestart()
     {
-        using (var ui = new UiHarness(Loc.Arabic))
-        {
-            ui.Window.FlowDirection.Should().Be(FlowDirection.RightToLeft);
-            ui.ButtonWithText("المكتبة").Should().NotBeNull();
+        using var ui = new UiHarness(Loc.Arabic);
 
-            ui.Vm.OpenSettingsCommand.Execute(null);
-            ui.Settle();
-            ui.Click("اللغة");
-            ui.Click("English");
+        ui.Window.FlowDirection.Should().Be(FlowDirection.RightToLeft);
+        ui.ButtonWithText("المكتبة").Should().NotBeNull();
 
-            ui.Window.FlowDirection.Should().Be(FlowDirection.LeftToRight);
-            ui.ButtonWithText("Library").Should().NotBeNull();
-            ui.ButtonWithText("Updates").Should().NotBeNull();
-        }
+        ui.Vm.OpenSettingsCommand.Execute(null);
+        ui.Settle();
+        ui.Click("اللغة");
+        ui.Click("English");
 
-        // "إعادة التشغيل": ViewModel جديد يقرأ config.json من القرص
+        ui.Window.FlowDirection.Should().Be(FlowDirection.LeftToRight);
+        ui.ButtonWithText("Library").Should().NotBeNull();
+        ui.ButtonWithText("Updates").Should().NotBeNull();
+
+        // "إعادة التشغيل": اللغة في الذاكرة تعود للافتراضي، وViewModel جديد يقرأها من القرص
         ConfigService.Load().Language.Should().Be(Loc.English);
+        Loc.Instance.Language = Loc.Arabic;
         var reloaded = new MainViewModel(new Mock<HalawaHub.Core.Library.ILibraryService>().Object,
             new FilterService(), new Mock<IUpdateService>().Object, startBackgroundTasks: false);
         reloaded.Language.Should().Be(Loc.English);
         reloaded.AppFlowDirection.Should().Be(FlowDirection.LeftToRight);
-
-        Loc.Instance.Language = Loc.Arabic;
     }
 
     [AvaloniaFact]

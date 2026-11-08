@@ -1,0 +1,246 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:c="using:HalawaHub.App.Controls"
+             xmlns:conv="using:HalawaHub.App.Converters"
+             x:Class="HalawaHub.App.Views.SettingsDialog"
+             x:Name="Root"
+             x:DataType="vm:MainViewModel"
+             IsVisible="{Binding IsSettingsVisible}">
+
+    <UserControl.Styles>
+        <Style Selector="Button.seg">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Transitions">
+                <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.seg.on, Button.seg.on:pointerover">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Panel>
+        <Border Name="Scrim" Background="#C7060202" PointerPressed="Scrim_PointerPressed"/>
+
+        <Border Name="DialogBox" Width="900" Height="540" HorizontalAlignment="Center" VerticalAlignment="Top"
+                Margin="20,110,20,20" CornerRadius="14" Background="{StaticResource DialogBrush}"
+                BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                BoxShadow="0 30 80 0 #B3000000" RenderTransformOrigin="50%,50%">
+            <Border CornerRadius="13" ClipToBounds="True">
+            <Panel>
+                <!-- وهج أعلى النافذة، ثابت في جهة اليمين -->
+                <Border IsHitTestVisible="False" FlowDirection="LeftToRight">
+                    <Border.Background>
+                        <RadialGradientBrush Center="85%,-20%" GradientOrigin="85%,-20%" RadiusX="700" RadiusY="300">
+                            <GradientStop Color="#2EB91C1C" Offset="0"/>
+                            <GradientStop Color="#00B91C1C" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <Grid ColumnDefinitions="230,*">
+                    <!-- الشريط الجانبي -->
+                    <Border Grid.Column="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrushCard}"
+                            BorderThickness="0,0,1,0" Padding="12,20">
+                        <StackPanel>
+                            <Border BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1" Padding="10,0,10,14" Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Border Width="36" Height="36" CornerRadius="9" Background="#000000" BoxShadow="0 0 12 0 #4DEF4444">
+                                        <Border CornerRadius="9" ClipToBounds="True">
+                                            <Image Source="avares://Halawa-Hub/Assets/logo.png" Stretch="UniformToFill"/>
+                                        </Border>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Halawa Hub" FontSize="15" FontWeight="Bold" FontFamily="fonts:Inter#Inter"/>
+                                        <TextBlock Text="{Binding AppVersion}" FontSize="12" Foreground="#9C8A8A" HorizontalAlignment="Left"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="{l:Loc setTitle}" Foreground="{StaticResource RedHoverBrush}" FontWeight="Bold"
+                                       FontSize="15" Margin="10,0,10,12"/>
+
+                            <Panel>
+                                <c:SlidingPill Orientation="Vertical" Pitch="48" Motion="Dialog" ItemCount="6" IsHitTestVisible="False"
+                                               SelectedIndex="{Binding SettingsSection}">
+                                    <Border CornerRadius="10" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #73EF4444"/>
+                                </c:SlidingPill>
+                                <StackPanel>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="0" Content="{l:Loc sUpdates}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="1" Content="{l:Loc sLanguage}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="2" Content="{l:Loc sApi}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="3" Content="{l:Loc sAppearance}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="4" Content="{l:Loc sStartup}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=5}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="5" Content="{l:Loc sBuild}"/>
+                                </StackPanel>
+                            </Panel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- المحتوى -->
+                    <Grid Grid.Column="1" Margin="26,22" RowDefinitions="Auto,*,Auto">
+                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                            <TextBlock Name="Title" Classes="h2" Text="{Binding SettingsTitle}"/>
+                            <Button Grid.Column="1" Classes="x" Command="{Binding CloseSettingsCommand}"
+                                    ToolTip.Tip="{l:Loc close}" AutomationProperties.Name="{l:Loc close}">
+                                <c:VectorIcon Data="{StaticResource IconX}" Size="18"/>
+                            </Button>
+                        </Grid>
+
+                        <ScrollViewer Grid.Row="1" Name="Body" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                            <Panel>
+                                <!-- التحديثات -->
+                                <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}">
+                                    <Border Classes="kv">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Classes="k" Text="{l:Loc curVersion}"/>
+                                            <TextBlock Text="{Binding AppVersion}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Classes="stat"
+                                            Classes.ok="{Binding UpdateBadge, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=Done}"
+                                            Classes.bad="{Binding UpdateBadge, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=Error}"
+                                            Classes.wait="{Binding UpdateBadge, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=Pending}">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                            <c:StatusBadge State="{Binding UpdateBadge}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Classes="stat-title" Text="{Binding UpdateStatusText}"
+                                                       VerticalAlignment="Center" Margin="14,0"/>
+                                            <Button Grid.Column="2" Classes="btn pri" Margin="0,0,10,0" Content="{Binding InstallButtonText}"
+                                                    IsVisible="{Binding IsUpdateAvailable}" Command="{Binding InstallUpdateCommand}"/>
+                                            <Button Grid.Column="3" Classes="btn" Content="{l:Loc check}"
+                                                    IsEnabled="{Binding !IsCheckingForUpdates}" Command="{Binding CheckForUpdatesNowCommand}"/>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Classes="lbl" Text="{Binding UpdateMessage}" IsVisible="{Binding IsInstallingUpdate}"
+                                               Foreground="{StaticResource AmberBrush}"/>
+                                    <TextBlock Classes="lbl" Text="{l:Loc installNote}"/>
+                                </StackPanel>
+
+                                <!-- اللغة -->
+                                <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}">
+                                    <Border Width="182" HorizontalAlignment="Left" CornerRadius="10" Background="{StaticResource PageBrush}"
+                                            BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1">
+                                        <Panel Height="44">
+                                            <c:SlidingPill ItemCount="2" SelectedIndex="{Binding LanguageIndex}" Inset="4" Motion="Even" Margin="0,4" IsHitTestVisible="False">
+                                                <Border CornerRadius="8" Background="#B91C1C" BoxShadow="0 0 12 0 #73EF4444"/>
+                                            </c:SlidingPill>
+                                            <UniformGrid Columns="2" Margin="4">
+                                                <Button Classes="seg" Classes.on="{Binding LanguageIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                                        Command="{Binding SetLanguageCommand}" CommandParameter="ar" AutomationProperties.Name="عربي">
+                                                    <TextBlock Text="عربي" FontFamily="avares://Halawa-Hub/Assets/Fonts#Cairo"/>
+                                                </Button>
+                                                <Button Classes="seg" Classes.on="{Binding LanguageIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                                        Command="{Binding SetLanguageCommand}" CommandParameter="en" AutomationProperties.Name="English">
+                                                    <TextBlock Text="English" FontFamily="fonts:Inter#Inter"/>
+                                                </Button>
+                                            </UniformGrid>
+                                        </Panel>
+                                    </Border>
+                                    <TextBlock Classes="lbl" Text="{l:Loc langNote}"/>
+                                </StackPanel>
+
+                                <!-- مفاتيح API -->
+                                <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}">
+                                    <TextBlock Classes="lbl" Text="{l:Loc sgdb}"/>
+                                    <Grid ColumnDefinitions="*,Auto,Auto">
+                                        <TextBox Classes="inp" PasswordChar="•" Text="{Binding SteamGridDbApiKey, Mode=TwoWay}"
+                                                 Watermark="{l:Loc keyPh}" AutomationProperties.Name="SteamGridDB"/>
+                                        <Button Grid.Column="1" Classes="btn" Margin="10,0,0,0" Content="{l:Loc verify}"
+                                                Command="{Binding VerifyApiKeyCommand}"/>
+                                        <Button Grid.Column="2" Classes="btn" Margin="10,0,0,0" Content="{l:Loc getKey}"
+                                                Command="{Binding OpenUrlCommand}" CommandParameter="{Binding SteamGridDbKeyUrl}"/>
+                                    </Grid>
+                                    <Border Classes="stat" IsVisible="{Binding HasApiKeyStatus}"
+                                            Classes.ok="{Binding ApiKeyBadge, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=Done}"
+                                            Classes.bad="{Binding ApiKeyBadge, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=Error}"
+                                            Classes.wait="{Binding ApiKeyBadge, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=Pending}">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <c:StatusBadge State="{Binding ApiKeyBadge}" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock Classes="stat-title" Text="{Binding ApiKeyStatusText}"/>
+                                                <TextBlock Text="SteamGridDB" FontSize="12" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Left"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- المظهر -->
+                                <StackPanel Spacing="16" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}">
+                                    <TextBlock Classes="lbl" Text="{l:Loc moreThemes}"/>
+                                    <Grid ColumnDefinitions="*,Auto" MaxWidth="480" HorizontalAlignment="Stretch">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Text="{l:Loc showHidden}" FontSize="15"/>
+                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc showHiddenNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowHiddenGames, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc showHidden}"/>
+                                    </Grid>
+                                </StackPanel>
+
+                                <!-- التشغيل -->
+                                <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}">
+                                    <Grid ColumnDefinitions="*,Auto" MaxWidth="480" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Text="{l:Loc startWith}" FontSize="15"/>
+                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc startNote}" IsVisible="{Binding IsStartupSupported}"/>
+                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc startUnsupported}" IsVisible="{Binding !IsStartupSupported}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding LaunchOnStartup, Mode=TwoWay}"
+                                                      IsEnabled="{Binding IsStartupSupported}" AutomationProperties.Name="{l:Loc startWith}"/>
+                                    </Grid>
+                                </StackPanel>
+
+                                <!-- معلومات النسخة -->
+                                <StackPanel Spacing="0" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=5}">
+                                    <Border Classes="kv">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Classes="k" Text="{l:Loc version}"/>
+                                            <TextBlock Text="{Binding AppVersion}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Classes="kv">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Classes="k" Text=".NET"/>
+                                            <TextBlock Text="{Binding DotNetVersion}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Classes="kv">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Classes="k" Text="Avalonia UI"/>
+                                            <TextBlock Text="{Binding AvaloniaVersion}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Classes="kv" Margin="0,0,0,12">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Classes="k" Text="{l:Loc repo}"/>
+                                            <TextBlock Text="{Binding RepositoryName}" FlowDirection="LeftToRight"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Button Classes="btn" HorizontalAlignment="Stretch" Content="{l:Loc openGh}"
+                                            Command="{Binding OpenUrlCommand}" CommandParameter="{Binding RepositoryUrl}"/>
+                                </StackPanel>
+                            </Panel>
+                        </ScrollViewer>
+
+                        <Border Grid.Row="2" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,16,0,0">
+                            <TextBlock Classes="lbl" Text="{l:Loc saved}"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Panel>
+            </Border>
+        </Border>
+    </Panel>
+</UserControl>

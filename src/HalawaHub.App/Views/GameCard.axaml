@@ -1,0 +1,136 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:c="using:HalawaHub.App.Controls"
+             xmlns:conv="using:HalawaHub.App.Converters"
+             xmlns:behaviors="using:HalawaHub.App.Behaviors"
+             x:Class="HalawaHub.App.Views.GameCard"
+             x:DataType="vm:GameCardViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="Border.face">
+            <Setter Property="RenderTransform" Value="translateY(0px)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2"/>
+                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Panel.card:pointerover Border.face">
+            <Setter Property="RenderTransform" Value="translateY(-4px)"/>
+            <Setter Property="BoxShadow" Value="0 12 32 0 #47EF4444"/>
+        </Style>
+
+        <Style Selector="Button.eb">
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="CornerRadius" Value="22"/>
+        </Style>
+        <Style Selector="Button.eb.open /template/ Border#PART_Root">
+            <Setter Property="BoxShadow" Value="0 0 18 0 #99EF4444"/>
+        </Style>
+        <Style Selector="Button.eb:pointerover c|MenuCloseIcon">
+            <Setter Property="Foreground" Value="{StaticResource RedHoverBrush}"/>
+        </Style>
+        <Style Selector="Button.eb.open">
+            <Setter Property="Background" Value="{StaticResource MenuOpenGradient}"/>
+        </Style>
+        <Style Selector="Button.eb.open:pointerover c|MenuCloseIcon">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.mi">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+        <Style Selector="Button.mi:pointerover">
+            <Setter Property="Background" Value="#2A1418"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Panel Name="CardRoot" Classes="card">
+        <!-- وجه البطاقة: الغلاف أو التدرج مع الحرف -->
+        <Border Classes="face" CornerRadius="14"
+                BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                Background="{Binding PaletteIndex, Converter={x:Static conv:CoverPaletteConverter.Instance}}">
+            <Border CornerRadius="13" ClipToBounds="True">
+            <Panel>
+                <TextBlock Text="{Binding Letter}" FontSize="84" FontWeight="ExtraBold" Foreground="#1FFFFFFF"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"
+                           FontFamily="fonts:Inter#Inter"/>
+                <Image Stretch="UniformToFill" IsVisible="{Binding HasCoverImage}"
+                       behaviors:AsyncImage.DecodeWidth="360"
+                       behaviors:AsyncImage.SourceUrl="{Binding CoverImageUrl}"
+                       behaviors:AsyncImage.FallbackUrl="{Binding CoverImageUrlFallback}"/>
+
+                <!-- العنوان وزر التشغيل -->
+                <Border VerticalAlignment="Bottom" Padding="12,44,12,12">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="50%,0%" EndPoint="50%,100%">
+                            <GradientStop Color="#000A0404" Offset="0"/>
+                            <GradientStop Color="#F20A0404" Offset="0.55"/>
+                            <GradientStop Color="#F20A0404" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <Button Classes="play" Click="Play_Click" AutomationProperties.Name="{l:Loc play}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <c:VectorIcon Data="{StaticResource IconPlay}" Size="16" IsFilled="True"
+                                              StrokeBrush="{x:Null}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{l:Loc play}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Panel>
+            </Border>
+        </Border>
+
+        <!-- شارة المنصة -->
+        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Padding="9,3"
+                CornerRadius="8" Background="#C70A0404" IsHitTestVisible="False">
+            <TextBlock Text="{Binding PlatformShort}" FontSize="12" FlowDirection="LeftToRight"/>
+        </Border>
+
+        <!-- زر القائمة: ≡ يتحول إلى ✕ -->
+        <Button Classes="eb" Classes.open="{Binding IsMenuOpen}"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,6,0"
+                Click="Menu_Click" ToolTip.Tip="{l:Loc more}" AutomationProperties.Name="{l:Loc more}">
+            <c:MenuCloseIcon IsOpen="{Binding IsMenuOpen}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Button>
+
+        <Border Name="Menu" Classes="card-menu" IsVisible="{Binding IsMenuOpen}"
+                Width="176" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,8,0"
+                Background="#1A0A0C" BorderBrush="#3A1518" BorderThickness="1" CornerRadius="12" Padding="6"
+                BoxShadow="0 12 32 0 #99000000" RenderTransformOrigin="100%,0%">
+            <StackPanel>
+                <Button Classes="mi" Click="Favorite_Click" AutomationProperties.Name="{Binding FavoriteLabel}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:VectorIcon Data="{StaticResource IconHeart}" Size="16"
+                                      FillBrush="{Binding IsFavorite, Converter={x:Static conv:HeartFillConverter.Instance}}"
+                                      StrokeBrush="{Binding IsFavorite, Converter={x:Static conv:HeartStrokeConverter.Instance}}"
+                                      VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding FavoriteLabel}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button Name="SettingsItem" Classes="mi" Click="Settings_Click" AutomationProperties.Name="{l:Loc gameSettings}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Panel Width="16" Height="16" VerticalAlignment="Center">
+                            <c:SlidersIcon Name="MenuSliders" Small="True" Foreground="#E8D8D8" Ring="#1A0A0C"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Panel>
+                        <TextBlock Text="{l:Loc gameSettings}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+    </Panel>
+</UserControl>

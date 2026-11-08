@@ -10,3 +10,4 @@
 *.zip  binary
 *.exe  binary
 *.dll  binary
+*.ttf  binary

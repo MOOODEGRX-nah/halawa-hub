@@ -8,10 +8,12 @@
                 <!-- تنبيه: avares:// لازم يستخدم AssemblyName الفعلي "Halawa-Hub"
                      (بشرطة)، مو "HalawaHub.App" -->
                 <ResourceInclude Source="avares://Halawa-Hub/Assets/Icons.axaml"/>
+                <ResourceInclude Source="avares://Halawa-Hub/Styles/Theme.axaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://Halawa-Hub/Styles/AppStyles.axaml"/>
     </Application.Styles>
 </Application>

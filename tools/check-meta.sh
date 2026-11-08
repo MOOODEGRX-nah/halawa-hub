@@ -29,7 +29,7 @@ if [ -n "$DUPS" ]; then
     echo "META FAIL: duplicate CHANGELOG.json keys: $DUPS"
     FAIL=1
 fi
-TC="$(awk 'prev ~ /,[[:space:]]$/ && $0 ~ /^[[:space:]]*[\]\}]/ {printf "%d ", NR-1} {prev=$0}' CHANGELOG.json)"
+TC="$(awk 'prev ~ /,[[:space:]]*$/ && $0 ~ /^[[:space:]]*[\]\}]/ {printf "%d ", NR-1} {prev=$0}' CHANGELOG.json)"
 if [ -n "$TC" ]; then
     echo "META FAIL: trailing comma before a closing bracket at line(s): $TC"
     FAIL=1

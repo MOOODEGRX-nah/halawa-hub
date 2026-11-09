@@ -21,7 +21,7 @@ conflicts=('halawa-hub')
 # strip يكسر الملف التنفيذي: كود .NET مدمج داخل ملف ELF نفسه
 options=('!strip' '!debug')
 source=("halawa-hub-${pkgver}-linux-x64.tar.gz::${url}/releases/download/v${pkgver}/Halawa-Hub-linux-x64.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('fd4433e7a371aea6600977203681adffb049000d68eff5c021454d16d1ee841d')
 
 package() {
   cd "${srcdir}/Halawa-Hub"

@@ -44,3 +44,22 @@ jobs:
           name: Halawa-Hub-linux
           path: dist/
           retention-days: 14
+
+  # المستودع كما يستخدمه الناس: تثبيت وتحديث وإزالة بـ pacman الحقيقي، ورفض التوقيع الخاطئ
+  test-pacman-repo:
+    needs: package-linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container: archlinux:base-devel
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm git gnupg
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Halawa-Hub-linux
+          path: dist
+      - name: Test the pacman repository
+        env:
+          HALAWA_TEST_IN_CONTAINER: "1"
+        run: bash packaging/pacman/test-repo.sh dist/Halawa-Hub-linux-x64.tar.gz "$(tr -d '[:space:]' < VERSION)"

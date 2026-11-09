@@ -27,17 +27,76 @@ public class MotionTests
     private static List<double> Sample(UiHarness ui, int milliseconds, Func<double> read)
     {
         var values = new List<double>();
+
+        // أول دفعة تعالج كل ما تراكم على خيط الواجهة، وقد تأخذ أطول من النافذة كلها على
+        // جهاز بطيء. لو بدأ العد قبلها لخرجنا بعينة واحدة وظننا أن الحركة لم تعمل.
+        PumpOnce();
+        values.Add(read());
+
         var deadline = DateTime.UtcNow.AddMilliseconds(milliseconds);
         while (DateTime.UtcNow < deadline)
         {
-            Dispatcher.UIThread.RunJobs();
-            AvaloniaHeadlessPlatform.ForceRenderTimerTick();
-            Dispatcher.UIThread.RunJobs();
+            PumpOnce();
             values.Add(read());
             Thread.Sleep(8);
         }
         return values;
     }
+
+    private static void PumpOnce()
+    {
+        Dispatcher.UIThread.RunJobs();
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        Dispatcher.UIThread.RunJobs();
+    }
+
+    /// <summary>
+    /// ينتظر شرطًا بدل وقت ثابت، فلا يهم كم يأخذ الجهاز. ساعة الحركة في Avalonia حقيقية:
+    /// لو توقف الخيط طوال الحركة تضيع مراحلها الوسطى، فعند ثبات القيمة قبل تحقق الشرط
+    /// نطلق الحركة من جديد (retrigger) ونقيس المحاولة الجديدة وحدها.
+    /// </summary>
+    private static List<double> SampleUntil(Func<double> read, Func<List<double>, bool> done, string what, Action? retrigger = null)
+    {
+        var values = new List<double>();
+        var timeout = DateTime.UtcNow.AddSeconds(30);
+        var lastChange = DateTime.UtcNow;
+        var pumpsSinceChange = 0;
+
+        while (DateTime.UtcNow < timeout)
+        {
+            PumpOnce();
+
+            var value = read();
+            if (values.Count > 0 && Math.Round(value, 3) == Math.Round(values[^1], 3))
+            {
+                pumpsSinceChange++;
+            }
+            else
+            {
+                pumpsSinceChange = 0;
+                lastChange = DateTime.UtcNow;
+            }
+
+            values.Add(value);
+            if (done(values)) return values;
+
+            // العدّان معًا: بعد توقف طويل يكفي الوقت وحده رغم أن الحركة بدأت للتو
+            if (retrigger != null && pumpsSinceChange >= 60 && DateTime.UtcNow - lastChange > TimeSpan.FromSeconds(1.5))
+            {
+                retrigger();
+                values.Clear();
+                pumpsSinceChange = 0;
+                lastChange = DateTime.UtcNow;
+            }
+
+            Thread.Sleep(8);
+        }
+
+        throw new Xunit.Sdk.XunitException(
+            $"{what}: condition not met in 30s (saw: {string.Join(" ", values.Select(v => v.ToString("0.###")))})");
+    }
+
+    private static int DistinctCount(List<double> values) => values.Select(v => Math.Round(v, 3)).Distinct().Count();
 
     private static void ShouldHaveMoved(List<double> values, string what, int minimumSteps = 3) =>
         values.Select(v => Math.Round(v, 3)).Distinct().Count().Should()
@@ -241,35 +300,71 @@ public class MotionTests
         var input = Named<TextBox>(ui, "Input");
         box.Width.Should().Be(44);
 
+        var drop = Named<Border>(ui, "Dropdown");
+        var icon = Named<VectorIcon>(ui, "SearchIcon");
+
         // ضغطة الزر المغلق تنكمش
         var open = Named<Button>(ui, "OpenButton");
         var at = CenterOf(ui, open);
         ui.Window.MouseMove(at);
         ui.Window.MouseDown(at, MouseButton.Left);
-        ShouldHaveMoved(Sample(ui, 250, () => ScaleOf(box)), "search press");
+        ShouldHaveMoved(SampleUntil(() => ScaleOf(box),
+            v => DistinctCount(v) >= 3 && v[^1] < 0.95, "search press",
+            retrigger: () =>
+            {
+                ui.Window.MouseUp(at, MouseButton.Left);
+                Sample(ui, 200, () => 0);
+                ui.Window.MouseDown(at, MouseButton.Left);
+            }), "search press");
         box.RenderTransform!.Value.M11.Should().BeLessThan(0.95);
         ui.Window.MouseUp(at, MouseButton.Left);
 
-        var widths = Sample(ui, 550, () => box.Width);
+        // إغلاق يمر عبر الزر نفسه كما يفعل المستخدم، ثم فتح جديد
+        void ReopenSearch()
+        {
+            vm.IsSearchOpen = false;
+            Sample(ui, 450, () => 0);
+            vm.IsSearchOpen = true;
+        }
+
+        var widths = SampleUntil(() => box.Width,
+            v => DistinctCount(v) >= 3 && v.Max() > 340 && v[^1] == 340, "search expanding", retrigger: ReopenSearch);
         ShouldHaveMoved(widths, "search expanding");
         widths.Max().Should().BeGreaterThan(340, "it overshoots like the design's spring");
         box.Width.Should().Be(340);
         vm.IsSearchOpen.Should().BeTrue();
-        input.Opacity.Should().Be(1);
+        SampleUntil(() => input.Opacity, v => v[^1] == 1, "search input fade");
 
         vm.SearchQuery = "el";
-        var drop = Named<Border>(ui, "Dropdown");
-        ShouldHaveMoved(Sample(ui, 350, () => drop.Opacity), "search dropdown fade");
+        ShouldHaveMoved(SampleUntil(() => drop.Opacity,
+            v => DistinctCount(v) >= 3 && v[^1] == 1, "search dropdown fade",
+            retrigger: () =>
+            {
+                vm.SearchQuery = "";
+                Sample(ui, 100, () => 0);
+                vm.SearchQuery = "el";
+            }), "search dropdown fade");
 
+        // انحدار: توقف خيط الواجهة على جهاز CI كان يترك عينة واحدة خلال النافذة الثابتة،
+        // فيفشل الاختبار والحركة سليمة. هذا التوقف يبقى هنا ليحرس الانتظار بالشرط.
+        Dispatcher.UIThread.Post(() => Thread.Sleep(800));
         vm.SearchQuery = "zzz";
-        var icon = Named<VectorIcon>(ui, "SearchIcon");
-        var shake = Sample(ui, 700, () => icon.RenderTransform?.Value.M31 ?? 0);
+        var shake = SampleUntil(() => icon.RenderTransform?.Value.M31 ?? 0,
+            v => DistinctCount(v) >= 3, "no-match shake",
+            retrigger: () => vm.SearchQuery += "z");
         ShouldHaveMoved(shake, "no-match shake");
         var bubble = Named<Border>(ui, "Bubble");
         bubble.IsEffectivelyVisible.Should().BeTrue();
 
         vm.CloseSearch();
-        var closing = Sample(ui, 450, () => box.Width);
+        var closing = SampleUntil(() => box.Width,
+            v => DistinctCount(v) >= 3 && v[^1] == 44, "search closing",
+            retrigger: () =>
+            {
+                vm.IsSearchOpen = true;
+                Sample(ui, 500, () => 0);
+                vm.CloseSearch();
+            });
         ShouldHaveMoved(closing, "search closing");
         box.Width.Should().Be(44);
     }

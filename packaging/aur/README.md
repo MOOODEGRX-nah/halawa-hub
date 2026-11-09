@@ -1,6 +1,6 @@
 # حزمة AUR: halawa-hub-bin
 
-جاهزة للنشر من حساب AUR الخاص بك، بعد صدور إصدار فيه `Halawa-Hub-linux-x64.tar.gz`:
+جاهزة للنشر عندما يفتح AUR التسجيل من جديد. `PKGBUILD` و`.SRCINFO` هنا مضبوطان على v0.0.10.63 المنشور وبُنيا فعلًا بـ makepkg. لنشر إصدار أحدث:
 
 ```bash
 bash packaging/aur/update-pkgbuild.sh <version>   # يكتب الإصدار والهاش الحقيقي

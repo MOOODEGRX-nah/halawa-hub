@@ -79,9 +79,9 @@ echo "== a package signed by another key is refused"
 install -d -m 700 -o "$BUILDER" "$GNUPG-other"
 runuser -u "$BUILDER" -- env HOME="/home/$BUILDER" GNUPGHOME="$GNUPG-other" gpg --batch --passphrase '' --quick-generate-key "Not Trusted" ed25519 sign 1d
 runuser -u "$BUILDER" -- env HOME="/home/$BUILDER" GNUPGHOME="$GNUPG-other" gpg --batch --yes --detach-sign \
-    --output "$WORK/bad.sig" "$REPO/halawa-hub-$VERSION-2-x86_64.pkg.tar.zst"
+    --output "$WORK/src/bad.sig" "$REPO/halawa-hub-$VERSION-2-x86_64.pkg.tar.zst"
 cp "$REPO/halawa-hub-$VERSION-2-x86_64.pkg.tar.zst.sig" "$WORK/good.sig"
-cp "$WORK/bad.sig" "$REPO/halawa-hub-$VERSION-2-x86_64.pkg.tar.zst.sig"
+cp "$WORK/src/bad.sig" "$REPO/halawa-hub-$VERSION-2-x86_64.pkg.tar.zst.sig"
 pacman -R --noconfirm halawa-hub >/dev/null
 rm -f /var/cache/pacman/pkg/halawa-hub-*
 if pacman -S --noconfirm halawa-hub 2>/dev/null; then

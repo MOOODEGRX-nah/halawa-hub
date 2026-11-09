@@ -70,6 +70,35 @@ bash "$APP_DIR/uninstall.sh"
 [ ! -L "$HOME/.local/bin/halawa-hub" ] || fail "launcher link left behind"
 grep -q keep "$XDG_DATA_HOME/HalawaHub/favorites.json" || fail "user data was touched"
 
+echo "== one-line installer (get.sh), served from a local folder"
+GET="$(git rev-parse --show-toplevel)/packaging/linux/get.sh"
+FEED="$WORK/feed"
+mkdir -p "$FEED"
+cp "$PACKAGES/Halawa-Hub-linux-x64.tar.gz" "$FEED/"
+(cd "$FEED" && sha256sum Halawa-Hub-linux-x64.tar.gz > SHA256SUMS.txt)
+HALAWA_RELEASE_URL="file://$(printf '%s' "$FEED" | sed 's/ /%20/g')" bash "$GET"
+[ "$("$HOME/.local/bin/halawa-hub" --version)" = "$VERSION" ] || fail "get.sh did not install the right version"
+[ -f "$XDG_DATA_HOME/applications/halawa-hub.desktop" ] || fail "get.sh did not add the menu entry"
+
+echo "== get.sh --uninstall keeps user data"
+bash "$GET" --uninstall
+[ ! -e "$APP_DIR" ] || fail "get.sh --uninstall left the program behind"
+grep -q keep "$XDG_DATA_HOME/HalawaHub/favorites.json" || fail "get.sh --uninstall touched user data"
+
+echo "== get.sh refuses a wrong checksum and installs nothing"
+echo "$(printf '0%.0s' $(seq 1 64))  Halawa-Hub-linux-x64.tar.gz" > "$FEED/SHA256SUMS.txt"
+if HALAWA_RELEASE_URL="file://$FEED" bash "$GET" 2>/dev/null; then
+    fail "get.sh installed a file with a wrong checksum"
+fi
+[ ! -e "$APP_DIR" ] || fail "get.sh left files after a checksum failure"
+
+echo "== get.sh refuses a file missing from SHA256SUMS.txt"
+echo "$(printf '0%.0s' $(seq 1 64))  something-else" > "$FEED/SHA256SUMS.txt"
+if HALAWA_RELEASE_URL="file://$FEED" bash "$GET" 2>/dev/null; then
+    fail "get.sh installed a file it could not verify"
+fi
+[ ! -e "$APP_DIR" ] || fail "get.sh left files after a missing checksum"
+
 echo "== AppImage"
 APPIMAGE_FILE="$PACKAGES/Halawa-Hub-x86_64.AppImage"
 chmod +x "$APPIMAGE_FILE"

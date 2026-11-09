@@ -187,3 +187,58 @@ jobs:
           done
           echo "all attempts failed"
           exit 1
+
+  # مستودع pacman يتبع كل إصدار. يفشل صراحةً بلا المفتاح: الإصدار نُشر، لكن من يحدّث
+  # عبر pacman لن يرى الجديد، وهذا يجب أن يظهر أحمر لا أن يمر بصمت.
+  pacman-repo:
+    needs: [ build-linux, release ]
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm git gnupg github-cli
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Linux files
+        uses: actions/download-artifact@v4
+        with:
+          name: release-linux
+          path: release
+
+      - name: Prepare builder and signing key
+        env:
+          PACMAN_GPG_PRIVATE_KEY: ${{ secrets.PACMAN_GPG_PRIVATE_KEY }}
+        run: |
+          useradd -m builder
+          chown -R builder .
+          install -d -m 700 -o builder /home/builder/.gnupg
+          # runuser لا يغيّر HOME، وgpg يقرأ حلقته منه
+          as_builder() { runuser -u builder -- env HOME=/home/builder GNUPGHOME=/home/builder/.gnupg "$@"; }
+          if [ -z "$PACMAN_GPG_PRIVATE_KEY" ]; then
+            if [ "$GITHUB_REF" = "refs/heads/main" ] || [ "$GITHUB_REF" = "refs/heads/master" ]; then
+              echo "::error::PACMAN_GPG_PRIVATE_KEY is not set: the pacman repository was not updated"
+              exit 1
+            fi
+            # تجربة من فرع بلا السر: مفتاح مؤقت، ولا شيء يُنشر
+            as_builder gpg --batch --passphrase '' --quick-generate-key "Halawa-Hub dry run" ed25519 sign 1d
+          else
+            printf '%s\n' "$PACMAN_GPG_PRIVATE_KEY" | as_builder gpg --batch --import
+          fi
+          KEY="$(as_builder gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ { print $10; exit }')"
+          echo "PACMAN_GPG_KEY=$KEY" >> "$GITHUB_ENV"
+
+      - name: Build signed repository
+        run: >
+          runuser -u builder -- env HOME=/home/builder GNUPGHOME=/home/builder/.gnupg
+          bash packaging/pacman/build-repo.sh release/Halawa-Hub-linux-x64.tar.gz
+          "$(tr -d '[:space:]' < VERSION)" 1 pacman-out "$PACMAN_GPG_KEY"
+
+      # من فرع غير main يتوقف هنا مثل نشر الإصدار
+      - name: Publish repository
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: bash packaging/pacman/publish-repo.sh pacman-out

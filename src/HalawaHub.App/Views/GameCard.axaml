@@ -71,6 +71,21 @@
         <Style Selector="Button.mi:pointerover">
             <Setter Property="Background" Value="#2A1418"/>
         </Style>
+
+        <!-- شارة الحالة: اللون من النبرة -->
+        <Style Selector="Border.st.t0"><Setter Property="BorderBrush" Value="{StaticResource StatusOfflineBrush}"/></Style>
+        <Style Selector="Border.st.t0 TextBlock"><Setter Property="Foreground" Value="{StaticResource StatusOfflineBrush}"/></Style>
+        <Style Selector="Border.st.t1"><Setter Property="BorderBrush" Value="{StaticResource StatusRunningBrush}"/></Style>
+        <Style Selector="Border.st.t1 TextBlock"><Setter Property="Foreground" Value="{StaticResource StatusRunningBrush}"/></Style>
+        <Style Selector="Border.st.t2"><Setter Property="BorderBrush" Value="{StaticResource StatusRepairBrush}"/></Style>
+        <Style Selector="Border.st.t2 TextBlock"><Setter Property="Foreground" Value="{StaticResource StatusRepairBrush}"/></Style>
+        <Style Selector="Border.st.t3"><Setter Property="BorderBrush" Value="{StaticResource StatusUpdateBrush}"/></Style>
+        <Style Selector="Border.st.t3 TextBlock"><Setter Property="Foreground" Value="{StaticResource StatusUpdateBrush}"/></Style>
+
+        <!-- لعبة على قرص غير موصول: تبقى في المكتبة باهتة -->
+        <Style Selector="Border.cover-layer.offline">
+            <Setter Property="Opacity" Value="0.45"/>
+        </Style>
     </UserControl.Styles>
 
     <Panel Name="CardRoot" Classes="card">
@@ -78,7 +93,7 @@
         <Border Classes="face" CornerRadius="14"
                 BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
                 Background="{Binding PaletteIndex, Converter={x:Static conv:CoverPaletteConverter.Instance}}">
-            <Border CornerRadius="13" ClipToBounds="True">
+            <Border Classes="cover-layer" Classes.offline="{Binding IsDriveMissing}" CornerRadius="13" ClipToBounds="True">
             <Panel>
                 <TextBlock Text="{Binding Letter}" FontSize="84" FontWeight="ExtraBold" Foreground="#1FFFFFFF"
                            HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"
@@ -113,11 +128,20 @@
             </Border>
         </Border>
 
-        <!-- شارة المنصة -->
-        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Padding="9,3"
-                CornerRadius="8" Background="#C70A0404" IsHitTestVisible="False">
-            <TextBlock Text="{Binding PlatformShort}" FontSize="12" FlowDirection="LeftToRight"/>
-        </Border>
+        <!-- شارة المنصة، وتحتها شارة الحالة (تحديث، إصلاح، تعمل، القرص غير موصول) -->
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Spacing="6" IsHitTestVisible="False">
+            <Border Padding="9,3" CornerRadius="8" Background="#C70A0404" HorizontalAlignment="Left">
+                <TextBlock Text="{Binding PlatformShort}" FontSize="12" FlowDirection="LeftToRight"/>
+            </Border>
+            <Border Name="StatusBadge" Classes="st" Padding="8,3" CornerRadius="8" Background="#E60A0404" HorizontalAlignment="Left"
+                    BorderThickness="1" IsVisible="{Binding HasStatusBadge}"
+                    Classes.t0="{Binding StatusTone, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                    Classes.t1="{Binding StatusTone, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                    Classes.t2="{Binding StatusTone, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
+                    Classes.t3="{Binding StatusTone, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}">
+                <TextBlock Text="{Binding StatusBadgeText}" FontSize="11" FontWeight="SemiBold"/>
+            </Border>
+        </StackPanel>
 
         <!-- زر القائمة: ≡ يتحول إلى ✕ -->
         <Button Classes="eb" Classes.open="{Binding IsMenuOpen}"

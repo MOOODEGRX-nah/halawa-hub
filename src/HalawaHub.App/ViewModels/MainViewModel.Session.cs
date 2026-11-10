@@ -74,11 +74,14 @@ public partial class MainViewModel
         }
 
         Log.Info($"بدأت جلسة لعب: {game.Name} ({tracker?.Kind ?? "focus"})");
+        if (tracker?.State == PlaySessionState.Running) RefreshStatusOf(game.Platform, game.Id);
     }
 
     public void OnWindowRegainedFocus()
     {
         // احتياط قديم فقط للجلسات التي لا متتبع لها إطلاقًا
+        RefreshStatusesOnFocus();
+
         if (_session is { Tracker: null })
             EndPlaySession();
     }
@@ -138,6 +141,7 @@ public partial class MainViewModel
         switch (state)
         {
             case PlaySessionState.Running:
+                if (_session is { Persisted: false } first) RefreshStatusOf(first.Platform, first.Id);
                 PersistSessionIfRunning(force: false);
                 break;
             case PlaySessionState.Ended:
@@ -199,6 +203,7 @@ public partial class MainViewModel
             ? session.Tracker.Elapsed().TotalSeconds
             : (DateTime.UtcNow - session.StartUtc).TotalSeconds;
         CreditPlayTime(session.Platform, session.Id, secs);
+        RefreshStatusOf(session.Platform, session.Id);
         Log.Info($"انتهت جلسة لعب {session.Name}: {(int)secs / 60} دقيقة");
     }
 
@@ -288,6 +293,12 @@ public partial class MainViewModel
     };
 
     private void LaunchGame(GameCardViewModel? card)
+    {
+        if (card == null || AskBeforePlayingWithUpdate(card)) return;
+        LaunchGameNow(card);
+    }
+
+    private void LaunchGameNow(GameCardViewModel? card)
     {
         if (card == null) return;
 
@@ -391,21 +402,10 @@ public partial class MainViewModel
 
         // نعتمد فقط على أدوات الحذف الرسمية للمنصة نفسها (تفتح تأكيدها الخاص) —
         // ما نحذف أي ملفات مباشرة من هنا تفاديًا لأي خطر على بيانات المستخدم
-        if (game.Platform == "Steam" && !string.IsNullOrEmpty(game.Id))
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo($"steam://uninstall/{game.Id}") { UseShellExecute = true })?.Dispose();
-            }
-            catch (Exception ex)
-            {
-                ShowStatus(Loc.Instance.Format("uninstallFailed", ex.Message));
-            }
-        }
+        if (Launchers.Uninstall(game) is { } uninstall)
+            RunLauncherCommand(uninstall.Command, "uninstallFailed");
         else
-        {
             ShowStatus(Loc.Instance["uninstallUnsupported"]);
-        }
 
         CloseDetails();
     }

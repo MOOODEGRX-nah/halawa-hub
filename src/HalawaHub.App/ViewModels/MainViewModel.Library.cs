@@ -92,8 +92,13 @@ public partial class MainViewModel
     {
         Games.Clear();
 
+        // ألعاب قرص غير موصول تبقى من آخر فحص بدل أن تختفي
+        var games = LibraryCachePath != null && StatusProbe != null
+            ? LibraryCacheService.MergeOffline(LibraryCachePath, result.Games, StatusProbe.IsDriveMissing)
+            : result.Games;
+
         // بناء GameCardViewModels من النتائج
-        foreach (var game in result.Games)
+        foreach (var game in games)
         {
             var card = new GameCardViewModel(game, allTools);
             card.FavoriteChanged += (_, _) =>
@@ -109,6 +114,7 @@ public partial class MainViewModel
         UpdateHomeViewCollections();
         ApplyFilter();
         RefreshSearchState();
+        _ = RefreshStatusesAsync();
 
         // لو فيه مفتاح SteamGridDB مُعد، نكمّل أغلفة المنصات اللي ما عندها مصدر مباشر
         if (_coverClient.IsConfigured)

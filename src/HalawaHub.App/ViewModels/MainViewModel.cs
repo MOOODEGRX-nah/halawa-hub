@@ -353,6 +353,10 @@ public partial class MainViewModel : INotifyPropertyChanged
         PickCoverCandidateCommand = new RelayCommand(param => { _ = PickCoverCandidateAsync(param as CoverCandidate); });
         RestoreCoverCommand = new RelayCommand(_ => DetailsGame?.RestoreOriginalCover());
 
+        // الاختبارات بلا حالة Steam حقيقية ولا ذاكرة مكتبة مشتركة
+        StatusProbe = startBackgroundTasks ? GameStatusProbe.System : null;
+        LibraryCachePath = startBackgroundTasks ? LibraryCacheService.DefaultPath : null;
+
         // لا ننتظر الفحص هنا: النافذة تُفتح فورًا والمكتبة تمتلئ بعد ذلك
         _ = RefreshLibraryAsync();
 

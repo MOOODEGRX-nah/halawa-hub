@@ -57,3 +57,27 @@ public class StringEqualsConverter : IValueConverter
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is true ? parameter as string : Avalonia.Data.BindingOperations.DoNothing;
 }
+
+/// نبرة حالة اللعبة (GameCardViewModel.StatusTone) → لونها من الثيم
+public class StatusToneBrushConverter : IValueConverter
+{
+    public static readonly StatusToneBrushConverter Instance = new();
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var key = value is int tone
+            ? tone switch
+            {
+                0 => "StatusOfflineBrush",
+                1 => "StatusRunningBrush",
+                2 => "StatusRepairBrush",
+                3 => "StatusUpdateBrush",
+                _ => "TextBrush"
+            }
+            : "TextBrush";
+        return Avalonia.Application.Current?.TryGetResource(key, null, out var brush) == true ? brush : Brushes.White;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}

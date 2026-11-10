@@ -21,6 +21,11 @@
     <SolidColorBrush x:Key="TextBrush" Color="#F5EDED"/>
     <SolidColorBrush x:Key="MutedBrush" Color="#B8A4A4"/>
     <SolidColorBrush x:Key="ChipTextBrush" Color="#D9C7C7"/>
+    <!-- حالة اللعبة على البطاقة وفي نافذتها -->
+    <SolidColorBrush x:Key="StatusUpdateBrush" Color="#F5A623"/>
+    <SolidColorBrush x:Key="StatusRepairBrush" Color="#EF4444"/>
+    <SolidColorBrush x:Key="StatusRunningBrush" Color="#34D399"/>
+    <SolidColorBrush x:Key="StatusOfflineBrush" Color="#9C8A8A"/>
 
     <LinearGradientBrush x:Key="RedGradient" StartPoint="0%,50%" EndPoint="100%,50%">
         <GradientStop Color="#991B1B" Offset="0"/>

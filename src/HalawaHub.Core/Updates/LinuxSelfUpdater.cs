@@ -35,8 +35,8 @@ internal static class LinuxSelfUpdater
         {
             var relaunchPath = kind switch
             {
-                InstallKind.LinuxTarball => await UpdateTarballAsync(downloadUrl, expectedSha256, onStatus),
-                InstallKind.LinuxAppImage => await UpdateAppImageAsync(downloadUrl, expectedSha256, onStatus),
+                InstallKind.LinuxTarball => await UpdateTarballAsync(downloadUrl, expectedSha256!, onStatus),
+                InstallKind.LinuxAppImage => await UpdateAppImageAsync(downloadUrl, expectedSha256!, onStatus),
                 _ => null
             };
             if (relaunchPath == null) return false;

@@ -99,6 +99,27 @@
                                              AutomationProperties.Name="{l:Loc gameName}"/>
                                     <TextBlock Classes="lbl" Text="{l:Loc nameNote}"/>
                                 </StackPanel>
+                                <!-- الحالة والتحديث -->
+                                <Border Background="{StaticResource PageBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                                        CornerRadius="10" Padding="16,12">
+                                    <StackPanel Spacing="8">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBlock Classes="lbl" Text="{l:Loc statusLabel}" VerticalAlignment="Center"/>
+                                            <TextBlock Name="StatusDetails" Grid.Column="1" Text="{Binding StatusDetailsText}" FontSize="14" FontWeight="SemiBold"
+                                                       VerticalAlignment="Center" TextWrapping="Wrap"
+                                                       Foreground="{Binding StatusTone, Converter={x:Static conv:StatusToneBrushConverter.Instance}}"/>
+                                        </Grid>
+                                        <TextBlock Classes="lbl" FontSize="12" Text="{Binding UpdateNoteText}" TextWrapping="Wrap"/>
+                                        <WrapPanel IsVisible="{Binding HasStatusActions}">
+                                            <Button Classes="btn" Classes.pri="{Binding HasUpdate}" Margin="0,0,10,0" Content="{Binding OpenInLauncherLabel}"
+                                                    IsVisible="{Binding CanOpenInLauncher}"
+                                                    Command="{Binding #Root.((vm:MainViewModel)DataContext).OpenInLauncherCommand}" CommandParameter="{Binding}"/>
+                                            <Button Classes="btn" Classes.pri="{Binding NeedsRepair}" Content="{l:Loc verifyFiles}"
+                                                    IsVisible="{Binding CanVerify}"
+                                                    Command="{Binding #Root.((vm:MainViewModel)DataContext).VerifyFilesCommand}" CommandParameter="{Binding}"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
                                 <c:CappedWidth Cap="560">
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,6">
                                     <TextBlock Text="{l:Loc platform}" FontSize="16" VerticalAlignment="Center"/>
@@ -155,7 +176,7 @@
                                     <TextBlock Classes="lbl" Text="{l:Loc statusLabel}" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Column="1" Text="{Binding StatusText}" VerticalAlignment="Center"/>
                                 </Grid>
-                                <Button Classes="btn" HorizontalAlignment="Left" Content="{l:Loc uninstall}" IsVisible="{Binding CanUninstall}"
+                                <Button Classes="btn" HorizontalAlignment="Left" Content="{Binding UninstallLabel}" IsVisible="{Binding CanUninstall}"
                                         Command="{Binding #Root.((vm:MainViewModel)DataContext).DeleteGameCommand}"/>
                             </StackPanel>
 

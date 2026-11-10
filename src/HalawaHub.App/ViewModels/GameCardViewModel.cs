@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using HalawaHub.App.Services;
+using HalawaHub.Core.Library;
 using HalawaHub.Core.Models;
 using HalawaHub.Core.Plugins;
 
@@ -86,6 +87,74 @@ public class GameCardViewModel : INotifyPropertyChanged
 
     public bool HasPlayTime => PlayTimeService.GetTotal(Game.Platform, Game.Id).TotalSeconds >= 5;
 
+    // ===== الحالة: تحديث، إصلاح، تعمل، القرص غير موصول =====
+
+    private GameStatus _status;
+
+    public GameStatus Status
+    {
+        get => _status;
+        set
+        {
+            if (_status == value) return;
+            _status = value;
+            NotifyStatusChanged();
+        }
+    }
+
+    public bool HasUpdate => _status.HasFlag(GameStatus.UpdateAvailable);
+    public bool IsUpdating => _status.HasFlag(GameStatus.Updating);
+    public bool NeedsRepair => _status.HasFlag(GameStatus.NeedsRepair);
+    public bool IsRunning => _status.HasFlag(GameStatus.Running);
+    public bool IsDriveMissing => _status.HasFlag(GameStatus.DriveNotConnected);
+
+    /// شارة واحدة على البطاقة، بالأولوية: القرص، تعمل، إصلاح، تحديث
+    public string StatusBadgeText => Loc.Instance[
+        IsDriveMissing ? "stDrive" : IsRunning ? "stRunning" : NeedsRepair ? "stRepair" : IsUpdating ? "stUpdating" : HasUpdate ? "stUpdate" : "stNone"];
+
+    public bool HasStatusBadge => _status != GameStatus.None;
+
+    /// كل الحالات للنافذة، مفصولة بنقطة
+    public string StatusDetailsText
+    {
+        get
+        {
+            var l = Loc.Instance;
+            var parts = new System.Collections.Generic.List<string>();
+            if (IsDriveMissing) parts.Add(l["stDrive"]);
+            if (IsRunning) parts.Add(l["stRunning"]);
+            if (NeedsRepair) parts.Add(l["stRepair"]);
+            if (IsUpdating) parts.Add(l["stUpdating"]);
+            if (HasUpdate) parts.Add(l["stUpdate"]);
+            return parts.Count == 0 ? l["stOk"] : string.Join(" · ", parts);
+        }
+    }
+
+    /// لون الشارة: 0 رمادي (القرص)، 1 أخضر (تعمل)، 2 أحمر (إصلاح)، 3 كهرماني (تحديث)
+    public int StatusTone => IsDriveMissing ? 0 : IsRunning ? 1 : NeedsRepair ? 2 : HasStatusBadge ? 3 : 4;
+
+    public bool HasStatusActions => CanOpenInLauncher || CanVerify;
+
+    /// ما يعرفه Halawa عن تحديثات هذه المنصة، بصدق
+    public string UpdateNoteText => Loc.Instance.Format(Game.Platform switch
+    {
+        "Steam" => "updNoteSteam",
+        "Epic Games" => "updNoteEpic",
+        _ => CanOpenInLauncher ? "updNoteOther" : "updNoteNone"
+    }, LauncherActions.LauncherName(Game.Platform));
+
+    public bool CanOpenInLauncher => LauncherActions.System.OpenInLauncher(Game) != null;
+    public bool CanVerify => LauncherActions.System.Verify(Game) != null;
+    public string OpenInLauncherLabel => Loc.Instance.Format(Game.Platform == "Steam" && HasUpdate ? "updateInLauncher" : "openInLauncher", LauncherActions.LauncherName(Game.Platform));
+
+    private void NotifyStatusChanged()
+    {
+        foreach (var name in new[] { nameof(Status), nameof(HasUpdate), nameof(IsUpdating), nameof(NeedsRepair), nameof(IsRunning),
+                     nameof(IsDriveMissing), nameof(StatusBadgeText), nameof(HasStatusBadge), nameof(StatusDetailsText), nameof(StatusTone),
+                     nameof(OpenInLauncherLabel), nameof(UninstallLabel), nameof(UpdateNoteText) })
+            OnPropertyChanged(name);
+    }
+
     public void RefreshPlayTime()
     {
         OnPropertyChanged(nameof(PlayTimeText));
@@ -108,6 +177,7 @@ public class GameCardViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(LastPlayedText));
         OnPropertyChanged(nameof(PlayTimeText));
         OnPropertyChanged(nameof(FavoriteLabel));
+        NotifyStatusChanged();
         foreach (var tool in Tools) tool.NotifyLanguageChanged();
     }
 
@@ -183,7 +253,10 @@ public class GameCardViewModel : INotifyPropertyChanged
     /// على لينكس نطلب إلغاء التثبيت من Steam فقط: Heroic وLutris لا يوفران بروتوكولًا
     /// له، فلا نعرض زرًا لا يعمل. سلوك ويندوز كما هو (رسالة توضيحية).
     /// </summary>
-    public bool CanUninstall => !OperatingSystem.IsLinux() || Game.Platform == "Steam";
+    public bool CanUninstall => LauncherActions.System.Uninstall(Game) != null;
+
+    /// Epic: لا رابط للإزالة، فالزر يفتح المشغّل ويقول ذلك
+    public string UninstallLabel => Loc.Instance[LauncherActions.System.Uninstall(Game) is { OpensLauncher: true } ? "uninstallInLauncher" : "uninstall"];
 
     /// <summary>
     /// الألعاب التي تبدأ برابط (steam:// وheroic:// وlutris:) لا تأخذ وسائط على لينكس:

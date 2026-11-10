@@ -43,8 +43,9 @@
     <Panel>
         <Border Name="Scrim" Background="#C7060202" PointerPressed="Scrim_PointerPressed"/>
 
-        <Border Name="DialogBox" Width="760" Height="500" HorizontalAlignment="Center" VerticalAlignment="Top"
-                Margin="20,120,20,20" CornerRadius="14" Background="{StaticResource SurfaceBrush}"
+        <!-- الحجم يتبع البرنامج: 80% منه، لا أصغر من 760×500 ولا أكبر من 1400×900، ودائمًا داخله -->
+        <c:DialogFrame Name="Frame" MinFrameWidth="760" MinFrameHeight="500">
+        <Border Name="DialogBox" CornerRadius="14" Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1" RenderTransformOrigin="50%,50%">
             <Border CornerRadius="13" ClipToBounds="True">
             <Grid ColumnDefinitions="210,*">
@@ -98,28 +99,36 @@
                                              AutomationProperties.Name="{l:Loc gameName}"/>
                                     <TextBlock Classes="lbl" Text="{l:Loc nameNote}"/>
                                 </StackPanel>
+                                <c:CappedWidth Cap="560">
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,6">
                                     <TextBlock Text="{l:Loc platform}" FontSize="16" VerticalAlignment="Center"/>
                                     <Border Grid.Column="1" Background="#2A1313" CornerRadius="8" Padding="10,3">
                                         <TextBlock Text="{Binding PlatformShort}" FontSize="12" FlowDirection="LeftToRight"/>
                                     </Border>
                                 </Grid>
+                                </c:CappedWidth>
+                                <c:CappedWidth Cap="560">
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,6">
                                     <TextBlock Text="{l:Loc addFav}" FontSize="16" VerticalAlignment="Center"/>
                                     <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding IsFavorite, Mode=TwoWay}"
                                                   AutomationProperties.Name="{l:Loc addFav}"/>
                                 </Grid>
+                                </c:CappedWidth>
+                                <c:CappedWidth Cap="560">
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,6">
                                     <TextBlock Text="{l:Loc hide}" FontSize="16" VerticalAlignment="Center"/>
                                     <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding IsHidden, Mode=TwoWay}"
                                                   AutomationProperties.Name="{l:Loc hide}"/>
                                 </Grid>
+                                </c:CappedWidth>
                                 <!-- يظهر فقط بعد اللعب: لا يضيف شيئًا لأول فتح -->
-                                <Grid ColumnDefinitions="*,Auto" Margin="0,6" IsVisible="{Binding HasPlayTime}">
+                                <c:CappedWidth Cap="560" IsVisible="{Binding HasPlayTime}">
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,6">
                                     <TextBlock Text="{l:Loc playTime}" FontSize="16" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Column="1" Text="{Binding PlayTimeText}" FontSize="14" VerticalAlignment="Center"
                                                Foreground="{StaticResource AmberBrush}"/>
                                 </Grid>
+                                </c:CappedWidth>
                             </StackPanel>
 
                             <!-- الملفات المثبتة -->
@@ -167,7 +176,8 @@
                                             </Panel>
                                         </Border>
                                     </Border>
-                                    <StackPanel Grid.Column="1" Spacing="8" Margin="24,0,0,0">
+                                    <c:CappedWidth Grid.Column="1" Cap="384">
+                                    <StackPanel Spacing="8" Margin="24,0,0,0">
                                         <Button Classes="btn pri" HorizontalAlignment="Stretch" Content="{l:Loc changeImg}" Click="ChangeCover_Click"/>
                                         <Button Classes="btn" HorizontalAlignment="Stretch" Content="{l:Loc searchSgdb}"
                                                 IsEnabled="{Binding #Root.((vm:MainViewModel)DataContext).CanSearchCovers}"
@@ -178,6 +188,7 @@
                                         <TextBlock Classes="lbl" Text="{l:Loc sgdbNeedKey}" Foreground="{StaticResource AmberBrush}"
                                                    IsVisible="{Binding !#Root.((vm:MainViewModel)DataContext).CanSearchCovers}"/>
                                     </StackPanel>
+                                    </c:CappedWidth>
                                 </Grid>
 
                                 <!-- نتائج SteamGridDB -->
@@ -248,5 +259,6 @@
             </Grid>
             </Border>
         </Border>
+        </c:DialogFrame>
     </Panel>
 </UserControl>

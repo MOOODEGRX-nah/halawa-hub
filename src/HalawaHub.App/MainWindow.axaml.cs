@@ -10,6 +10,8 @@ namespace HalawaHub.App;
 
 public partial class MainWindow : Window
 {
+    private bool _startMinimizedApplied;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -42,6 +44,22 @@ public partial class MainWindow : Window
         AddHandler(KeyDownEvent, OnAnyKeyDown, RoutingStrategies.Tunnel);
 
         Loc.Instance.LanguageChanged += (_, _) => _ = FadeContentAsync();
+
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is not MainViewModel vm) return;
+            vm.MinimizeRequested += (_, _) => WindowState = WindowState.Minimized;
+            vm.ExitRequested += (_, _) => ExitForReal();
+        };
+
+        // "ابدأ مصغّرًا": للصينية إن كانت تعمل، وإلا لشريط المهام
+        Opened += (_, _) =>
+        {
+            if (DataContext is not MainViewModel { StartMinimized: true } || _startMinimizedApplied) return;
+            _startMinimizedApplied = true;
+            if (IsTrayUsable()) Hide();
+            else WindowState = WindowState.Minimized;
+        };
     }
 
     private async System.Threading.Tasks.Task FadeContentAsync()

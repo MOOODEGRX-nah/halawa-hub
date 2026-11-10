@@ -30,6 +30,7 @@ public class UiFlowTests
         ui.ButtonWithText("المكتبة").Should().NotBeNull();
 
         ui.Vm.OpenSettingsCommand.Execute(null);
+        ui.Vm.SelectSettingsSectionCommand.Execute("0");
         ui.Settle();
         ui.Click("اللغة");
         ui.Click("English");
@@ -244,13 +245,14 @@ public class UiFlowTests
     }
 
     [AvaloniaFact]
-    public void Settings_HasSixSections_AndClosesFromBackdrop()
+    public void Settings_HasTenSections_AndClosesFromBackdrop()
     {
         using var ui = new UiHarness(Loc.English);
         ui.Vm.OpenSettingsCommand.Execute(null);
+        ui.Vm.SelectSettingsSectionCommand.Execute("0");
         ui.Settle();
 
-        foreach (var name in new[] { "Language", "API keys", "Appearance", "Startup", "Build info", "Updates" })
+        foreach (var name in new[] { "Library", "Appearance", "Platforms", "Language", "API keys", "Plugins", "Updates", "Tools", "Build info", "General" })
         {
             ui.Click(ui.All<Button>().First(b => b.Classes.Contains("si") && (b.Content as string) == name));
             ui.Vm.SettingsTitle.Should().Be(name);
@@ -272,6 +274,7 @@ public class UiFlowTests
 
         using var ui = new UiHarness(Loc.English, updates.Object);
         ui.Vm.OpenSettingsCommand.Execute(null);
+        ui.Vm.SelectSettingsSectionCommand.Execute("0");
         ui.Settle();
 
         ui.Click("Check for updates");
@@ -293,6 +296,7 @@ public class UiFlowTests
 
         using var ui = new UiHarness(Loc.English, updates.Object);
         ui.Vm.OpenSettingsCommand.Execute(null);
+        ui.Vm.SelectSettingsSectionCommand.Execute("0");
         ui.Settle();
 
         ui.Click("Check for updates");

@@ -33,6 +33,9 @@ public partial class MainViewModel
         public DateTime StartUtc { get; init; } = DateTime.UtcNow;
         public IPlaySessionTracker? Tracker { get; init; }
         public bool Persisted { get; set; }
+
+        /// Halawa هو من شغّل Steam لهذه اللعبة، والمستخدم طلب إغلاقه بعدها
+        public bool CloseSteamAfter { get; set; }
     }
 
     private PlaySession? _session;
@@ -203,6 +206,7 @@ public partial class MainViewModel
             ? session.Tracker.Elapsed().TotalSeconds
             : (DateTime.UtcNow - session.StartUtc).TotalSeconds;
         CreditPlayTime(session.Platform, session.Id, secs);
+        if (session.CloseSteamAfter) ExitSteam();
         RefreshStatusOf(session.Platform, session.Id);
         Log.Info($"انتهت جلسة لعب {session.Name}: {(int)secs / 60} دقيقة");
     }
@@ -326,6 +330,9 @@ public partial class MainViewModel
             if (!string.IsNullOrEmpty(args))
                 psi.Arguments = args;
 
+            // هل كان Steam يعمل قبلنا؟ (لإغلاقه بعد اللعبة فقط إن كنا نحن من شغّله)
+            var steamWasRunning = game.Platform == "Steam" && IsSteamRunning();
+
             // قبل التشغيل: طول سجل Steam ولقطة العمليات الحالية
             var (tracker, ambiguous) = CreateTracker(game);
 
@@ -346,6 +353,7 @@ public partial class MainViewModel
             else
             {
                 BeginPlaySession(card, tracker);
+                if (_session != null) _session.CloseSteamAfter = CloseSteamAfterGame && game.Platform == "Steam" && !steamWasRunning;
             }
 
             if (problem == LaunchProblem.SteamNotSignedIn)
@@ -358,6 +366,8 @@ public partial class MainViewModel
                 _ = WatchLinuxOpenerAsync(game, proc);
             else
                 proc?.Dispose();
+
+            if (MinimizeOnGameStart) MinimizeRequested?.Invoke(this, EventArgs.Empty);
 
             card.NotifyPlayed();
             UpdateHomeViewCollections();
@@ -408,5 +418,33 @@ public partial class MainViewModel
             ShowStatus(Loc.Instance["uninstallUnsupported"]);
 
         CloseDetails();
+    }
+
+    private static bool IsSteamRunning()
+    {
+        try
+        {
+            var procs = Process.GetProcessesByName("steam");
+            foreach (var p in procs) p.Dispose();
+            return procs.Length > 0;
+        }
+        catch
+        {
+            return true; // لا نعرف: لا نغلقه
+        }
+    }
+
+    /// steam://ExitSteam موثّق في steam(6): يغلق Steam بشكل طبيعي
+    private void ExitSteam()
+    {
+        try
+        {
+            Log.Info("closing Steam after the game (Halawa started it)");
+            Process.Start(new ProcessStartInfo("steam://ExitSteam") { UseShellExecute = true })?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Log.Error("could not close Steam", ex);
+        }
     }
 }

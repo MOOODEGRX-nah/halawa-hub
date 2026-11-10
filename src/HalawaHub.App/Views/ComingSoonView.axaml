@@ -16,16 +16,9 @@
                 <StackPanel MaxWidth="420" Spacing="16" VerticalAlignment="Center">
                     <TextBlock Text="{l:Loc soonTitle}" FontSize="44" FontWeight="Bold"/>
                     <TextBlock Text="{l:Loc soonText}" FontSize="17" LineHeight="27"
-                               Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"/>
-                    <Border Name="Bar" Height="8" CornerRadius="4" Background="#2A1313" ClipToBounds="True">
-                        <Border Name="BarFill" CornerRadius="4" HorizontalAlignment="Left">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
-                                    <GradientStop Color="#B91C1C" Offset="0"/>
-                                    <GradientStop Color="#EF4444" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                        </Border>
+                               Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap"/>
+                    <Border Name="Bar" Height="8" CornerRadius="4" Background="{DynamicResource ChipBrush}" ClipToBounds="True">
+                        <Border Name="BarFill" CornerRadius="4" HorizontalAlignment="Left" Background="{DynamicResource ComingSoonGradient}"/>
                     </Border>
                     <TextBlock Classes="lbl" Text="{l:Loc inDev}"/>
                     <Button Classes="btn pri" HorizontalAlignment="Left" Margin="0,8,0,0"

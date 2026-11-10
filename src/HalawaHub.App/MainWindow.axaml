@@ -7,21 +7,14 @@
         x:DataType="vm:MainViewModel"
         Title="{Binding WindowTitleText}" Width="1280" Height="860" MinWidth="980" MinHeight="620"
         Icon="avares://Halawa-Hub/Assets/icon.ico"
-        Background="{StaticResource PageBrush}"
+        Background="{DynamicResource PageBrush}"
         FlowDirection="{Binding AppFlowDirection}"
         FontFamily="{Binding AppFontFamily}"
-        Foreground="{StaticResource TextBrush}">
+        Foreground="{DynamicResource TextBrush}">
 
-    <Panel>
+    <Panel Name="WindowRoot" Classes.nohover="{Binding !CoverHoverAnimation}">
         <!-- الوهج الأحمر أعلى الصفحة: ثابت في جهة اليمين باللغتين كما في التصميم -->
-        <Border IsHitTestVisible="False" FlowDirection="LeftToRight">
-            <Border.Background>
-                <RadialGradientBrush Center="85%,-10%" GradientOrigin="85%,-10%" RadiusX="900" RadiusY="400">
-                    <GradientStop Color="#38B91C1C" Offset="0"/>
-                    <GradientStop Color="#00B91C1C" Offset="1"/>
-                </RadialGradientBrush>
-            </Border.Background>
-        </Border>
+        <Border IsHitTestVisible="False" FlowDirection="LeftToRight" Background="{DynamicResource WindowGlowBrush}"/>
 
         <Grid Name="PageContent" RowDefinitions="Auto,*" Margin="28,0">
             <views:TopBar Grid.Row="0"/>
@@ -32,10 +25,10 @@
         <!-- رسائل الحالة والأخطاء -->
         <Border Name="Toast" IsVisible="{Binding HasStatusMessage}" IsHitTestVisible="False"
                 HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="20,0,20,24" MaxWidth="640"
-                Background="#1A0A0C" BorderBrush="#3A1518" BorderThickness="1" CornerRadius="12" Padding="16,10"
+                Background="{DynamicResource MenuBrush}" BorderBrush="{DynamicResource MenuBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="16,10"
                 BoxShadow="0 12 32 0 #99000000">
             <TextBlock Text="{Binding StatusMessage}" FontSize="13" TextWrapping="Wrap"
-                       Foreground="{StaticResource TextBrush}"/>
+                       Foreground="{DynamicResource TextBrush}"/>
         </Border>
 
         <views:GameDialog/>

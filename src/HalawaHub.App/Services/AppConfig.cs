@@ -48,4 +48,37 @@ public class AppConfig
 
     /// وقت اللعب وآخر تشغيل على البطاقات
     public bool ShowPlayTimeOnCards { get; set; } = true;
+
+    // ===== الإعدادات العامة (المرحلة 5) =====
+
+    /// زر الإغلاق: "tray" يصغّر للصينية، "exit" يغلق البرنامج
+    public string CloseAction { get; set; } = "tray";
+
+    /// البدء مصغّرًا (للصينية إن وُجدت)
+    public bool StartMinimized { get; set; }
+
+    /// تبويب المكتبة عند الفتح: 0 الرئيسي، 1 المفضل، 2 المثبتة، 3 المضاف حديثًا
+    public int StartTab { get; set; }
+
+    /// تصغير Halawa عند بدء لعبة
+    public bool MinimizeOnGameStart { get; set; }
+
+    /// إغلاق Steam بعد اللعبة إذا كان Halawa هو من شغّله
+    public bool CloseSteamAfterGame { get; set; }
+
+    /// تقليل الحركة: "off" (الحركة تعمل)، "on"، "auto" (يتبع النظام)
+    public string ReduceMotion { get; set; } = "off";
+
+    /// حركة الغلاف عند المرور بالفأرة
+    public bool CoverHoverAnimation { get; set; } = true;
+
+    /// عرض المكتبة: "grid" أو "list"
+    public string LibraryLayout { get; set; } = "grid";
+
+    /// حجم البطاقة: "small" أو "comfortable" أو "large"
+    public string CardSize { get; set; } = "comfortable";
+
+    /// الثيم: dark, oled, light — ولون التمييز: red, blue, purple, green, orange
+    public string Theme { get; set; } = "dark";
+    public string Accent { get; set; } = "red";
 }

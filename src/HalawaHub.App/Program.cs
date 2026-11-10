@@ -21,6 +21,9 @@ class Program
             return;
         }
 
+        // "احذف كل البيانات" يُنفَّذ هنا، قبل أن تقرأ أي خدمة ملفاتها
+        HalawaHub.App.Services.DataWipe.RunIfScheduled();
+
         InstallInfo.ScrubAppImageEnvironment();
 
         // بعد تحديث لينكس: النسخة القديمة تشغّلنا ثم تخرج، فننتظر تحرير قفل النسخة الواحدة

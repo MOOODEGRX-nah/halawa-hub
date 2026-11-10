@@ -356,6 +356,8 @@ public partial class MainViewModel : INotifyPropertyChanged
         _sortMode = string.IsNullOrEmpty(_config.SortMode) ? "name" : _config.SortMode;
         _sortReverse = _config.SortReverse;
         _showPlayTimeOnCards = _config.ShowPlayTimeOnCards;
+        // تبويب المكتبة عند الفتح (إعداد عام)
+        if (_config.StartTab > 0 && _config.StartTab < LibraryTabs.Length) _selectedNavItem = LibraryTabs[_config.StartTab];
         foreach (var search in _config.RecentSearches ?? new List<string>())
             RecentSearches.Add(search);
 

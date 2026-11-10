@@ -14,7 +14,7 @@
             <Setter Property="Height" Value="36"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Transitions">
                 <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions>
@@ -40,73 +40,121 @@
         <Style Selector="Button.seg.on, Button.seg.on:pointerover">
             <Setter Property="Foreground" Value="White"/>
         </Style>
+
+        <!-- مجموعة اختيارات (الثيم، الحركة، العرض...): الخيار المختار بلون التمييز -->
+        <Style Selector="Border.choice">
+            <Setter Property="Background" Value="{DynamicResource PageBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushCard}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style Selector="Button.ch">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="MinWidth" Value="84"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.ch:pointerover">
+            <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+        </Style>
+        <Style Selector="Button.ch.on, Button.ch.on:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentDeepBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.sw">
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="CornerRadius" Value="17"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+        <Style Selector="Button.sw.on">
+            <Setter Property="BorderBrush" Value="{DynamicResource TextBrush}"/>
+        </Style>
+        <Style Selector="TextBlock.row">
+            <Setter Property="FontSize" Value="15"/>
+        </Style>
+        <Style Selector="TextBlock.note">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
     </UserControl.Styles>
 
     <Panel>
-        <Border Name="Scrim" Background="#C7060202" PointerPressed="Scrim_PointerPressed"/>
+        <Border Name="Scrim" Background="{DynamicResource ScrimBrush}" PointerPressed="Scrim_PointerPressed"/>
 
         <!-- الحجم يتبع البرنامج: 80% منه، لا أصغر من 900×540 ولا أكبر من 1400×900، ودائمًا داخله -->
         <c:DialogFrame Name="Frame" MinFrameWidth="900" MinFrameHeight="540">
-        <Border Name="DialogBox" CornerRadius="14" Background="{StaticResource DialogBrush}"
-                BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+        <Border Name="DialogBox" CornerRadius="14" Background="{DynamicResource DialogBrush}"
+                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1"
                 BoxShadow="0 30 80 0 #B3000000" RenderTransformOrigin="50%,50%">
             <Border CornerRadius="13" ClipToBounds="True">
             <Panel>
                 <!-- وهج أعلى النافذة، ثابت في جهة اليمين -->
-                <Border IsHitTestVisible="False" FlowDirection="LeftToRight">
-                    <Border.Background>
-                        <RadialGradientBrush Center="85%,-20%" GradientOrigin="85%,-20%" RadiusX="700" RadiusY="300">
-                            <GradientStop Color="#2EB91C1C" Offset="0"/>
-                            <GradientStop Color="#00B91C1C" Offset="1"/>
-                        </RadialGradientBrush>
-                    </Border.Background>
-                </Border>
+                <Border IsHitTestVisible="False" FlowDirection="LeftToRight" Background="{DynamicResource DialogGlowBrush}"/>
 
                 <Grid ColumnDefinitions="230,*">
                     <!-- الشريط الجانبي -->
-                    <Border Grid.Column="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrushCard}"
+                    <Border Grid.Column="0" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrushCard}"
                             BorderThickness="0,0,1,0" Padding="12,20">
-                        <StackPanel>
-                            <Border BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1" Padding="10,0,10,14" Margin="0,0,0,10">
+                        <Grid RowDefinitions="Auto,Auto,*">
+                            <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" Padding="10,0,10,14" Margin="0,0,0,10">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <Border Width="36" Height="36" CornerRadius="9" Background="#000000" BoxShadow="0 0 12 0 #4DEF4444">
+                                    <Border Width="36" Height="36" CornerRadius="9" Background="#000000" BoxShadow="{DynamicResource GlowLogo}">
                                         <Border CornerRadius="9" ClipToBounds="True">
                                             <Image Source="avares://Halawa-Hub/Assets/logo.png" Stretch="UniformToFill"/>
                                         </Border>
                                     </Border>
                                     <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="Halawa Hub" FontSize="15" FontWeight="Bold" FontFamily="fonts:Inter#Inter"/>
-                                        <TextBlock Text="{Binding AppVersion}" FontSize="12" Foreground="#9C8A8A" HorizontalAlignment="Left"/>
+                                        <TextBlock Text="{Binding AppVersion}" FontSize="12" Foreground="{DynamicResource SubtleBrush}" HorizontalAlignment="Left"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
 
-                            <TextBlock Text="{l:Loc setTitle}" Foreground="{StaticResource RedHoverBrush}" FontWeight="Bold"
+                            <TextBlock Text="{l:Loc setTitle}" Grid.Row="1" Foreground="{DynamicResource RedHoverBrush}" FontWeight="Bold"
                                        FontSize="15" Margin="10,0,10,12"/>
 
-                            <Panel>
-                                <c:SlidingPill Name="SettingsNavPill" Orientation="Vertical" Pitch="48" Motion="Dialog" ItemCount="7" IsHitTestVisible="False"
-                                               SelectedIndex="{Binding SettingsSection}">
-                                    <Border CornerRadius="10" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #73EF4444"/>
+                            <!-- الأقسام بترتيب الظهور؛ رقم كل قسم ثابت، والشريط يتبع موضعه (SettingsPillIndex) -->
+                            <ScrollViewer Name="NavScroll" Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                            <Panel VerticalAlignment="Top">
+                                <c:SlidingPill Name="SettingsNavPill" Orientation="Vertical" Pitch="48" Motion="Dialog" ItemCount="{Binding SettingsSectionCount}" IsHitTestVisible="False"
+                                               SelectedIndex="{Binding SettingsPillIndex}">
+                                    <Border CornerRadius="10" Background="{DynamicResource RedGradient}" BoxShadow="{DynamicResource GlowM}"/>
                                 </c:SlidingPill>
                                 <StackPanel Spacing="4">
-                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
-                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="0" Content="{l:Loc sUpdates}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="4" Content="{l:Loc sGeneral}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=7}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="7" Content="{l:Loc sLibrary}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="3" Content="{l:Loc sAppearance}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=8}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="8" Content="{l:Loc sPlatforms}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="1" Content="{l:Loc sLanguage}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="2" Content="{l:Loc sApi}"/>
-                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}"
-                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="3" Content="{l:Loc sAppearance}"/>
-                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}"
-                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="4" Content="{l:Loc sStartup}"/>
-                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=5}"
-                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="5" Content="{l:Loc sBuild}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=6}"
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="6" Content="{l:Loc sPlugins}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="0" Content="{l:Loc sUpdates}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=9}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="9" Content="{l:Loc sTools}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=5}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="5" Content="{l:Loc sBuild}"/>
                                 </StackPanel>
                             </Panel>
-                        </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
                     </Border>
 
                     <!-- المحتوى -->
@@ -145,8 +193,8 @@
                                                     <Panel Classes="spin" Height="16" ClipToBounds="True" VerticalAlignment="Center">
                                                         <Panel Name="SpinRing" Classes="spin-ring" FlowDirection="LeftToRight" Width="16" Height="16" HorizontalAlignment="Left">
                                                             <Panel.RenderTransform><RotateTransform/></Panel.RenderTransform>
-                                                            <Ellipse Stroke="#40FFFFFF" StrokeThickness="2"/>
-                                                            <Arc Stroke="{StaticResource AmberBrush}" StrokeThickness="2" StartAngle="-90" SweepAngle="90"/>
+                                                            <Ellipse Stroke="{DynamicResource Wash25Brush}" StrokeThickness="2"/>
+                                                            <Arc Stroke="{DynamicResource AmberBrush}" StrokeThickness="2" StartAngle="-90" SweepAngle="90"/>
                                                         </Panel>
                                                     </Panel>
                                                     <TextBlock Text="{l:Loc check}" VerticalAlignment="Center"/>
@@ -155,17 +203,17 @@
                                         </Grid>
                                     </Border>
                                     <TextBlock Classes="lbl" Text="{Binding UpdateMessage}" IsVisible="{Binding IsInstallingUpdate}"
-                                               Foreground="{StaticResource AmberBrush}"/>
+                                               Foreground="{DynamicResource AmberBrush}"/>
                                     <TextBlock Classes="lbl" Text="{l:Loc installNote}"/>
                                 </StackPanel>
 
                                 <!-- اللغة -->
                                 <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}">
-                                    <Border Width="182" HorizontalAlignment="Left" CornerRadius="10" Background="{StaticResource PageBrush}"
-                                            BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1">
+                                    <Border Width="182" HorizontalAlignment="Left" CornerRadius="10" Background="{DynamicResource PageBrush}"
+                                            BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1">
                                         <Panel Height="44">
                                             <c:SlidingPill ItemCount="2" SelectedIndex="{Binding LanguageIndex}" Inset="4" Motion="Even" Margin="0,4" IsHitTestVisible="False">
-                                                <Border CornerRadius="8" Background="#B91C1C" BoxShadow="0 0 12 0 #73EF4444"/>
+                                                <Border CornerRadius="8" Background="{DynamicResource AccentDeepBrush}" BoxShadow="{DynamicResource GlowS}"/>
                                             </c:SlidingPill>
                                             <UniformGrid Columns="2" Margin="4">
                                                 <Button Classes="seg" Classes.on="{Binding LanguageIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
@@ -202,60 +250,267 @@
                                             <c:StatusBadge State="{Binding ApiKeyBadge}" VerticalAlignment="Center"/>
                                             <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
                                                 <TextBlock Classes="stat-title" Text="{Binding ApiKeyStatusText}"/>
-                                                <TextBlock Text="SteamGridDB" FontSize="12" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Left"/>
+                                                <TextBlock Text="SteamGridDB" FontSize="12" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Left"/>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
                                 </StackPanel>
 
-                                <!-- المظهر -->
-                                <StackPanel Spacing="16" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}">
-                                    <TextBlock Classes="lbl" Text="{l:Loc moreThemes}"/>
-                                    <c:CappedWidth Cap="480">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
-                                            <TextBlock Text="{l:Loc showHidden}" FontSize="15"/>
-                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc showHiddenNote}"/>
-                                        </StackPanel>
-                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowHiddenGames, Mode=TwoWay}"
-                                                      AutomationProperties.Name="{l:Loc showHidden}"/>
-                                    </Grid>
-                                    </c:CappedWidth>
-                                    <c:CappedWidth Cap="480">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
-                                            <TextBlock Text="{l:Loc showStats}" FontSize="15"/>
-                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc showStatsNote}"/>
-                                        </StackPanel>
-                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowPlayTimeOnCards, Mode=TwoWay}"
-                                                      AutomationProperties.Name="{l:Loc showStats}"/>
-                                    </Grid>
-                                    </c:CappedWidth>
-                                </StackPanel>
-
-                                <!-- التشغيل -->
-                                <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}">
+                                <!-- عام -->
+                                <StackPanel Spacing="16" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}">
                                     <c:CappedWidth Cap="480">
                                     <Grid ColumnDefinitions="*,Auto" Margin="0,4">
                                         <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
-                                            <TextBlock Text="{l:Loc startWith}" FontSize="15"/>
-                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc startNote}" IsVisible="{Binding IsStartupSupported}"/>
-                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc startUnsupported}" IsVisible="{Binding !IsStartupSupported}"/>
+                                            <TextBlock Classes="row" Text="{l:Loc startWith}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc startNote}" IsVisible="{Binding IsStartupSupported}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc startUnsupported}" IsVisible="{Binding !IsStartupSupported}"/>
                                         </StackPanel>
                                         <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding LaunchOnStartup, Mode=TwoWay}"
                                                       IsEnabled="{Binding IsStartupSupported}" AutomationProperties.Name="{l:Loc startWith}"/>
                                     </Grid>
                                     </c:CappedWidth>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc startMin}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc startMinNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding StartMinimized, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc startMin}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
                                     <c:CappedWidth Cap="480" IsVisible="{Binding IsAppMenuSupported}">
                                     <Grid ColumnDefinitions="*,Auto" Margin="0,4">
                                         <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
-                                            <TextBlock Text="{l:Loc appMenu}" FontSize="15"/>
-                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc appMenuNote}"/>
+                                            <TextBlock Classes="row" Text="{l:Loc appMenu}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc appMenuNote}"/>
                                         </StackPanel>
                                         <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowInAppMenu, Mode=TwoWay}"
                                                       AutomationProperties.Name="{l:Loc appMenu}"/>
                                     </Grid>
                                     </c:CappedWidth>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="row" Text="{l:Loc closeBtn}"/>
+                                        <Border Classes="choice">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <Button Classes="ch" Classes.on="{Binding CloseActionIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="close:tray" Content="{l:Loc closeTray}"/>
+                                                <Button Classes="ch" Classes.on="{Binding CloseActionIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="close:exit" Content="{l:Loc closeExit}"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <TextBlock Classes="note" Text="{l:Loc closeBtnNote}"/>
+                                    </StackPanel>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="row" Text="{l:Loc startTab}"/>
+                                        <Border Classes="choice">
+                                            <WrapPanel>
+                                                <Button Classes="ch" Classes.on="{Binding StartTab, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="starttab:0" Content="{l:Loc home}"/>
+                                                <Button Classes="ch" Classes.on="{Binding StartTab, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="starttab:1" Content="{l:Loc favorites}"/>
+                                                <Button Classes="ch" Classes.on="{Binding StartTab, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="starttab:2" Content="{l:Loc installed}"/>
+                                                <Button Classes="ch" Classes.on="{Binding StartTab, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="starttab:3" Content="{l:Loc recent}"/>
+                                            </WrapPanel>
+                                        </Border>
+                                        <TextBlock Classes="note" Text="{l:Loc startTabNote}"/>
+                                    </StackPanel>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc minOnPlay}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc minOnPlayNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding MinimizeOnGameStart, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc minOnPlay}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc closeSteam}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc closeSteamNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding CloseSteamAfterGame, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc closeSteam}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                </StackPanel>
+
+                                <!-- المكتبة -->
+                                <StackPanel Spacing="16" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=7}">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="row" Text="{l:Loc layout}"/>
+                                        <Border Classes="choice">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <Button Classes="ch" Classes.on="{Binding LibraryLayoutIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="layout:grid" Content="{l:Loc layoutGrid}"/>
+                                                <Button Classes="ch" Classes.on="{Binding LibraryLayoutIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="layout:list" Content="{l:Loc layoutList}"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <TextBlock Classes="note" Text="{l:Loc layoutNote}"/>
+                                    </StackPanel>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="row" Text="{l:Loc cardSize}"/>
+                                        <Border Classes="choice">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <Button Classes="ch" Classes.on="{Binding CardSizeIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="cardsize:small" Content="{l:Loc sizeSmall}"/>
+                                                <Button Classes="ch" Classes.on="{Binding CardSizeIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="cardsize:comfortable" Content="{l:Loc sizeComfortable}"/>
+                                                <Button Classes="ch" Classes.on="{Binding CardSizeIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="cardsize:large" Content="{l:Loc sizeLarge}"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <TextBlock Classes="note" Text="{l:Loc cardSizeNote}"/>
+                                    </StackPanel>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="row" Text="{l:Loc defaultSort}"/>
+                                        <Border Classes="choice">
+                                            <WrapPanel>
+                                                <Button Classes="ch" Classes.on="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=name}"
+                                                        Command="{Binding SetSortModeCommand}" CommandParameter="name" Content="{l:Loc sortName}"/>
+                                                <Button Classes="ch" Classes.on="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=lastplayed}"
+                                                        Command="{Binding SetSortModeCommand}" CommandParameter="lastplayed" Content="{l:Loc sortLastPlayed}"/>
+                                                <Button Classes="ch" Classes.on="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=playtime}"
+                                                        Command="{Binding SetSortModeCommand}" CommandParameter="playtime" Content="{l:Loc sortPlayTime}"/>
+                                                <Button Classes="ch" Classes.on="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=added}"
+                                                        Command="{Binding SetSortModeCommand}" CommandParameter="added" Content="{l:Loc sortAdded}"/>
+                                                <Button Classes="ch" Classes.on="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=platform}"
+                                                        Command="{Binding SetSortModeCommand}" CommandParameter="platform" Content="{l:Loc sortPlatform}"/>
+                                            </WrapPanel>
+                                        </Border>
+                                        <TextBlock Classes="note" Text="{l:Loc defaultSortNote}"/>
+                                    </StackPanel>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc showStats}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc showStatsNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowPlayTimeOnCards, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc showStats}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc showHidden}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc showHiddenNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowHiddenGames, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc showHidden}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                </StackPanel>
+
+                                <!-- المظهر -->
+                                <StackPanel Spacing="16" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="row" Text="{l:Loc theme}"/>
+                                        <Border Classes="choice">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <Button Classes="ch" Classes.on="{Binding ThemeIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="theme:dark" Content="{l:Loc themeDark}"/>
+                                                <Button Classes="ch" Classes.on="{Binding ThemeIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="theme:oled" Content="{l:Loc themeOled}"/>
+                                                <Button Classes="ch" Classes.on="{Binding ThemeIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="theme:light" Content="{l:Loc themeLight}"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <TextBlock Classes="note" Text="{l:Loc themeNote}"/>
+                                    </StackPanel>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="row" Text="{l:Loc accent}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Classes="sw" Background="#DC2626" Classes.on="{Binding AccentKey, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=red}"
+                                                    Command="{Binding SettingChoiceCommand}" CommandParameter="accent:red" ToolTip.Tip="{l:Loc accentRed}" AutomationProperties.Name="{l:Loc accentRed}"/>
+                                            <Button Classes="sw" Background="#2563EB" Classes.on="{Binding AccentKey, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=blue}"
+                                                    Command="{Binding SettingChoiceCommand}" CommandParameter="accent:blue" ToolTip.Tip="{l:Loc accentBlue}" AutomationProperties.Name="{l:Loc accentBlue}"/>
+                                            <Button Classes="sw" Background="#9333EA" Classes.on="{Binding AccentKey, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=purple}"
+                                                    Command="{Binding SettingChoiceCommand}" CommandParameter="accent:purple" ToolTip.Tip="{l:Loc accentPurple}" AutomationProperties.Name="{l:Loc accentPurple}"/>
+                                            <Button Classes="sw" Background="#15803D" Classes.on="{Binding AccentKey, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=green}"
+                                                    Command="{Binding SettingChoiceCommand}" CommandParameter="accent:green" ToolTip.Tip="{l:Loc accentGreen}" AutomationProperties.Name="{l:Loc accentGreen}"/>
+                                            <Button Classes="sw" Background="#C2410C" Classes.on="{Binding AccentKey, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=orange}"
+                                                    Command="{Binding SettingChoiceCommand}" CommandParameter="accent:orange" ToolTip.Tip="{l:Loc accentOrange}" AutomationProperties.Name="{l:Loc accentOrange}"/>
+                                        </StackPanel>
+                                        <TextBlock Classes="note" Text="{l:Loc accentNote}"/>
+                                    </StackPanel>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="row" Text="{l:Loc reduceMotion}"/>
+                                        <Border Classes="choice">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <Button Classes="ch" Classes.on="{Binding ReduceMotionIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="motion:off" Content="{l:Loc motionOff}"/>
+                                                <Button Classes="ch" Classes.on="{Binding ReduceMotionIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="motion:on" Content="{l:Loc motionOn}"/>
+                                                <Button Classes="ch" Classes.on="{Binding ReduceMotionIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
+                                                        Command="{Binding SettingChoiceCommand}" CommandParameter="motion:auto" Content="{l:Loc motionAuto}"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <TextBlock Classes="note" Text="{l:Loc reduceMotionNote}"/>
+                                        <TextBlock Classes="note" Text="{Binding ReduceMotionStateText}" IsVisible="{Binding ReduceMotionStateText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                    </StackPanel>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc coverHover}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc coverHoverNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding CoverHoverAnimation, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc coverHover}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                </StackPanel>
+
+                                <!-- المنصات -->
+                                <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=8}">
+                                    <TextBlock Classes="note" Text="{l:Loc platformsNote}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Button Classes="btn" Content="{l:Loc redetect}" Command="{Binding RedetectPlatformsCommand}"/>
+                                        <Button Classes="btn pri" Content="{l:Loc scanThisPc}" Command="{Binding RefreshCommand}"/>
+                                    </StackPanel>
+                                    <ItemsControl ItemsSource="{Binding PlatformRows}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:PlatformRow">
+                                                <Border Background="{DynamicResource PageBrush}" BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1"
+                                                        CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
+                                                    <StackPanel Spacing="4">
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"/>
+                                                            <TextBlock Grid.Column="1" Text="{Binding DetectedText}" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+                                                        </Grid>
+                                                        <TextBlock Text="{Binding GamesText}" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+                                                        <TextBlock Text="{Binding CapsText}" FontSize="12" TextWrapping="Wrap"/>
+                                                        <SelectableTextBlock Text="{Binding PathText}" FontSize="11" Foreground="{DynamicResource SubtleBrush}"
+                                                                             FlowDirection="LeftToRight" HorizontalAlignment="Left" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <!-- الأدوات -->
+                                <StackPanel Spacing="16" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=9}">
+                                    <StackPanel Spacing="6">
+                                        <WrapPanel>
+                                            <Button Classes="btn" Margin="0,0,10,8" Content="{l:Loc openLogs}" Command="{Binding OpenLogFolderCommand}"/>
+                                            <Button Classes="btn" Margin="0,0,10,8" Content="{l:Loc openData}" Command="{Binding OpenDataFolderCommand}"/>
+                                            <Button Classes="btn" Margin="0,0,10,8" Content="{l:Loc clearCovers}" Command="{Binding ClearCoverCacheCommand}"/>
+                                        </WrapPanel>
+                                        <TextBlock Classes="note" Text="{l:Loc toolsNote}"/>
+                                    </StackPanel>
+                                    <Border BorderBrush="{DynamicResource StatusRepairBrush}" BorderThickness="1" CornerRadius="10" Padding="16,12">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="{l:Loc dangerZone}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource StatusRepairBrush}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc deleteAllNote}"/>
+                                            <Button Classes="btn" HorizontalAlignment="Left" Content="{l:Loc deleteAll}" Command="{Binding DeleteAllDataCommand}"/>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
 
                                 <!-- الإضافات -->
@@ -270,9 +525,9 @@
                                                     <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
                                                         <TextBlock Text="{Binding FileName}" FontSize="15" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
                                                         <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{Binding StateText}"/>
-                                                        <SelectableTextBlock FontSize="11" Foreground="#9C8A8A" Margin="0,2,0,0" TextWrapping="Wrap"
+                                                        <SelectableTextBlock FontSize="11" Foreground="{DynamicResource SubtleBrush}" Margin="0,2,0,0" TextWrapping="Wrap"
                                                                              FlowDirection="LeftToRight" HorizontalAlignment="Left" Text="{Binding Path}"/>
-                                                        <SelectableTextBlock FontSize="11" Foreground="#9C8A8A" FlowDirection="LeftToRight" HorizontalAlignment="Left"
+                                                        <SelectableTextBlock FontSize="11" Foreground="{DynamicResource SubtleBrush}" FlowDirection="LeftToRight" HorizontalAlignment="Left"
                                                                              Text="{Binding HashText}"/>
                                                     </StackPanel>
                                                     <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding IsEnabled, Mode=TwoWay}"
@@ -316,7 +571,7 @@
                             </Panel>
                         </ScrollViewer>
 
-                        <Border Grid.Row="2" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,16,0,0">
+                        <Border Grid.Row="2" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,16,0,0">
                             <TextBlock Classes="lbl" Text="{l:Loc saved}"/>
                         </Border>
                     </Grid>

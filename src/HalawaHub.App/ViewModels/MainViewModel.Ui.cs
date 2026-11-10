@@ -550,7 +550,7 @@ public partial class MainViewModel
         }
     }
 
-    private int _settingsSection;
+    private int _settingsSection = SectionGeneral;
     public int SettingsSection
     {
         get => _settingsSection;
@@ -560,6 +560,8 @@ public partial class MainViewModel
             _settingsSection = value;
             OnPropertyChanged(nameof(SettingsSection));
             OnPropertyChanged(nameof(SettingsTitle));
+            OnPropertyChanged(nameof(SettingsPillIndex));
+            if (value == SectionPlatforms) RefreshPlatformRows();
         }
     }
 
@@ -568,9 +570,12 @@ public partial class MainViewModel
         1 => "sLanguage",
         2 => "sApi",
         3 => "sAppearance",
-        4 => "sStartup",
+        4 => "sGeneral",
         5 => "sBuild",
         6 => "sPlugins",
+        7 => "sLibrary",
+        8 => "sPlatforms",
+        9 => "sTools",
         _ => "sUpdates"
     }];
 

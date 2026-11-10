@@ -25,7 +25,11 @@
         </Style>
         <Style Selector="Border.cover:pointerover">
             <Setter Property="RenderTransform" Value="translateY(-4px) rotate(-1.5deg)"/>
-            <Setter Property="BoxShadow" Value="0 14 30 0 #4DEF4444"/>
+            <Setter Property="BoxShadow" Value="{DynamicResource GlowCoverHover}"/>
+        </Style>
+        <Style Selector="Panel.nohover Border.cover:pointerover">
+            <Setter Property="RenderTransform" Value="translateY(0px) rotate(0deg)"/>
+            <Setter Property="BoxShadow" Value="0 0 0 0 #00000000"/>
         </Style>
         <Style Selector="Button.thumb">
             <Setter Property="Width" Value="96"/>
@@ -33,33 +37,33 @@
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Margin" Value="0,0,10,10"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushCard}"/>
-            <Setter Property="Background" Value="{StaticResource PageBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushCard}"/>
+            <Setter Property="Background" Value="{DynamicResource PageBrush}"/>
         </Style>
         <Style Selector="Button.thumb:pointerover">
-            <Setter Property="BorderBrush" Value="{StaticResource RedHoverBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RedHoverBrush}"/>
         </Style>
     </UserControl.Styles>
 
     <Panel>
-        <Border Name="Scrim" Background="#C7060202" PointerPressed="Scrim_PointerPressed"/>
+        <Border Name="Scrim" Background="{DynamicResource ScrimBrush}" PointerPressed="Scrim_PointerPressed"/>
 
         <!-- الحجم يتبع البرنامج: 80% منه، لا أصغر من 760×500 ولا أكبر من 1400×900، ودائمًا داخله -->
         <c:DialogFrame Name="Frame" MinFrameWidth="760" MinFrameHeight="500">
-        <Border Name="DialogBox" CornerRadius="14" Background="{StaticResource SurfaceBrush}"
-                BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1" RenderTransformOrigin="50%,50%">
+        <Border Name="DialogBox" CornerRadius="14" Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1" RenderTransformOrigin="50%,50%">
             <Border CornerRadius="13" ClipToBounds="True">
             <Grid ColumnDefinitions="210,*">
                 <!-- الشريط الجانبي -->
-                <Border Grid.Column="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrushCard}"
+                <Border Grid.Column="0" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrushCard}"
                         BorderThickness="0,0,1,0" Padding="12,20">
                     <StackPanel>
-                        <TextBlock Text="{Binding DetailsGame.Name, FallbackValue=''}" Foreground="{StaticResource RedHoverBrush}"
+                        <TextBlock Text="{Binding DetailsGame.Name, FallbackValue=''}" Foreground="{DynamicResource RedHoverBrush}"
                                    FontWeight="Bold" FontSize="17" Margin="10,0,10,16" TextTrimming="CharacterEllipsis"/>
                         <Panel>
                             <c:SlidingPill Orientation="Vertical" Pitch="48" Motion="Dialog" IsHitTestVisible="False"
                                            ItemCount="{Binding GameDialogSectionCount}" SelectedIndex="{Binding GameDialogPillIndex}">
-                                <Border CornerRadius="10" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #73EF4444"/>
+                                <Border CornerRadius="10" Background="{DynamicResource RedGradient}" BoxShadow="{DynamicResource GlowM}"/>
                             </c:SlidingPill>
                             <StackPanel Spacing="4">
                                 <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
@@ -104,7 +108,7 @@
                                     <TextBlock Classes="lbl" Text="{l:Loc nameNote}"/>
                                 </StackPanel>
                                 <!-- الحالة والتحديث -->
-                                <Border Background="{StaticResource PageBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                                <Border Background="{DynamicResource PageBrush}" BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1"
                                         CornerRadius="10" Padding="16,12">
                                     <StackPanel Spacing="8">
                                         <Grid ColumnDefinitions="*,Auto">
@@ -127,7 +131,7 @@
                                 <c:CappedWidth Cap="560">
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,6">
                                     <TextBlock Text="{l:Loc platform}" FontSize="16" VerticalAlignment="Center"/>
-                                    <Border Grid.Column="1" Background="#2A1313" CornerRadius="8" Padding="10,3">
+                                    <Border Grid.Column="1" Background="{DynamicResource ChipBrush}" CornerRadius="8" Padding="10,3">
                                         <TextBlock Text="{Binding PlatformShort}" FontSize="12" FlowDirection="LeftToRight"/>
                                     </Border>
                                 </Grid>
@@ -151,14 +155,14 @@
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,6">
                                     <TextBlock Text="{l:Loc playTime}" FontSize="16" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Column="1" Text="{Binding PlayTimeText}" FontSize="14" VerticalAlignment="Center"
-                                               Foreground="{StaticResource AmberBrush}"/>
+                                               Foreground="{DynamicResource AmberBrush}"/>
                                 </Grid>
                                 </c:CappedWidth>
                                 <c:CappedWidth Cap="560" IsVisible="{Binding HasLastPlayed}">
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,6">
                                     <TextBlock Text="{l:Loc lastPlayedLbl}" FontSize="16" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Column="1" Text="{Binding LastPlayedText}" FontSize="14" VerticalAlignment="Center"
-                                               Foreground="{StaticResource MutedBrush}"/>
+                                               Foreground="{DynamicResource MutedBrush}"/>
                                 </Grid>
                                 </c:CappedWidth>
                             </StackPanel>
@@ -177,7 +181,7 @@
                                     <Button Classes="btn" Content="{l:Loc copyPath}" IsEnabled="{Binding HasInstallPath}" Click="CopyPath_Click"/>
                                 </StackPanel>
                                 <Border HorizontalAlignment="Left" Padding="16,10" CornerRadius="10"
-                                        Background="{StaticResource PageBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1">
+                                        Background="{DynamicResource PageBrush}" BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1">
                                     <StackPanel Orientation="Horizontal" Spacing="12">
                                         <TextBlock Classes="lbl" Text="{l:Loc sizeOnDisk}" VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding SizeOnDiskText}" FontSize="15" FontWeight="Bold" FlowDirection="LeftToRight" VerticalAlignment="Center"/>
@@ -207,7 +211,7 @@
                             <Panel IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}">
                                 <Grid ColumnDefinitions="150,*" IsVisible="{Binding !#Root.((vm:MainViewModel)DataContext).IsCoverSearchOpen}">
                                     <Border Classes="cover" FlowDirection="LeftToRight" Width="150" Height="225" CornerRadius="12" VerticalAlignment="Top"
-                                            BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                                            BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1"
                                             Background="{Binding PaletteIndex, Converter={x:Static conv:CoverPaletteConverter.Instance}}">
                                         <Border CornerRadius="11" ClipToBounds="True">
                                             <Panel>
@@ -229,7 +233,7 @@
                                         <Button Classes="btn" HorizontalAlignment="Stretch" Content="{l:Loc restore}"
                                                 Command="{Binding #Root.((vm:MainViewModel)DataContext).RestoreCoverCommand}"/>
                                         <TextBlock Classes="lbl" Text="{l:Loc imgNote}"/>
-                                        <TextBlock Classes="lbl" Text="{l:Loc sgdbNeedKey}" Foreground="{StaticResource AmberBrush}"
+                                        <TextBlock Classes="lbl" Text="{l:Loc sgdbNeedKey}" Foreground="{DynamicResource AmberBrush}"
                                                    IsVisible="{Binding !#Root.((vm:MainViewModel)DataContext).CanSearchCovers}"/>
                                     </StackPanel>
                                     </c:CappedWidth>
@@ -288,7 +292,7 @@
                                                 <StackPanel Spacing="4">
                                                     <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                                     <TextBlock Text="{Binding Date, StringFormat='{}{0:yyyy-MM-dd}'}" FontSize="12"
-                                                               Foreground="{StaticResource MutedBrush}" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
+                                                               Foreground="{DynamicResource MutedBrush}" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
                                                 </StackPanel>
                                             </Button>
                                         </DataTemplate>
@@ -301,7 +305,7 @@
                                           IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=5}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:GameToolViewModel">
-                                        <Border Background="{StaticResource PageBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                                        <Border Background="{DynamicResource PageBrush}" BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1"
                                                 CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
                                             <Grid ColumnDefinitions="*,Auto">
                                                 <StackPanel Margin="0,0,10,0" VerticalAlignment="Center">
@@ -317,7 +321,7 @@
                         </Panel>
                     </ScrollViewer>
 
-                    <Border Grid.Row="2" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,16,0,0">
+                    <Border Grid.Row="2" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0" Margin="0,16,0,0">
                         <TextBlock Classes="lbl" Text="{l:Loc saved}"/>
                     </Border>
                 </Grid>

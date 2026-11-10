@@ -50,6 +50,7 @@ public class ScreenCaptureTests
         ui.WaitFor(() => !vm.IsCheckingForUpdates);
         vm.ApiKeyStatus = ApiKeyCheckState.Valid;
         vm.OpenSettingsCommand.Execute(null);
+        vm.SelectSettingsSectionCommand.Execute("0");
 
         var settings = new[] { "05-settings-updates", "06-settings-language", "07-settings-api", "08-settings-appearance", "09-settings-startup", "10-settings-build" };
         for (var i = 0; i < settings.Length; i++)
@@ -102,6 +103,7 @@ public class ScreenCaptureTests
 
         vm.ApiKeyStatus = ApiKeyCheckState.Valid;
         vm.OpenSettingsCommand.Execute(null);
+        vm.SelectSettingsSectionCommand.Execute("0");
         for (var i = 0; i < 6; i++)
         {
             vm.SelectSettingsSectionCommand.Execute(i.ToString());

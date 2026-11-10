@@ -117,6 +117,7 @@ public partial class MainViewModel
         RefreshSearchState();
         _ = RefreshStatusesAsync();
         FirstSeenService.SaveIfChanged();
+        if (IsListLayout) RequestListSizes();
 
         // لو فيه مفتاح SteamGridDB مُعد، نكمّل أغلفة المنصات اللي ما عندها مصدر مباشر
         if (_coverClient.IsConfigured)

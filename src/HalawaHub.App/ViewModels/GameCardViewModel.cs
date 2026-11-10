@@ -332,7 +332,10 @@ public class GameCardViewModel : INotifyPropertyChanged
     private bool _sizeRequested;
 
     /// يبدأ حساب الحجم في الخلفية عند فتح قسم الملفات أول مرة
-    public async void EnsureSizeRequested()
+    public void EnsureSizeRequested() => _ = EnsureSizeAsync();
+
+    /// يكتمل بعد حساب الحجم (عرض القائمة يحسب الأحجام واحدًا تلو الآخر)
+    public async System.Threading.Tasks.Task EnsureSizeAsync()
     {
         if (_sizeRequested) return;
         _sizeRequested = true;

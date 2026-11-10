@@ -6,27 +6,27 @@
              x:Class="HalawaHub.App.Views.ConfirmDialog"
              x:DataType="vm:MainViewModel"
              IsVisible="{Binding IsConfirmOpen}">
-    <Panel Background="#C7060202">
+    <Panel Background="{DynamicResource ScrimBrush}">
         <Border Width="520" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center"
-                CornerRadius="14" Padding="26,22" Background="{StaticResource DialogBrush}"
-                BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1" BoxShadow="0 30 80 0 #B3000000">
+                CornerRadius="14" Padding="26,22" Background="{DynamicResource DialogBrush}"
+                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1" BoxShadow="0 30 80 0 #B3000000">
             <Grid RowDefinitions="Auto,Auto,*,Auto">
                 <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Classes="h2" Text="{Binding Confirm.Title}" Foreground="{StaticResource RedHoverBrush}"
+                    <TextBlock Classes="h2" Text="{Binding Confirm.Title}" Foreground="{DynamicResource RedHoverBrush}"
                                TextWrapping="Wrap"/>
                     <Button Grid.Column="1" Classes="x" Command="{Binding CancelConfirmCommand}"
                             ToolTip.Tip="{l:Loc close}" AutomationProperties.Name="{l:Loc close}">
                         <c:VectorIcon Data="{StaticResource IconX}" Size="18"/>
                     </Button>
                 </Grid>
-                <TextBlock Grid.Row="1" Text="{Binding Confirm.Message}" Foreground="{StaticResource ChipTextBrush}"
+                <TextBlock Grid.Row="1" Text="{Binding Confirm.Message}" Foreground="{DynamicResource ChipTextBrush}"
                            FontSize="14" TextWrapping="Wrap" Margin="0,10,0,12"/>
                 <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding Confirm.HasDetails}">
-                    <Border Background="#14FFFFFF" CornerRadius="10" Padding="12,10">
+                    <Border Background="{DynamicResource Wash08Brush}" CornerRadius="10" Padding="12,10">
                         <ItemsControl ItemsSource="{Binding Confirm.Details}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
-                                    <SelectableTextBlock Text="{Binding}" FontSize="12" Foreground="#9C8A8A"
+                                    <SelectableTextBlock Text="{Binding}" FontSize="12" Foreground="{DynamicResource SubtleBrush}"
                                                          TextWrapping="Wrap" Margin="0,2" FlowDirection="LeftToRight"
                                                          HorizontalAlignment="Left"/>
                                 </DataTemplate>

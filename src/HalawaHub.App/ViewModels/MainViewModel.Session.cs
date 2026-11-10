@@ -17,24 +17,40 @@ namespace HalawaHub.App.ViewModels;
 
 public partial class MainViewModel
 {
+    private static readonly TimeSpan SteamPollInterval = TimeSpan.FromSeconds(2);
+
     private GameCardViewModel? _sessionGame;
     private DateTime _sessionStart;
     private Process? _sessionProcess;
+    private SteamSessionTracker? _steamTracker;
+    private Avalonia.Threading.DispatcherTimer? _steamPollTimer;
 
-    private void BeginPlaySession(GameCardViewModel card, Process? proc)
+    /// <summary>
+    /// ألعاب Steam تُشغَّل عبر steam:// فلا نملك عمليتها؛ إن وُجد سجل Steam
+    /// نتتبع الجلسة منه (steamTracker) بدل تركيز النافذة الذي كان ينهيها بعد ثوانٍ.
+    /// </summary>
+    internal void BeginPlaySession(GameCardViewModel card, Process? proc, SteamSessionTracker? steamTracker = null)
     {
         EndPlaySession();
         _sessionGame = card;
         _sessionStart = DateTime.UtcNow;
 
-        if (proc != null && File.Exists(card.Game.ExecutablePath))
+        if (steamTracker != null)
+        {
+            _steamTracker = steamTracker;
+            StartSteamPolling();
+        }
+        else if (proc != null && File.Exists(card.Game.ExecutablePath))
         {
             try
             {
                 _sessionProcess = proc;
                 proc.EnableRaisingEvents = true;
-                proc.Exited += (_, _) =>
-                    Avalonia.Threading.Dispatcher.UIThread.Post(EndPlaySession);
+                // عملية لعبة سابقة قد تخرج بعد بدء جلسة جديدة — لا تُنهِ إلا جلستها
+                proc.Exited += (_, _) => Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    if (_sessionGame == card) EndPlaySession();
+                });
             }
             catch
             {
@@ -47,17 +63,66 @@ public partial class MainViewModel
 
     public void OnWindowRegainedFocus()
     {
-        if (_sessionGame != null && _sessionProcess == null)
+        // احتياط قديم للجلسات التي لا نملك لها عملية ولا سجلًا (Epic/Xbox...)
+        if (_sessionGame != null && _sessionProcess == null && _steamTracker == null)
             EndPlaySession();
+    }
+
+    private void StartSteamPolling()
+    {
+        _steamPollTimer ??= CreateSteamPollTimer();
+        _steamPollTimer.Start();
+    }
+
+    private Avalonia.Threading.DispatcherTimer CreateSteamPollTimer()
+    {
+        var timer = new Avalonia.Threading.DispatcherTimer { Interval = SteamPollInterval };
+        timer.Tick += (_, _) => PollSteamSession();
+        return timer;
+    }
+
+    private void StopSteamPolling()
+    {
+        _steamPollTimer?.Stop();
+        _steamTracker = null;
+    }
+
+    internal void PollSteamSession()
+    {
+        var tracker = _steamTracker;
+        if (tracker == null || _sessionGame == null)
+        {
+            // الجلسة أُلغيت من مكان آخر (مثل فشل xdg-open على لينكس)
+            StopSteamPolling();
+            return;
+        }
+
+        switch (tracker.Poll())
+        {
+            case SteamSessionState.Ended:
+                EndPlaySession();
+                break;
+
+            case SteamSessionState.NeverStarted:
+                Log.Info($"Steam: لم تبدأ {_sessionGame.Name} خلال المهلة — لا يُحتسب وقت لعب");
+                _sessionGame = null;
+                StopSteamPolling();
+                break;
+        }
     }
 
     private void EndPlaySession()
     {
         var card = _sessionGame;
+        var tracker = _steamTracker;
+        StopSteamPolling();
+        _sessionProcess = null;
         if (card == null) return;
         _sessionGame = null;
 
-        var secs = (DateTime.UtcNow - _sessionStart).TotalSeconds;
+        var secs = tracker != null
+            ? tracker.Elapsed(DateTime.Now).TotalSeconds
+            : (DateTime.UtcNow - _sessionStart).TotalSeconds;
         PlayTimeService.AddSeconds(card.Game.Platform, card.Game.Id, secs);
         card.RefreshPlayTime();
         UpdateHomeViewCollections();
@@ -82,8 +147,11 @@ public partial class MainViewModel
             if (!string.IsNullOrEmpty(args))
                 psi.Arguments = args;
 
+            // قبل التشغيل: يحفظ طول سجل Steam الحالي حتى لا يفوته سطر بدء اللعبة
+            var steamTracker = game.Platform == "Steam" ? SteamSessionTracker.TryCreate(game.Id) : null;
+
             var proc = Process.Start(psi);
-            BeginPlaySession(card, proc);
+            BeginPlaySession(card, proc, steamTracker);
 
             if (OperatingSystem.IsLinux() && proc != null && GameCardViewModel.IsUrlLaunch(game.ExecutablePath))
                 _ = WatchLinuxOpenerAsync(card, proc);

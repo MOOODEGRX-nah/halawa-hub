@@ -492,7 +492,10 @@ public class MotionTests
         Action toStartup = () => vm.SelectSettingsSectionCommand.Execute("4");
         toStartup();
         PillMove(pill, () => vm.SelectSettingsSectionCommand.Execute("0"), toStartup, "side pill after resize");
-        Sample(ui, 100, () => 0);
+        // آخر خطوات الحركة قد تتأخر على جهاز بطيء: ننتظر ثبات الموضع نفسه قبل المقارنة
+        SampleUntil(() => CenterOf(ui, pill).Y,
+            v => v.Count >= 15 && v.TakeLast(15).Distinct().Count() == 1 && Math.Abs(pill.Bounds.Height - 44) < 0.01,
+            "side pill settles");
         var selected = ui.All<Button>().First(b => b.Classes.Contains("si") && b.Classes.Contains("on"));
         CenterOf(ui, pill).Y.Should().BeApproximately(CenterOf(ui, selected).Y, 1, "the pill lands on the selected item");
 

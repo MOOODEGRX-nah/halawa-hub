@@ -45,8 +45,9 @@
     <Panel>
         <Border Name="Scrim" Background="#C7060202" PointerPressed="Scrim_PointerPressed"/>
 
-        <Border Name="DialogBox" Width="900" Height="540" HorizontalAlignment="Center" VerticalAlignment="Top"
-                Margin="20,110,20,20" CornerRadius="14" Background="{StaticResource DialogBrush}"
+        <!-- الحجم يتبع البرنامج: 80% منه، لا أصغر من 900×540 ولا أكبر من 1400×900، ودائمًا داخله -->
+        <c:DialogFrame Name="Frame" MinFrameWidth="900" MinFrameHeight="540">
+        <Border Name="DialogBox" CornerRadius="14" Background="{StaticResource DialogBrush}"
                 BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
                 BoxShadow="0 30 80 0 #B3000000" RenderTransformOrigin="50%,50%">
             <Border CornerRadius="13" ClipToBounds="True">
@@ -207,7 +208,8 @@
                                 <!-- المظهر -->
                                 <StackPanel Spacing="16" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}">
                                     <TextBlock Classes="lbl" Text="{l:Loc moreThemes}"/>
-                                    <Grid ColumnDefinitions="*,Auto" MaxWidth="480" HorizontalAlignment="Stretch">
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto">
                                         <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
                                             <TextBlock Text="{l:Loc showHidden}" FontSize="15"/>
                                             <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc showHiddenNote}"/>
@@ -215,11 +217,13 @@
                                         <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowHiddenGames, Mode=TwoWay}"
                                                       AutomationProperties.Name="{l:Loc showHidden}"/>
                                     </Grid>
+                                    </c:CappedWidth>
                                 </StackPanel>
 
                                 <!-- التشغيل -->
                                 <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}">
-                                    <Grid ColumnDefinitions="*,Auto" MaxWidth="480" Margin="0,4">
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
                                         <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
                                             <TextBlock Text="{l:Loc startWith}" FontSize="15"/>
                                             <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc startNote}" IsVisible="{Binding IsStartupSupported}"/>
@@ -228,7 +232,9 @@
                                         <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding LaunchOnStartup, Mode=TwoWay}"
                                                       IsEnabled="{Binding IsStartupSupported}" AutomationProperties.Name="{l:Loc startWith}"/>
                                     </Grid>
-                                    <Grid ColumnDefinitions="*,Auto" MaxWidth="480" Margin="0,4" IsVisible="{Binding IsAppMenuSupported}">
+                                    </c:CappedWidth>
+                                    <c:CappedWidth Cap="480" IsVisible="{Binding IsAppMenuSupported}">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
                                         <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
                                             <TextBlock Text="{l:Loc appMenu}" FontSize="15"/>
                                             <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc appMenuNote}"/>
@@ -236,6 +242,7 @@
                                         <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowInAppMenu, Mode=TwoWay}"
                                                       AutomationProperties.Name="{l:Loc appMenu}"/>
                                     </Grid>
+                                    </c:CappedWidth>
                                 </StackPanel>
 
                                 <!-- معلومات النسخة -->
@@ -278,5 +285,6 @@
             </Panel>
             </Border>
         </Border>
+        </c:DialogFrame>
     </Panel>
 </UserControl>

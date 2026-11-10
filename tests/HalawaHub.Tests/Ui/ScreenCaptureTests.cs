@@ -80,4 +80,44 @@ public class ScreenCaptureTests
         Shot(ui, language, "21-search-no-match");
         vm.CloseSearch();
     }
+
+    /// <summary>
+    /// النافذتان العائمتان بكل أقسامهما على أحجام مختلفة للبرنامج: أصغر حجم، مكبّر، وشاشة كبيرة.
+    /// </summary>
+    [AvaloniaTheory]
+    [InlineData(Loc.Arabic, 980, 620)]
+    [InlineData(Loc.English, 980, 620)]
+    [InlineData(Loc.Arabic, 1920, 1080)]
+    [InlineData(Loc.English, 1920, 1080)]
+    [InlineData(Loc.Arabic, 2560, 1440)]
+    [InlineData(Loc.English, 2560, 1440)]
+    public void Dialogs_Render_AtWindowSize(string language, int width, int height)
+    {
+        using var ui = new UiHarness(language);
+        var vm = ui.Vm;
+        ui.Window.Width = width;
+        ui.Window.Height = height;
+        ui.Settle();
+        var size = $"{width}x{height}";
+
+        vm.ApiKeyStatus = ApiKeyCheckState.Valid;
+        vm.OpenSettingsCommand.Execute(null);
+        for (var i = 0; i < 6; i++)
+        {
+            vm.SelectSettingsSectionCommand.Execute(i.ToString());
+            Shot(ui, language, $"{size}-settings-{i}");
+        }
+        vm.CloseSettingsCommand.Execute(null);
+        ui.Settle();
+
+        var cyberpunk = vm.Games.First(g => g.Game.Id == "cyberpunk");
+        vm.OpenDetailsCommand.Execute(cyberpunk);
+        for (var i = 0; i < 4; i++)
+        {
+            vm.SelectGameDialogSectionCommand.Execute(i.ToString());
+            Shot(ui, language, $"{size}-game-{i}");
+        }
+        vm.CloseDetailsCommand.Execute(null);
+        ui.Settle();
+    }
 }

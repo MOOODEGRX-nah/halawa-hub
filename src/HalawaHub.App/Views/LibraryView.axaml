@@ -124,18 +124,35 @@
                     </c:SlidingPill>
                 </Panel>
 
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" Margin="0,0,16,0" VerticalAlignment="Center">
+                <!-- إضافة لعبة يدويًا -->
+                <Button Name="AddGameButton" Classes="ib" VerticalAlignment="Center"
+                        Click="AddGame_Click" ToolTip.Tip="{l:Loc addGame}" AutomationProperties.Name="{l:Loc addGame}">
+                    <c:VectorIcon Data="{StaticResource IconPlus}" Size="18"/>
+                </Button>
+
                 <!-- الترتيب: ليس في التصميم، باقٍ كقائمة صغيرة بجانب البحث -->
-                <Button Grid.Column="2" Classes="ib" Margin="0,0,16,0" VerticalAlignment="Center"
+                <Button Classes="ib" VerticalAlignment="Center"
                         ToolTip.Tip="{l:Loc sortBy}" AutomationProperties.Name="{l:Loc sortBy}">
                     <c:VectorIcon Data="{StaticResource IconSort}" Size="18"/>
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
-                            <MenuItem Header="{l:Loc sortName}" Tag="name" Click="Sort_Click"/>
-                            <MenuItem Header="{l:Loc sortLastPlayed}" Tag="lastplayed" Click="Sort_Click"/>
-                            <MenuItem Header="{l:Loc sortPlatform}" Tag="platform" Click="Sort_Click"/>
+                            <MenuItem Header="{l:Loc sortName}" Tag="name" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=name, Mode=OneWay}"/>
+                            <MenuItem Header="{l:Loc sortLastPlayed}" Tag="lastplayed" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=lastplayed, Mode=OneWay}"/>
+                            <MenuItem Header="{l:Loc sortPlayTime}" Tag="playtime" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=playtime, Mode=OneWay}"/>
+                            <MenuItem Header="{l:Loc sortAdded}" Tag="added" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=added, Mode=OneWay}"/>
+                            <MenuItem Header="{l:Loc sortPlatform}" Tag="platform" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=platform, Mode=OneWay}"/>
+                            <Separator/>
+                            <MenuItem Header="{l:Loc sortReverse}" ToggleType="CheckBox" IsChecked="{Binding SortReverse, Mode=TwoWay}"/>
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>
+                </StackPanel>
 
                 <views:SearchBox Grid.Column="3" VerticalAlignment="Center" Margin="0,0,16,0"/>
 
@@ -200,6 +217,18 @@
                     </ItemsControl>
                     <TextBlock Text="{l:Loc emptyPage}" IsVisible="{Binding IsPageEmpty}" FontSize="15"
                                Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center" Margin="0,60"/>
+                    <!-- المكتبة كلها فارغة: فحص الجهاز من هنا مباشرة -->
+                    <Button Name="ScanThisPcButton" Classes="btn pri" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,100,0,0"
+                            IsVisible="{Binding IsLibraryEmpty}" Command="{Binding RefreshCommand}" Content="{l:Loc scanThisPc}"/>
+                    <!-- فشل الفحص: السبب وزر إعادة المحاولة -->
+                    <Border Name="ScanErrorBanner" IsVisible="{Binding HasScanError}" VerticalAlignment="Top" HorizontalAlignment="Center"
+                            Margin="0,10,0,0" MaxWidth="640" Padding="16,10" CornerRadius="12"
+                            Background="#1A0A0C" BorderBrush="{StaticResource StatusRepairBrush}" BorderThickness="1">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding ScanError}" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13" Margin="0,0,12,0"/>
+                            <Button Grid.Column="1" Classes="btn" Command="{Binding RefreshCommand}" Content="{l:Loc tryAgain}"/>
+                        </Grid>
+                    </Border>
                 </Panel>
             </ScrollViewer>
             <!-- لقطة الصفحة السابقة أثناء الانزلاق بين التبويبات -->

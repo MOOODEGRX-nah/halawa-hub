@@ -58,6 +58,9 @@ internal sealed class UiHarness : IDisposable
         cfg.Language = language;
         cfg.SteamGridDbApiKey = "";
         cfg.ShowHiddenGames = false;
+        cfg.SortMode = "name";
+        cfg.SortReverse = false;
+        cfg.ShowPlayTimeOnCards = true;
         ConfigService.Save(cfg);
 
         var library = new Mock<ILibraryService>();

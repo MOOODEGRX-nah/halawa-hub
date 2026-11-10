@@ -149,8 +149,43 @@ public partial class MainViewModel : INotifyPropertyChanged
         get => _sortMode;
         set
         {
+            if (_sortMode == value) return;
             _sortMode = value;
+            _config.SortMode = value;
+            ConfigService.Save(_config);
             OnPropertyChanged(nameof(SortMode));
+            ApplyFilter();
+        }
+    }
+
+    private bool _showPlayTimeOnCards = true;
+    /// إظهار وقت اللعب وآخر تشغيل على البطاقات
+    public bool ShowPlayTimeOnCards
+    {
+        get => _showPlayTimeOnCards;
+        set
+        {
+            if (_showPlayTimeOnCards == value) return;
+            _showPlayTimeOnCards = value;
+            _config.ShowPlayTimeOnCards = value;
+            ConfigService.Save(_config);
+            foreach (var card in Games) card.ShowStats = value;
+            OnPropertyChanged(nameof(ShowPlayTimeOnCards));
+        }
+    }
+
+    private bool _sortReverse;
+    /// عكس اتجاه الترتيب الحالي
+    public bool SortReverse
+    {
+        get => _sortReverse;
+        set
+        {
+            if (_sortReverse == value) return;
+            _sortReverse = value;
+            _config.SortReverse = value;
+            ConfigService.Save(_config);
+            OnPropertyChanged(nameof(SortReverse));
             ApplyFilter();
         }
     }
@@ -309,7 +344,8 @@ public partial class MainViewModel : INotifyPropertyChanged
             new RiotLibraryProvider(),
             new XboxLibraryProvider(),
             new HeroicLibraryProvider(),
-            new LutrisLibraryProvider()
+            new LutrisLibraryProvider(),
+            new ManualGamesProvider()
         };
 
         _config = ConfigService.Load();
@@ -317,6 +353,9 @@ public partial class MainViewModel : INotifyPropertyChanged
         // قبل إنشاء أي نص: اللغة المحفوظة، والملفات القديمة بدون الحقل تفتح بالعربية
         Loc.Instance.Language = _config.Language;
         _showHiddenGames = _config.ShowHiddenGames;
+        _sortMode = string.IsNullOrEmpty(_config.SortMode) ? "name" : _config.SortMode;
+        _sortReverse = _config.SortReverse;
+        _showPlayTimeOnCards = _config.ShowPlayTimeOnCards;
         foreach (var search in _config.RecentSearches ?? new List<string>())
             RecentSearches.Add(search);
 

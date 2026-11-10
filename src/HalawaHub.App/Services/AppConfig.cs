@@ -39,4 +39,13 @@ public class AppConfig
 
     /// آخر عمليات البحث، تظهر كاقتراحات عند فتح البحث
     public List<string> RecentSearches { get; set; } = new();
+
+    /// ترتيب المكتبة: name, lastplayed, platform, playtime, added
+    public string SortMode { get; set; } = "name";
+
+    /// عكس اتجاه الترتيب
+    public bool SortReverse { get; set; }
+
+    /// وقت اللعب وآخر تشغيل على البطاقات
+    public bool ShowPlayTimeOnCards { get; set; } = true;
 }

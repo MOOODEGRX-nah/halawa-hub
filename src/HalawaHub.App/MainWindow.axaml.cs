@@ -68,7 +68,25 @@ public partial class MainWindow : Window
     /// Esc يغلق الأقرب: القائمة، ثم البحث، ثم النافذة المفتوحة
     private void OnAnyKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Escape || DataContext is not MainViewModel vm) return;
+        if (DataContext is not MainViewModel vm) return;
+
+        // Ctrl+K: بحث سريع من أي صفحة
+        if (e.Key == Key.K && (e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta)))
+        {
+            if (vm.IsQuickSearchOpen) vm.CloseQuickSearch();
+            else if (!vm.IsConfirmOpen) vm.OpenQuickSearch();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key != Key.Escape) return;
+
+        if (vm.IsQuickSearchOpen)
+        {
+            vm.CloseQuickSearch();
+            e.Handled = true;
+            return;
+        }
 
         if (vm.IsConfirmOpen)
         {

@@ -65,4 +65,17 @@ public partial class GameCard : UserControl
 
     private void Settings_Click(object? sender, RoutedEventArgs e) =>
         MainVm?.OpenDetailsCommand.Execute(_card);
+
+    private void Shortcut_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_card != null) MainVm?.CreateDesktopShortcut(_card);
+    }
+
+    private async void CopyId_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_card == null) return;
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard != null) await clipboard.SetTextAsync(_card.Game.Id);
+        MainVm?.OnGameIdCopied(_card);
+    }
 }

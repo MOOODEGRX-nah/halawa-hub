@@ -93,4 +93,19 @@ public partial class GameDialog : UserControl
         if (files.Count > 0)
             card.SetCustomCover(files[0].Path.LocalPath);
     }
+
+    private async void ChangeManualFile_Click(object? sender, RoutedEventArgs e)
+    {
+        var card = _vm?.DetailsGame;
+        if (card == null || !card.IsManual) return;
+        var file = await GamePickers.PickGameFileAsync(this);
+        if (file != null) await _vm!.ChangeManualGameFileAsync(card, file);
+    }
+
+    private async void RemoveManual_Click(object? sender, RoutedEventArgs e)
+    {
+        var card = _vm?.DetailsGame;
+        if (card == null || !card.IsManual) return;
+        await _vm!.RemoveManualGameAsync(card);
+    }
 }

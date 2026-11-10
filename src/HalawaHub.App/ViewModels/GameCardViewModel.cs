@@ -34,6 +34,7 @@ public class GameCardViewModel : INotifyPropertyChanged
         _isFavorite = FavoritesService.IsFavorite(game.Platform, game.Id);
         _launchParameters = LaunchParamsService.Get(game.Platform, game.Id);
         LastPlayed = PlayHistoryService.GetLastPlayed(game.Platform, game.Id);
+        DateAdded = FirstSeenService.Get(game);
         _displayName = GameOverridesService.GetDisplayName(game.Platform, game.Id);
         _editableName = _displayName ?? game.Name;
         _isHidden = GameOverridesService.IsHidden(game.Platform, game.Id);
@@ -55,6 +56,11 @@ public class GameCardViewModel : INotifyPropertyChanged
     }
 
     public DateTime? LastPlayed { get; private set; }
+
+    /// أول مرة رآها Halawa (للترتيب حسب "تاريخ الإضافة")
+    public DateTime DateAdded { get; }
+
+    public TimeSpan PlayTimeTotal => PlayTimeService.GetTotal(Game.Platform, Game.Id);
 
     public string LastPlayedText
     {
@@ -140,6 +146,7 @@ public class GameCardViewModel : INotifyPropertyChanged
     {
         "Steam" => "updNoteSteam",
         "Epic Games" => "updNoteEpic",
+        ManualGames.Platform => "updNoteManual",
         _ => CanOpenInLauncher ? "updNoteOther" : "updNoteNone"
     }, LauncherActions.LauncherName(Game.Platform));
 
@@ -155,10 +162,40 @@ public class GameCardViewModel : INotifyPropertyChanged
             OnPropertyChanged(name);
     }
 
+    private bool _showStats = true;
+
+    /// إعداد "وقت اللعب على البطاقات" (تضبطه MainViewModel)
+    public bool ShowStats
+    {
+        get => _showStats;
+        set
+        {
+            if (_showStats == value) return;
+            _showStats = value;
+            OnPropertyChanged(nameof(ShowStats));
+            OnPropertyChanged(nameof(HasStatsLine));
+        }
+    }
+
+    /// سطر البطاقة: "12 ساعة · قبل 3 أيام"
+    public string StatsText => string.Join(" · ", new[] { PlayTimeText, LastPlayedText }.Where(s => !string.IsNullOrEmpty(s)));
+
+    public bool HasStatsLine => _showStats && StatsText.Length > 0;
+
+    public bool HasLastPlayed => LastPlayed != null;
+
+    private void NotifyStats()
+    {
+        OnPropertyChanged(nameof(StatsText));
+        OnPropertyChanged(nameof(HasStatsLine));
+        OnPropertyChanged(nameof(HasLastPlayed));
+    }
+
     public void RefreshPlayTime()
     {
         OnPropertyChanged(nameof(PlayTimeText));
         OnPropertyChanged(nameof(HasPlayTime));
+        NotifyStats();
     }
 
     /// تُستدعى بعد ما تشتغل اللعبة فعليًا — تسجّل وقت التشغيل الحالي
@@ -168,6 +205,7 @@ public class GameCardViewModel : INotifyPropertyChanged
         LastPlayed = DateTime.UtcNow;
         OnPropertyChanged(nameof(LastPlayed));
         OnPropertyChanged(nameof(LastPlayedText));
+        NotifyStats();
     }
 
     /// النصوص المحسوبة تتغير مع اللغة، أما الروابط الثابتة فتتحدث وحدها عبر Loc
@@ -175,8 +213,10 @@ public class GameCardViewModel : INotifyPropertyChanged
     {
         OnPropertyChanged(nameof(StatusText));
         OnPropertyChanged(nameof(LastPlayedText));
+        NotifyStats();
         OnPropertyChanged(nameof(PlayTimeText));
         OnPropertyChanged(nameof(FavoriteLabel));
+        OnPropertyChanged(nameof(PlatformShort));
         NotifyStatusChanged();
         foreach (var tool in Tools) tool.NotifyLanguageChanged();
     }
@@ -240,12 +280,20 @@ public class GameCardViewModel : INotifyPropertyChanged
         "Epic Games" => "Epic",
         "Riot Games" => "Riot",
         "Xbox / Microsoft Store" => "Xbox",
+        HalawaHub.Core.Library.ManualGames.Platform => Loc.Instance["platManual"],
         _ => platform
     };
 
     public string StatusText => Loc.Instance[Game.IsInstalled ? "statusInstalled" : "statusNotInstalled"];
     public bool IsInstalled => Game.IsInstalled;
     public bool HasTools => Tools.Count > 0;
+
+    /// لعبة أضافها المستخدم: يمكن تغيير ملفها أو إزالتها من Halawa
+    public bool IsManual => Game.Platform == ManualGames.Platform;
+
+    /// تبويب الأخبار: ألعاب Steam فقط (ISteamNews)
+    public bool HasNews => Game.Platform == "Steam" && !string.IsNullOrEmpty(Game.Id) && Game.Id.All(char.IsAsciiDigit);
+    public string ManualTarget => Game.ExecutablePath;
 
     // ===== الملفات =====
 
@@ -288,6 +336,13 @@ public class GameCardViewModel : INotifyPropertyChanged
     {
         if (_sizeRequested) return;
         _sizeRequested = true;
+        // مجلد عام (مجلد Windows لاختصار يدوي مثلًا): حجمه ليس حجم اللعبة، وحسابه بطيء جدًا
+        var dir = HalawaHub.Core.Sessions.GameFolderMatcher.NormalizeDir(Game.InstallPath);
+        if (dir == null || HalawaHub.Core.Sessions.GameFolderMatcher.IsTooBroad(dir, OperatingSystem.IsWindows()))
+        {
+            SizeOnDiskText = "—";
+            return;
+        }
         SizeOnDiskText = GameSizeService.Format(await GameSizeService.GetSizeAsync(Game.InstallPath));
     }
 

@@ -17,7 +17,7 @@ public partial class MainViewModel
         var filtered = _filterService.ApplyFilter(
             Games, SearchQuery, SelectedNavItem, SortMode,
             NavAll, NavFavorite, NavInstalled, NavRecent,
-            platform: SelectedPlatform, includeHidden: ShowHiddenGames);
+            platform: SelectedPlatform, includeHidden: ShowHiddenGames, reverse: SortReverse);
         foreach (var card in filtered)
             FilteredGames.Add(card);
 

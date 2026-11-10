@@ -5,6 +5,7 @@
              xmlns:c="using:HalawaHub.App.Controls"
              xmlns:conv="using:HalawaHub.App.Converters"
              xmlns:core="using:HalawaHub.Core.Covers"
+             xmlns:news="using:HalawaHub.Core.News"
              xmlns:behaviors="using:HalawaHub.App.Behaviors"
              xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
              x:Class="HalawaHub.App.Views.GameDialog"
@@ -57,7 +58,7 @@
                                    FontWeight="Bold" FontSize="17" Margin="10,0,10,16" TextTrimming="CharacterEllipsis"/>
                         <Panel>
                             <c:SlidingPill Orientation="Vertical" Pitch="48" Motion="Dialog" IsHitTestVisible="False"
-                                           ItemCount="{Binding GameDialogSectionCount}" SelectedIndex="{Binding GameDialogSection}">
+                                           ItemCount="{Binding GameDialogSectionCount}" SelectedIndex="{Binding GameDialogPillIndex}">
                                 <Border CornerRadius="10" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #73EF4444"/>
                             </c:SlidingPill>
                             <StackPanel Spacing="4">
@@ -70,8 +71,11 @@
                                 <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}"
                                         Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="3" Content="{l:Loc launch}"/>
                                 <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}"
+                                        IsVisible="{Binding DetailsGame.HasNews, FallbackValue=False}"
+                                        Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="4" Content="{l:Loc news}"/>
+                                <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=5}"
                                         IsVisible="{Binding DetailsGame.HasTools, FallbackValue=False}"
-                                        Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="4" Content="{l:Loc tools}"/>
+                                        Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="5" Content="{l:Loc tools}"/>
                             </StackPanel>
                         </Panel>
                     </StackPanel>
@@ -150,6 +154,13 @@
                                                Foreground="{StaticResource AmberBrush}"/>
                                 </Grid>
                                 </c:CappedWidth>
+                                <c:CappedWidth Cap="560" IsVisible="{Binding HasLastPlayed}">
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+                                    <TextBlock Text="{l:Loc lastPlayedLbl}" FontSize="16" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding LastPlayedText}" FontSize="14" VerticalAlignment="Center"
+                                               Foreground="{StaticResource MutedBrush}"/>
+                                </Grid>
+                                </c:CappedWidth>
                             </StackPanel>
 
                             <!-- الملفات المثبتة -->
@@ -178,6 +189,18 @@
                                 </Grid>
                                 <Button Classes="btn" HorizontalAlignment="Left" Content="{Binding UninstallLabel}" IsVisible="{Binding CanUninstall}"
                                         Command="{Binding #Root.((vm:MainViewModel)DataContext).DeleteGameCommand}"/>
+                                <!-- لعبة مضافة يدويًا: الملف الذي يُشغَّل، وتغييره أو إزالتها من Halawa -->
+                                <StackPanel Spacing="8" IsVisible="{Binding IsManual}">
+                                    <TextBlock Classes="lbl" Text="{l:Loc manualTarget}"/>
+                                    <Border Classes="code">
+                                        <TextBlock Text="{Binding ManualTarget}" TextWrapping="Wrap"/>
+                                    </Border>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Button Classes="btn" Content="{l:Loc changeFile}" Click="ChangeManualFile_Click"/>
+                                        <Button Classes="btn" Content="{l:Loc removeManual}" Click="RemoveManual_Click"/>
+                                    </StackPanel>
+                                    <TextBlock Classes="lbl" Text="{l:Loc removeManualNote}" TextWrapping="Wrap"/>
+                                </StackPanel>
                             </StackPanel>
 
                             <!-- التخصيص -->
@@ -252,9 +275,30 @@
                                 <TextBlock Classes="lbl" Text="{l:Loc launchUrlNote}" TextWrapping="Wrap" IsVisible="{Binding !SupportsLaunchParameters}"/>
                             </StackPanel>
 
+                            <!-- الأخبار: ألعاب Steam فقط -->
+                            <StackPanel Spacing="8" IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}">
+                                <TextBlock Classes="lbl" Text="{l:Loc newsLoading}" IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).IsGameNewsLoading}"/>
+                                <TextBlock Classes="lbl" Text="{l:Loc newsNone}" IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).HasNoGameNews}"/>
+                                <ItemsControl ItemsSource="{Binding #Root.((vm:MainViewModel)DataContext).GameNews}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="news:NewsItem">
+                                            <Button Classes="btn" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Height="NaN"
+                                                    Padding="14,10" Margin="0,0,0,8"
+                                                    Command="{Binding #Root.((vm:MainViewModel)DataContext).OpenUrlCommand}" CommandParameter="{Binding Url}">
+                                                <StackPanel Spacing="4">
+                                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                                    <TextBlock Text="{Binding Date, StringFormat='{}{0:yyyy-MM-dd}'}" FontSize="12"
+                                                               Foreground="{StaticResource MutedBrush}" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
                             <!-- الأدوات: تظهر فقط إذا كانت للعبة أدوات من الإضافات -->
                             <ItemsControl ItemsSource="{Binding Tools}"
-                                          IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}">
+                                          IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=5}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:GameToolViewModel">
                                         <Border Background="{StaticResource PageBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"

@@ -138,6 +138,13 @@ public partial class LibraryView : UserControl
         }
     }.RunAsync(target);
 
+    private async void AddGame_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_vm == null) return;
+        var file = await GamePickers.PickGameFileAsync(this);
+        if (file != null) await _vm.AddManualGameAsync(file);
+    }
+
     private void Sort_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is MenuItem { Tag: string mode }) _vm?.SetSortMode(mode);

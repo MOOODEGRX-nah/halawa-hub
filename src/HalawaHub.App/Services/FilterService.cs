@@ -22,7 +22,8 @@ public class FilterService : IFilterService
         string navInstalled,
         string navRecent,
         string? platform = null,
-        bool includeHidden = false)
+        bool includeHidden = false,
+        bool reverse = false)
     {
         // الألعاب المخفية لا تظهر في أي تبويب ما لم يطلب المستخدم إظهارها
         IEnumerable<GameCardViewModel> query = includeHidden ? games : games.Where(c => !c.IsHidden);
@@ -58,11 +59,20 @@ public class FilterService : IFilterService
             query = query.Where(c => c.Platform == platformName);
         }
 
-        query = sortMode switch
+        // الاتجاه الطبيعي لكل ترتيب (الاسم أ←ي، والأحدث/الأكثر أولًا)، و"اعكس" يقلبه
+        var byName = StringComparer.OrdinalIgnoreCase;
+        query = (sortMode, reverse) switch
         {
-            "lastplayed" => query.OrderByDescending(c => c.LastPlayed ?? DateTime.MinValue),
-            "platform" => query.OrderBy(c => c.Platform).ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase),
-            _ => query.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+            ("lastplayed", false) => query.OrderByDescending(c => c.LastPlayed ?? DateTime.MinValue).ThenBy(c => c.Name, byName),
+            ("lastplayed", true) => query.OrderBy(c => c.LastPlayed ?? DateTime.MaxValue).ThenBy(c => c.Name, byName),
+            ("platform", false) => query.OrderBy(c => c.Platform).ThenBy(c => c.Name, byName),
+            ("platform", true) => query.OrderByDescending(c => c.Platform).ThenBy(c => c.Name, byName),
+            ("playtime", false) => query.OrderByDescending(c => c.PlayTimeTotal).ThenBy(c => c.Name, byName),
+            ("playtime", true) => query.OrderBy(c => c.PlayTimeTotal).ThenBy(c => c.Name, byName),
+            ("added", false) => query.OrderByDescending(c => c.DateAdded).ThenBy(c => c.Name, byName),
+            ("added", true) => query.OrderBy(c => c.DateAdded).ThenBy(c => c.Name, byName),
+            (_, true) => query.OrderByDescending(c => c.Name, byName),
+            _ => query.OrderBy(c => c.Name, byName)
         };
 
         return query.ToList();

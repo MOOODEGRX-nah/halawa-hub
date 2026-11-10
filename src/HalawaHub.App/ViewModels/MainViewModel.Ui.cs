@@ -215,8 +215,30 @@ public partial class MainViewModel
             if (_isPageEmpty == value) return;
             _isPageEmpty = value;
             OnPropertyChanged(nameof(IsPageEmpty));
+            OnPropertyChanged(nameof(IsLibraryEmpty));
         }
     }
+
+    /// المكتبة كلها فارغة (لا مجرد صفحة): يظهر زر "افحص هذا الجهاز"
+    public bool IsLibraryEmpty => _isPageEmpty && Games.Count == 0 && _scanError == null;
+
+    private string? _scanError;
+
+    /// فشل آخر فحص: يظهر شريط فيه السبب وزر "حاول مجددًا"
+    public string? ScanError
+    {
+        get => _scanError;
+        private set
+        {
+            if (_scanError == value) return;
+            _scanError = value;
+            OnPropertyChanged(nameof(ScanError));
+            OnPropertyChanged(nameof(HasScanError));
+            OnPropertyChanged(nameof(IsLibraryEmpty));
+        }
+    }
+
+    public bool HasScanError => _scanError != null;
 
     // ===== الترتيب =====
 
@@ -354,6 +376,8 @@ public partial class MainViewModel
             OnPropertyChanged(nameof(GameDialogSection));
             OnPropertyChanged(nameof(GameDialogTitle));
             if (value == 1) DetailsGame?.EnsureSizeRequested();
+            if (value == NewsSection && DetailsGame != null) _ = LoadGameNewsAsync(DetailsGame);
+            OnPropertyChanged(nameof(GameDialogPillIndex));
         }
     }
 
@@ -362,11 +386,15 @@ public partial class MainViewModel
         1 => "files",
         2 => "custom",
         3 => "launch",
-        4 => "tools",
+        NewsSection => "news",
+        ToolsSection => "tools",
         _ => "general"
     }];
 
-    public int GameDialogSectionCount => DetailsGame?.HasTools == true ? 5 : 4;
+    public int GameDialogSectionCount => 4 + (DetailsGame?.HasNews == true ? 1 : 0) + (DetailsGame?.HasTools == true ? 1 : 0);
+
+    /// موضع القسم في الشريط الجانبي (الأدوات تأتي مكان الأخبار إن لم تكن للعبة أخبار)
+    public int GameDialogPillIndex => _gameDialogSection == ToolsSection && DetailsGame?.HasNews != true ? NewsSection : _gameDialogSection;
 
     private void OpenDetails(GameCardViewModel? card)
     {

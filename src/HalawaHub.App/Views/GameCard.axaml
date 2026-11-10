@@ -113,8 +113,12 @@
                         </LinearGradientBrush>
                     </Border.Background>
                     <StackPanel Spacing="10">
+                        <StackPanel Spacing="2">
                         <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
                                    TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Name="StatsLine" Text="{Binding StatsText}" FontSize="12" Foreground="{StaticResource MutedBrush}"
+                                       TextTrimming="CharacterEllipsis" IsVisible="{Binding HasStatsLine}"/>
+                        </StackPanel>
                         <Button Classes="play" Click="Play_Click" AutomationProperties.Name="{l:Loc play}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <c:VectorIcon Data="{StaticResource IconPlay}" Size="16" IsFilled="True"
@@ -173,6 +177,18 @@
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Panel>
                         <TextBlock Text="{l:Loc gameSettings}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button Classes="mi" Click="Shortcut_Click" AutomationProperties.Name="{l:Loc desktopShortcut}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:VectorIcon Data="{StaticResource IconShortcut}" Size="16" VerticalAlignment="Center"/>
+                        <TextBlock Text="{l:Loc desktopShortcut}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button Classes="mi" Click="CopyId_Click" AutomationProperties.Name="{l:Loc copyId}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:VectorIcon Data="{StaticResource IconCopy}" Size="16" VerticalAlignment="Center"/>
+                        <TextBlock Text="{l:Loc copyId}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </StackPanel>

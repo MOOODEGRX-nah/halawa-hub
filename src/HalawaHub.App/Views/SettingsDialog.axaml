@@ -221,6 +221,16 @@
                                                       AutomationProperties.Name="{l:Loc showHidden}"/>
                                     </Grid>
                                     </c:CappedWidth>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Text="{l:Loc showStats}" FontSize="15"/>
+                                            <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{l:Loc showStatsNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowPlayTimeOnCards, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc showStats}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
                                 </StackPanel>
 
                                 <!-- التشغيل -->

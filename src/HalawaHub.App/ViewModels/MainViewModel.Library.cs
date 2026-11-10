@@ -50,6 +50,7 @@ public partial class MainViewModel
 
         ClearStatus();
         IsRefreshDone = false;
+        ScanError = null;
         IsRefreshing = true;
 
         var allProviders = _builtInProviders.Concat(_pluginLoader.LibraryProviders).ToList();
@@ -73,7 +74,7 @@ public partial class MainViewModel
         catch (Exception ex)
         {
             Log.Error("فشل فحص المكتبات", ex);
-            ShowStatus(Loc.Instance.Format("scanFailed", ex.Message));
+            ScanError = Loc.Instance.Format("scanFailed", ex.Message);
         }
         finally
         {
@@ -100,7 +101,7 @@ public partial class MainViewModel
         // بناء GameCardViewModels من النتائج
         foreach (var game in games)
         {
-            var card = new GameCardViewModel(game, allTools);
+            var card = new GameCardViewModel(game, allTools) { ShowStats = _showPlayTimeOnCards };
             card.FavoriteChanged += (_, _) =>
             {
                 UpdateHomeViewCollections();
@@ -115,6 +116,7 @@ public partial class MainViewModel
         ApplyFilter();
         RefreshSearchState();
         _ = RefreshStatusesAsync();
+        FirstSeenService.SaveIfChanged();
 
         // لو فيه مفتاح SteamGridDB مُعد، نكمّل أغلفة المنصات اللي ما عندها مصدر مباشر
         if (_coverClient.IsConfigured)

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using HalawaHub.Core;
+using HalawaHub.Core.Security;
 
 namespace HalawaHub.App.Services;
 
@@ -68,7 +69,49 @@ public static class ConfigService
             return defaults;
         }
 
+        LoadSecrets(path, parsed);
         return parsed;
+    }
+
+    internal const string SteamGridDbSecretName = "steamgriddb-api-key";
+
+    /// <summary>
+    /// المفتاح من مخزن الأسرار. ملف قديم فيه المفتاح نصًا صريحًا يُرحَّل فورًا:
+    /// يُحفظ مشفّرًا ويُحذف النص من config.json.
+    /// </summary>
+    private static void LoadSecrets(string path, AppConfig config)
+    {
+        if (!string.IsNullOrEmpty(config.LegacyPlainSteamGridDbApiKey))
+        {
+            config.SteamGridDbApiKey = config.LegacyPlainSteamGridDbApiKey!;
+            config.LegacyPlainSteamGridDbApiKey = null;
+            Log.Info("config.json: migrating the SteamGridDB key to the secret store");
+            SaveTo(path, config);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(config.SteamGridDbApiKeyRef)) return;
+
+        var key = SecretStore.Load(config.SteamGridDbApiKeyRef);
+        if (key == null)
+        {
+            // مخزن مقفل أو حساب ويندوز آخر: لا نمسح المرجع، فقد يعمل في المرة القادمة
+            Log.Error("SteamGridDB key could not be read from the secret store");
+            return;
+        }
+        config.SteamGridDbApiKey = key;
+        config.SavedSteamGridDbApiKey = key;
+    }
+
+    private static void ProtectSecrets(AppConfig config)
+    {
+        config.LegacyPlainSteamGridDbApiKey = null;
+        if (config.SavedSteamGridDbApiKey == config.SteamGridDbApiKey && config.SteamGridDbApiKeyRef != null) return;
+        if (config.SavedSteamGridDbApiKey == null && config.SteamGridDbApiKey.Length == 0) return;
+
+        config.SteamGridDbApiKeyRef = SecretStore.Save(SteamGridDbSecretName, config.SteamGridDbApiKey);
+        if (config.SteamGridDbApiKeyRef.Length == 0) config.SteamGridDbApiKeyRef = null;
+        config.SavedSteamGridDbApiKey = config.SteamGridDbApiKey;
     }
 
     internal static void SaveTo(string path, AppConfig config)
@@ -77,6 +120,8 @@ public static class ConfigService
         {
             var dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+
+            ProtectSecrets(config);
 
             var content = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
             WriteAtomic(path, content);

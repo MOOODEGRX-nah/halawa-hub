@@ -85,7 +85,7 @@
                                        FontSize="15" Margin="10,0,10,12"/>
 
                             <Panel>
-                                <c:SlidingPill Orientation="Vertical" Pitch="48" Motion="Dialog" ItemCount="6" IsHitTestVisible="False"
+                                <c:SlidingPill Name="SettingsNavPill" Orientation="Vertical" Pitch="48" Motion="Dialog" ItemCount="7" IsHitTestVisible="False"
                                                SelectedIndex="{Binding SettingsSection}">
                                     <Border CornerRadius="10" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #73EF4444"/>
                                 </c:SlidingPill>
@@ -102,6 +102,8 @@
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="4" Content="{l:Loc sStartup}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=5}"
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="5" Content="{l:Loc sBuild}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=6}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="6" Content="{l:Loc sPlugins}"/>
                                 </StackPanel>
                             </Panel>
                         </StackPanel>
@@ -191,6 +193,7 @@
                                         <Button Grid.Column="2" Classes="btn" Margin="10,0,0,0" Content="{l:Loc getKey}"
                                                 Command="{Binding OpenUrlCommand}" CommandParameter="{Binding SteamGridDbKeyUrl}"/>
                                     </Grid>
+                                    <TextBlock Classes="lbl" FontSize="12" Text="{Binding SecretStorageText}" TextWrapping="Wrap"/>
                                     <Border Classes="stat" IsVisible="{Binding HasApiKeyStatus}"
                                             Classes.ok="{Binding ApiKeyBadge, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=Done}"
                                             Classes.bad="{Binding ApiKeyBadge, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=Error}"
@@ -243,6 +246,32 @@
                                                       AutomationProperties.Name="{l:Loc appMenu}"/>
                                     </Grid>
                                     </c:CappedWidth>
+                                </StackPanel>
+
+                                <!-- الإضافات -->
+                                <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=6}">
+                                    <TextBlock Classes="lbl" Text="{l:Loc pluginsNote}" TextWrapping="Wrap"/>
+                                    <TextBlock Classes="lbl" Text="{l:Loc pluginsEmpty}" IsVisible="{Binding !HasPlugins}"/>
+                                    <ItemsControl ItemsSource="{Binding PluginItems}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:PluginItemViewModel">
+                                                <c:CappedWidth Cap="560">
+                                                <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+                                                    <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                                        <TextBlock Text="{Binding FileName}" FontSize="15" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
+                                                        <TextBlock Classes="lbl" FontSize="12" Margin="0,2,0,0" Text="{Binding StateText}"/>
+                                                        <SelectableTextBlock FontSize="11" Foreground="#9C8A8A" Margin="0,2,0,0" TextWrapping="Wrap"
+                                                                             FlowDirection="LeftToRight" HorizontalAlignment="Left" Text="{Binding Path}"/>
+                                                        <SelectableTextBlock FontSize="11" Foreground="#9C8A8A" FlowDirection="LeftToRight" HorizontalAlignment="Left"
+                                                                             Text="{Binding HashText}"/>
+                                                    </StackPanel>
+                                                    <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                                  AutomationProperties.Name="{Binding FileName}"/>
+                                                </Grid>
+                                                </c:CappedWidth>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </StackPanel>
 
                                 <!-- معلومات النسخة -->

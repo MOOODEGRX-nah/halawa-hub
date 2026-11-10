@@ -41,5 +41,6 @@
         <views:GameDialog/>
         <views:SettingsDialog/>
         <views:WhatsNewDialog/>
+        <views:ConfirmDialog/>
     </Panel>
 </Window>

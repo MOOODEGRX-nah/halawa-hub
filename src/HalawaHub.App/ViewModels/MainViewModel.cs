@@ -298,6 +298,7 @@ public partial class MainViewModel : INotifyPropertyChanged
         var pluginsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
         _pluginLoader = new PluginLoader(pluginsDir);
         _pluginLoader.LoadPlugins();
+        BuildPluginItems();
 
         // منصات مدمجة بالنواة كبداية، وأي منصة إضافية تُضاف كـ Plugin لاحقًا
         _builtInProviders = new List<IGameLibraryProvider>
@@ -361,6 +362,7 @@ public partial class MainViewModel : INotifyPropertyChanged
         {
             _ = InitializeBackgroundTasksAsync();
             _ = RecoverActiveSessionAsync();
+            AskAboutPendingPlugins();
         }
     }
 

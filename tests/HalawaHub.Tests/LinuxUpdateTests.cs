@@ -413,7 +413,7 @@ public sealed class LinuxSelfUpdaterTests : IDisposable
         var ok = await LinuxSelfUpdater.ApplyAsync(InstallKind.LinuxTarball, "http://127.0.0.1:1/never", null, s => status = s);
 
         ok.Should().BeFalse();
-        status.Should().Be(SelfUpdater.StatusChecksumFailed);
+        status.Should().Be(SelfUpdater.StatusChecksumMissing);
     }
 
     private sealed class OneFileServer : IDisposable

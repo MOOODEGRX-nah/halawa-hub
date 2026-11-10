@@ -90,6 +90,8 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(UpdateStatusText));
         OnPropertyChanged(nameof(InstallButtonText));
         OnPropertyChanged(nameof(ApiKeyStatusText));
+        OnPropertyChanged(nameof(SecretStorageText));
+        RefreshPluginTexts();
         OnPropertyChanged(nameof(GameDialogTitle));
         OnPropertyChanged(nameof(SettingsTitle));
     }
@@ -540,6 +542,7 @@ public partial class MainViewModel
         3 => "sAppearance",
         4 => "sStartup",
         5 => "sBuild",
+        6 => "sPlugins",
         _ => "sUpdates"
     }];
 

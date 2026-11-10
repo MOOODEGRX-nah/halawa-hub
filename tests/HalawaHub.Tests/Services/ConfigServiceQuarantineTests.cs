@@ -56,8 +56,9 @@ public class ConfigServiceQuarantineTests : IDisposable
     [Fact]
     public void ValidJson_PreservesValues()
     {
-        var original = new AppConfig { SteamGridDbApiKey = "real-key", LastSeenVersion = "0.0.10.50" };
-        File.WriteAllText(_path, JsonSerializer.Serialize(original));
+        // ملف بالصيغة القديمة (المفتاح نص صريح) — يُقرأ ثم يُرحَّل إلى مخزن الأسرار
+        File.WriteAllText(_path, "{\"SteamGridDbApiKey\":\"real-key\",\"LastSeenVersion\":\"0.0.10.50\"}");
+
 
         var loaded = ConfigService.LoadFrom(_path);
 

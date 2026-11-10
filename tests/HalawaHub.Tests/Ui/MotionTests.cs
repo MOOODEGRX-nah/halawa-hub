@@ -215,7 +215,7 @@ public class MotionTests
         // القائمة الجانبية في الإعدادات
         vm.OpenSettingsCommand.Execute(null);
         Sample(ui, 500, () => 0);
-        var settingsPill = Pill(ui, p => p.Orientation == Avalonia.Layout.Orientation.Vertical && p.ItemCount == 6);
+        var settingsPill = Pill(ui, p => p.Name == "SettingsNavPill");
         vm.SelectSettingsSectionCommand.Execute("3");
         var heights = Sample(ui, 700, () => settingsPill.Bounds.Height);
         heights.Max().Should().BeGreaterThan(44 * 1.5, "the side pill stretches vertically");
@@ -488,7 +488,7 @@ public class MotionTests
         Sample(ui, 100, () => 0);
         box.Bounds.Width.Should().Be(900, "80% of 1100 is below the design size, so the design size wins");
 
-        var pill = Pill(ui, p => p.Orientation == Avalonia.Layout.Orientation.Vertical && p.ItemCount == 6);
+        var pill = Pill(ui, p => p.Name == "SettingsNavPill");
         Action toStartup = () => vm.SelectSettingsSectionCommand.Execute("4");
         toStartup();
         PillMove(pill, () => vm.SelectSettingsSectionCommand.Execute("0"), toStartup, "side pill after resize");

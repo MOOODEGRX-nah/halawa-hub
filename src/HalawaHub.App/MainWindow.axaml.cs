@@ -70,7 +70,12 @@ public partial class MainWindow : Window
     {
         if (e.Key != Key.Escape || DataContext is not MainViewModel vm) return;
 
-        if (vm.CloseAllCardMenus())
+        if (vm.IsConfirmOpen)
+        {
+            vm.CancelConfirmCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (vm.CloseAllCardMenus())
         {
             e.Handled = true;
         }

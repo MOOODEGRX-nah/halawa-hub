@@ -153,7 +153,17 @@ public partial class MainViewModel
     {
         ConfigService.Save(_config);
         _coverClient = new SteamGridDbClient(_config.SteamGridDbApiKey);
+        OnPropertyChanged(nameof(SecretStorageText));
     }
+
+    /// أين يُحفظ مفتاح API على هذا الجهاز (يظهر تحت حقل المفتاح)
+    public string SecretStorageText => Loc.Instance[
+        (HalawaHub.Core.Security.SecretStore.BackendOf(_config.SteamGridDbApiKeyRef) ?? HalawaHub.Core.Security.SecretStore.PreferredBackend) switch
+        {
+            HalawaHub.Core.Security.SecretBackend.WindowsDpapi => "secretDpapi",
+            HalawaHub.Core.Security.SecretBackend.SecretService => "secretKeyring",
+            _ => "secretFile"
+        }];
 
     private async void CloseSettings()
     {

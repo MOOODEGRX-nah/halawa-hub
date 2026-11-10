@@ -9,8 +9,23 @@ public class AppConfig
     /// (Steam عنده مصدر مباشر بدون مفتاح، ما يحتاجه).
     /// احصل عليه من: https://www.steamgriddb.com/profile/preferences (تبويب API)
     /// اتركه فاضي لو ما تبي هذي الميزة.
+    /// في الذاكرة فقط: يُحفظ مشفّرًا عبر SecretStore في SteamGridDbApiKeyRef.
     /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
     public string SteamGridDbApiKey { get; set; } = "";
+
+    /// الصيغة القديمة (نص صريح). تُقرأ من الملفات القديمة ثم تُرحَّل وتُحذف من الملف.
+    [System.Text.Json.Serialization.JsonPropertyName("SteamGridDbApiKey")]
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LegacyPlainSteamGridDbApiKey { get; set; }
+
+    /// مرجع المفتاح المحفوظ: dpapi:… أو secret-service:… أو file:…
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? SteamGridDbApiKeyRef { get; set; }
+
+    /// آخر قيمة حُفظت، حتى لا نعيد التشفير (أو نستدعي secret-tool) مع كل حفظ للإعدادات
+    [System.Text.Json.Serialization.JsonIgnore]
+    internal string? SavedSteamGridDbApiKey { get; set; }
 
     /// آخر إصدار شافه المستخدم فعليًا — نستخدمه لمعرفة هل نعرض نافذة
     /// "ما الجديد" أو لا (نعرضها بس أول مرة يفتح فيها إصدار جديد)

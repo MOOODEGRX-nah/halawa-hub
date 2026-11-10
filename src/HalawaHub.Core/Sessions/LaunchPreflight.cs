@@ -40,11 +40,11 @@ public sealed class LaunchPreflight
     public (LaunchProblem Problem, string Detail) Check(GameInfo game)
     {
         var install = game.InstallPath?.Trim() ?? "";
-        if (install.Length > 0 && Path.IsPathRooted(install) && !DirExists(install))
+        if (install.Length > 0 && IsRooted(install, Windows) && !DirExists(install))
         {
             if (Windows)
             {
-                var root = Path.GetPathRoot(install);
+                var root = RootOf(install, Windows);
                 if (!string.IsNullOrEmpty(root) && !root.StartsWith(@"\\", StringComparison.Ordinal) && !DirExists(root))
                     return (LaunchProblem.DriveNotConnected, root.TrimEnd('\\'));
             }
@@ -61,7 +61,7 @@ public sealed class LaunchPreflight
             if (!ProtocolRegistered(scheme))
                 return (LaunchProblem.LauncherNotFound, LauncherName(game, scheme));
         }
-        else if (exe.Length > 0 && Path.IsPathRooted(exe) && !FileExists(exe))
+        else if (exe.Length > 0 && IsRooted(exe, Windows) && !FileExists(exe))
         {
             // Riot: الملف التنفيذي هو Riot Client، لا اللعبة
             return game.Platform == "Riot Games"
@@ -74,6 +74,15 @@ public sealed class LaunchPreflight
 
         return (LaunchProblem.None, "");
     }
+
+    /// مسار مطلق حسب نظام المسار نفسه لا النظام الذي نعمل عليه (Path.IsPathRooted لا يفهم C: على لينكس)
+    public static bool IsRooted(string path, bool windows) => windows
+        ? (path.Length >= 3 && char.IsAsciiLetter(path[0]) && path[1] == ':' && path[2] is '\\' or '/') || path.StartsWith(@"\\", StringComparison.Ordinal)
+        : path.StartsWith('/');
+
+    /// "X:\" لمسار ويندوز بحرف قرص؛ مسار الشبكة يرجع كما هو (لا يُفحص كقرص)
+    public static string? RootOf(string path, bool windows) =>
+        !windows ? "/" : path.StartsWith(@"\\", StringComparison.Ordinal) ? @"\\" : path.Length >= 3 ? path[..2] + "\\" : null;
 
     public static bool BlocksLaunch(LaunchProblem p) =>
         p is LaunchProblem.DriveNotConnected or LaunchProblem.GameFilesMissing or LaunchProblem.LauncherNotFound;

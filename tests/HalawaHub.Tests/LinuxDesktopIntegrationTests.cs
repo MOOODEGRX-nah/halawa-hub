@@ -285,11 +285,11 @@ public class LinuxPlatformUiTests
     }
 
     [Fact]
-    public void Uninstall_StaysVisibleOnWindows()
+    public void Uninstall_IsHiddenWhenThePlatformHasNoWayToDoIt()
     {
-        if (!OperatingSystem.IsWindows()) return;
-
-        Card("Epic Games", "x://y").CanUninstall.Should().BeTrue("Windows keeps its explanatory message");
+        // Steam له رابط إلغاء تثبيت على كل نظام؛ منصة بلا أي وسيلة لا تعرض زرًا لا يعمل
+        Card("Steam", "steam://rungameid/1").CanUninstall.Should().BeTrue();
+        Card("Lutris", "lutris:rungameid/1").CanUninstall.Should().BeFalse();
     }
 
     [Fact]

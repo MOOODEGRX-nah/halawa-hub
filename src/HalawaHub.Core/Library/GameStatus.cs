@@ -86,10 +86,10 @@ public sealed class GameStatusProbe
 
     public bool IsDriveMissing(string? installPath)
     {
-        if (string.IsNullOrWhiteSpace(installPath) || !Path.IsPathRooted(installPath)) return false;
+        if (string.IsNullOrWhiteSpace(installPath) || !LaunchPreflight.IsRooted(installPath, Windows)) return false;
         if (Windows)
         {
-            var root = Path.GetPathRoot(installPath);
+            var root = LaunchPreflight.RootOf(installPath, Windows);
             return !string.IsNullOrEmpty(root) && !root.StartsWith(@"\\", StringComparison.Ordinal) && !DirExists(root);
         }
         return LaunchPreflight.IsRemovableMount(installPath) is { } mount && !DirExists(mount);

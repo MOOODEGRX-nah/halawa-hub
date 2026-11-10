@@ -459,12 +459,27 @@ public class MotionTests
         ui.Window.Height = 1080;
         Sample(ui, 200, () => 0);
 
-        vm.OpenSettingsCommand.Execute(null);
+        // كل قياس ينتظر الحركة نفسها بدل وقت ثابت: على جهاز CI بطيء قد تنتهي حركة الإغلاق
+        // (0.22 ثانية) قبل أول عينة، فنعيدها ونقيس المحاولة الجديدة
+        List<double> Opening(Border box, Action open, Action close, string what) => SampleUntil(() => ScaleOf(box),
+            v => v.Max() > 1 && Math.Abs(v[^1] - 1) < 0.001 && box.Opacity == 1, what,
+            retrigger: () => { close(); Sample(ui, 500, () => 0); open(); });
+
+        List<double> Closing(Border box, Action open, Action close, string what) => SampleUntil(() => box.Opacity,
+            v => v.Any(o => o > 0.01 && o < 0.99), what,
+            retrigger: () => { open(); Sample(ui, 700, () => 0); close(); });
+
+        List<double> PillMove(Control pill, Action back, Action go, string what) => SampleUntil(() => pill.Bounds.Height,
+            v => v.Max() > 44 * 1.5 && Math.Abs(v[^1] - 44) < 1, what,
+            retrigger: () => { back(); Sample(ui, 700, () => 0); go(); });
+
+        Action openSettings = () => vm.OpenSettingsCommand.Execute(null);
+        Action closeSettings = () => vm.CloseSettingsCommand.Execute(null);
+        openSettings();
         PumpOnce();
         var box = DialogBoxOf<SettingsDialog>(ui);
-        var opening = Sample(ui, 480, () => ScaleOf(box));
-        ShouldHaveMoved(opening, "settings opening on a big window", minimumSteps: 2);
-        opening.Max().Should().BeGreaterThan(1, "the dialog keeps its spring at the new size");
+        ShouldHaveMoved(Opening(box, openSettings, closeSettings, "settings opening on a big window"),
+            "settings opening on a big window", minimumSteps: 2);
         box.Bounds.Width.Should().Be(1400);
 
         // تصغير البرنامج والنافذة مفتوحة، ثم التنقل بين الأقسام
@@ -474,35 +489,40 @@ public class MotionTests
         box.Bounds.Width.Should().Be(900, "80% of 1100 is below the design size, so the design size wins");
 
         var pill = Pill(ui, p => p.Orientation == Avalonia.Layout.Orientation.Vertical && p.ItemCount == 6);
-        vm.SelectSettingsSectionCommand.Execute("4");
-        var heights = Sample(ui, 700, () => pill.Bounds.Height);
-        heights.Max().Should().BeGreaterThan(44 * 1.5, "the side pill still stretches on its way");
-        heights.Last().Should().BeApproximately(44, 1);
+        Action toStartup = () => vm.SelectSettingsSectionCommand.Execute("4");
+        toStartup();
+        PillMove(pill, () => vm.SelectSettingsSectionCommand.Execute("0"), toStartup, "side pill after resize");
+        Sample(ui, 100, () => 0);
         var selected = ui.All<Button>().First(b => b.Classes.Contains("si") && b.Classes.Contains("on"));
         CenterOf(ui, pill).Y.Should().BeApproximately(CenterOf(ui, selected).Y, 1, "the pill lands on the selected item");
 
-        vm.CloseSettingsCommand.Execute(null);
-        ShouldHaveMoved(Sample(ui, 200, () => box.Opacity), "settings closing after resize", minimumSteps: 2);
-        Sample(ui, 150, () => 0);
+        closeSettings();
+        Closing(box, openSettings, closeSettings, "settings closing after resize");
+        Sample(ui, 400, () => 0);
         vm.IsSettingsVisible.Should().BeFalse();
 
         // نافذة اللعبة: تُفتح بعد تكبير البرنامج مرة أخرى
         ui.Window.Width = 2560;
         ui.Window.Height = 1440;
         Sample(ui, 100, () => 0);
-        vm.OpenDetailsCommand.Execute(vm.Games.First());
+        var game = vm.Games.First();
+        Action openGame = () => vm.OpenDetailsCommand.Execute(game);
+        Action closeGame = () => vm.CloseDetailsCommand.Execute(null);
+        openGame();
         PumpOnce();
         var gameBox = DialogBoxOf<GameDialog>(ui);
-        ShouldHaveMoved(Sample(ui, 450, () => ScaleOf(gameBox)), "game dialog opening on a big window", minimumSteps: 2);
+        ShouldHaveMoved(Opening(gameBox, openGame, closeGame, "game dialog opening on a big window"),
+            "game dialog opening on a big window", minimumSteps: 2);
         gameBox.Bounds.Size.Should().Be(new Size(1400, 900), "capped so text does not stretch on very large screens");
 
         var gamePill = Pill(ui, p => p.Orientation == Avalonia.Layout.Orientation.Vertical && p.ItemCount == 4);
-        vm.SelectGameDialogSectionCommand.Execute("3");
-        ShouldHaveMoved(Sample(ui, 700, () => gamePill.Bounds.Height), "game dialog pill");
+        Action toLaunch = () => vm.SelectGameDialogSectionCommand.Execute("3");
+        toLaunch();
+        PillMove(gamePill, () => vm.SelectGameDialogSectionCommand.Execute("0"), toLaunch, "game dialog pill");
 
-        vm.CloseDetailsCommand.Execute(null);
-        ShouldHaveMoved(Sample(ui, 200, () => gameBox.Opacity), "game dialog closing", minimumSteps: 2);
-        Sample(ui, 150, () => 0);
+        closeGame();
+        Closing(gameBox, openGame, closeGame, "game dialog closing");
+        Sample(ui, 400, () => 0);
         vm.DetailsGame.Should().BeNull();
     }
 

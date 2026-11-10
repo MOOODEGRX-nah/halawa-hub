@@ -13,6 +13,13 @@ public static class PlayTimeService
 {
     private static readonly object Lock = new();
     private static Dictionary<string, long>? _cache;
+    private static Dictionary<string, long> _external = new();
+
+    /// وقت لعب من مصدر خارجي (Steam) بمفاتيح "Platform|Id"؛ قاموس فارغ يلغيه
+    public static void SetExternal(Dictionary<string, long> seconds)
+    {
+        lock (Lock) _external = seconds;
+    }
 
     private static string FilePath => AppPaths.InData("playtime.json");
 
@@ -41,7 +48,10 @@ public static class PlayTimeService
         lock (Lock)
         {
             var key = platform + "|" + id;
-            return Load().TryGetValue(key, out var secs) ? TimeSpan.FromSeconds(secs) : TimeSpan.Zero;
+            var own = Load().TryGetValue(key, out var secs) ? secs : 0;
+            // وقت Steam المستورد (إن فُعّل): نعرض الأكبر، ولا نكتبه في playtime.json
+            if (_external.TryGetValue(key, out var ext) && ext > own) own = ext;
+            return TimeSpan.FromSeconds(own);
         }
     }
 

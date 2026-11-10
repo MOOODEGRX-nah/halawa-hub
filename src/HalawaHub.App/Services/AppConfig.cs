@@ -81,4 +81,10 @@ public class AppConfig
     /// الثيم: dark, oled, light — ولون التمييز: red, blue, purple, green, orange
     public string Theme { get; set; } = "dark";
     public string Accent { get; set; } = "red";
+
+    /// استيراد وقت اللعب من Steam (يُعرض الأكبر بين Halawa وSteam)
+    public bool ImportSteamPlaytime { get; set; } = true;
+
+    /// SteamID64 للحساب المختار؛ فارغ = آخر حساب سجّل الدخول
+    public string SteamAccountId { get; set; } = "";
 }

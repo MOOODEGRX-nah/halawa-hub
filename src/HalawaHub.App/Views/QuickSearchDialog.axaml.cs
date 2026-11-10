@@ -15,9 +15,15 @@ public partial class QuickSearchDialog : UserControl
         QuickResults.DoubleTapped += (_, _) => (DataContext as MainViewModel)?.ConfirmQuickSearch();
         PropertyChanged += (_, e) =>
         {
-            // عند الفتح: التركيز في حقل البحث مباشرة
-            if (e.Property == IsVisibleProperty && IsVisible)
-                Dispatcher.UIThread.Post(() => QuickInput.Focus(), DispatcherPriority.Input);
+            // عند الفتح: التركيز في حقل البحث فورًا (حتى لا تضيع الأحرف المكتوبة مباشرة بعد Ctrl+K)،
+            // ومرة ثانية بعد التخطيط، مع تظليل أول نتيجة
+            if (e.Property != IsVisibleProperty || !IsVisible) return;
+            QuickInput.Focus();
+            Dispatcher.UIThread.Post(() =>
+            {
+                QuickInput.Focus();
+                if (DataContext is MainViewModel vm) QuickResults.SelectedIndex = vm.QuickSearchIndex;
+            }, DispatcherPriority.Loaded);
         };
     }
 

@@ -473,6 +473,35 @@
                                         <Button Classes="btn" Content="{l:Loc redetect}" Command="{Binding RedetectPlatformsCommand}"/>
                                         <Button Classes="btn pri" Content="{l:Loc scanThisPc}" Command="{Binding RefreshCommand}"/>
                                     </StackPanel>
+                                    <!-- وقت اللعب من Steam -->
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc steamImport}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc steamImportNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ImportSteamPlaytime, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc steamImport}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                    <StackPanel Spacing="6" IsVisible="{Binding HasSeveralSteamAccounts}">
+                                        <TextBlock Classes="row" Text="{l:Loc steamAccount}"/>
+                                        <Border Classes="choice">
+                                            <ItemsControl ItemsSource="{Binding SteamAccounts}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:SteamAccountChoice">
+                                                        <Button Classes="ch" Classes.on="{Binding IsSelected}" Content="{Binding Name}"
+                                                                Command="{Binding #Root.((vm:MainViewModel)DataContext).SelectSteamAccountCommand}"
+                                                                CommandParameter="{Binding SteamId64}"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Border>
+                                        <TextBlock Classes="note" Text="{l:Loc steamAccountNote}"/>
+                                    </StackPanel>
                                     <ItemsControl ItemsSource="{Binding PlatformRows}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:PlatformRow">

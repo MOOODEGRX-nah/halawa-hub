@@ -397,6 +397,7 @@ public partial class MainViewModel : INotifyPropertyChanged
         // الاختبارات بلا حالة Steam حقيقية ولا ذاكرة مكتبة مشتركة
         StatusProbe = startBackgroundTasks ? GameStatusProbe.System : null;
         LibraryCachePath = startBackgroundTasks ? LibraryCacheService.DefaultPath : null;
+        SteamPathProvider = startBackgroundTasks ? SteamLibraryProvider.GetSteamPath : null;
 
         // لا ننتظر الفحص هنا: النافذة تُفتح فورًا والمكتبة تمتلئ بعد ذلك
         _ = RefreshLibraryAsync();

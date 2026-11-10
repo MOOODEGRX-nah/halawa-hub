@@ -141,7 +141,11 @@ public partial class MainViewModel
     }
 
     /// يحفظ أي تعديل معلق بالإعدادات ويطبق المفتاح الجديد فورًا
-    public void FlushPendingSettings() => _apiKeySaveDebouncer.Flush();
+    public void FlushPendingSettings()
+    {
+        _apiKeySaveDebouncer.Flush();
+        PersistActiveSession();
+    }
 
     internal bool IsCoverClientConfigured => _coverClient.IsConfigured;
 

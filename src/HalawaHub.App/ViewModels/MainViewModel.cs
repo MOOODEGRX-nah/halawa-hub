@@ -358,7 +358,10 @@ public partial class MainViewModel : INotifyPropertyChanged
         // مهام الخلفية عند فتح البرنامج، بالترتيب الصح (فحص التحديث أول عشان
         // خبر "تحديث متوفر" يظهر صح بقائمة الأخبار)
         if (startBackgroundTasks)
+        {
             _ = InitializeBackgroundTasksAsync();
+            _ = RecoverActiveSessionAsync();
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

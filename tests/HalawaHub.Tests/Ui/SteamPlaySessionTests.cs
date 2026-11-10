@@ -49,17 +49,17 @@ public class SteamPlaySessionTests : IDisposable
         var card = ui.Vm.Games.Single(g => g.Game.Id == appId);
         var tracker = new SteamSessionTracker(_log, appId, isProcessAlive: _ => true);
 
-        ui.Vm.BeginPlaySession(card, null, tracker);
+        ui.Vm.BeginPlaySession(card, tracker);
         Append($"[2026-11-10 11:18:40] AppID {appId} adding PID 13400 as a tracked process \"Spaceship.exe\"\r\n");
-        ui.Vm.PollSteamSession();
+        ui.Vm.PollSession();
 
         // نافذة "Starting game" في Steam تعيد التركيز لنافذتنا — كانت تنهي الجلسة هنا
         ui.Vm.OnWindowRegainedFocus();
-        ui.Vm.PollSteamSession();
+        ui.Vm.PollSession();
 
         Append($"[2026-11-10 11:21:31] AppID {appId} no longer tracking PID 13400, exit code 0\r\n");
         Append($"[2026-11-10 11:21:31] Remove {appId} from running list\r\n");
-        ui.Vm.PollSteamSession();
+        ui.Vm.PollSession();
 
         PlayTimeService.GetTotal("Steam", appId).Should().Be(TimeSpan.FromSeconds(171));
     }
@@ -73,15 +73,15 @@ public class SteamPlaySessionTests : IDisposable
         var now = DateTime.Now;
         var tracker = new SteamSessionTracker(_log, appId, startupTimeout: TimeSpan.FromMinutes(3), now: () => now);
 
-        ui.Vm.BeginPlaySession(card, null, tracker);
+        ui.Vm.BeginPlaySession(card, tracker);
         now = now.AddMinutes(4);
-        ui.Vm.PollSteamSession();
+        ui.Vm.PollSession();
 
         // بعد إلغاء الجلسة لا يجوز أن يحتسب التركيز شيئًا ولا أن يعيد إحياءها
         ui.Vm.OnWindowRegainedFocus();
         Append($"[2026-11-10 11:30:00] AppID {appId} adding PID 1 as a tracked process \"x.exe\"\r\n");
         Append($"[2026-11-10 11:40:00] Remove {appId} from running list\r\n");
-        ui.Vm.PollSteamSession();
+        ui.Vm.PollSession();
 
         PlayTimeService.GetTotal("Steam", appId).Should().Be(TimeSpan.Zero);
     }
@@ -96,12 +96,12 @@ public class SteamPlaySessionTests : IDisposable
         var secondCard = ui.Vm.Games.Single(g => g.Game.Id == second);
 
         var tracker = new SteamSessionTracker(_log, first, isProcessAlive: _ => true);
-        ui.Vm.BeginPlaySession(firstCard, null, tracker);
+        ui.Vm.BeginPlaySession(firstCard, tracker);
         var startedAt = DateTime.Now.AddMinutes(-10);
         Append($"[{startedAt:yyyy-MM-dd HH:mm:ss}] AppID {first} adding PID 1 as a tracked process \"a.exe\"\r\n");
-        ui.Vm.PollSteamSession();
+        ui.Vm.PollSession();
 
-        ui.Vm.BeginPlaySession(secondCard, null, new SteamSessionTracker(_log, second));
+        ui.Vm.BeginPlaySession(secondCard, new SteamSessionTracker(_log, second));
 
         PlayTimeService.GetTotal("Steam", first).TotalMinutes.Should().BeApproximately(10, 0.2);
     }

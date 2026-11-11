@@ -117,7 +117,7 @@ public class SmallFeaturesUiTests
 
         var dota = ui.Vm.Games.Single(c => c.Game.Id == "570");
         ui.Vm.OpenDetailsCommand.Execute(dota);
-        ui.Vm.GameDialogSectionCount.Should().Be(5);
+        ui.Vm.GameDialogSectionCount.Should().Be(6);
         ui.Vm.SelectGameDialogSectionCommand.Execute("4");
         await ui.Vm.LoadGameNewsAsync(dota);
         ui.Settle();

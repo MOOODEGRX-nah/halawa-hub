@@ -262,6 +262,17 @@
                                             </StackPanel>
                                         </Grid>
                                     </Border>
+                                    <!-- مفتاح Steam Web API (اختياري): ألعاب Steam المملوكة غير المثبتة -->
+                                    <TextBlock Classes="lbl" Text="{l:Loc steamWebKey}" Margin="0,10,0,0"/>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox Classes="inp" PasswordChar="•" Text="{Binding SteamWebApiKey, Mode=TwoWay}"
+                                                 Watermark="{l:Loc keyPh}" AutomationProperties.Name="Steam Web API"/>
+                                        <Button Grid.Column="1" Classes="btn" Margin="10,0,0,0" Content="{l:Loc getKey}"
+                                                Command="{Binding OpenUrlCommand}" CommandParameter="https://steamcommunity.com/dev/apikey"/>
+                                    </Grid>
+                                    <TextBlock Classes="lbl" FontSize="12" Text="{l:Loc steamWebKeyNote}" TextWrapping="Wrap"/>
+                                    <TextBlock Classes="lbl" FontSize="12" Text="{Binding OwnedStatusText}" IsVisible="{Binding HasOwnedStatus}"
+                                               Foreground="{DynamicResource AmberBrush}"/>
                                 </StackPanel>
 
                                 <!-- عام -->
@@ -462,6 +473,16 @@
                                         </StackPanel>
                                         <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowFreeGames, Mode=TwoWay}"
                                                       AutomationProperties.Name="{l:Loc showFree}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc mergeDup}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc mergeDupNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding MergeDuplicates, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc mergeDup}"/>
                                     </Grid>
                                     </c:CappedWidth>
                                 </StackPanel>

@@ -299,7 +299,14 @@ public partial class MainViewModel
 
     private void LaunchGame(GameCardViewModel? card)
     {
-        if (card == null || AskBeforePlayingWithUpdate(card)) return;
+        if (card == null || AskLaunchFrom(card)) return;
+        LaunchGameDirect(card);
+    }
+
+    /// تشغيل هذه النسخة بعينها (بعد اختيار المنصة إن كانت اللعبة على أكثر من واحدة)
+    private void LaunchGameDirect(GameCardViewModel card)
+    {
+        if (AskBeforePlayingWithUpdate(card)) return;
         LaunchGameNow(card);
     }
 
@@ -310,6 +317,14 @@ public partial class MainViewModel
         var game = card.Game;
         ClearStatus();
         _lastLaunchHint = null;
+
+        // لعبة Steam مملوكة غير مثبتة: نطلب من Steam تثبيتها، ولا جلسة لعب
+        if (!game.IsInstalled && game.Platform == "Steam" && game.ExecutablePath.StartsWith("steam://install/", StringComparison.Ordinal))
+        {
+            if (RunLauncherCommand(new LauncherCommand(game.ExecutablePath), "openLauncherFailed"))
+                ShowStatus(Loc.Instance.Format("installAsked", card.Name));
+            return;
+        }
 
         var (problem, detail) = Preflight.Check(game);
         var problemMessage = LaunchProblemMessage(problem, card.Name, detail);

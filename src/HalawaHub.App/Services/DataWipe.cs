@@ -34,6 +34,7 @@ public static class DataWipe
         if (!File.Exists(marker)) return false;
 
         try { HalawaHub.Core.Security.SecretStore.Delete("steamgriddb-api-key"); } catch { /* best effort */ }
+        try { HalawaHub.Core.Security.SecretStore.Delete("steam-web-api-key"); } catch { /* best effort */ }
 
         foreach (var entry in Directory.EnumerateFileSystemEntries(dataDir).ToList())
         {

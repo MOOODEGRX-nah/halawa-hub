@@ -92,14 +92,26 @@ public partial class MainViewModel
         IsRefreshDone = false;
     }
 
+    private LibraryScanResult? _lastScan;
+    private IEnumerable<IGameTool> _lastScanTools = Array.Empty<IGameTool>();
+
+    /// يعيد بناء البطاقات من آخر فحص (بعد وصول قائمة الألعاب المملوكة مثلًا) بلا فحص جديد
+    private void ReapplyLastScan()
+    {
+        if (_lastScan != null) ApplyScanResult(_lastScan, _lastScanTools);
+    }
+
     private void ApplyScanResult(LibraryScanResult result, IEnumerable<IGameTool> allTools)
     {
+        _lastScan = result;
+        _lastScanTools = allTools;
         Games.Clear();
 
         // ألعاب قرص غير موصول تبقى من آخر فحص بدل أن تختفي
-        var games = LibraryCachePath != null && StatusProbe != null
+        IEnumerable<GameInfo> games = LibraryCachePath != null && StatusProbe != null
             ? LibraryCacheService.MergeOffline(LibraryCachePath, result.Games, StatusProbe.IsDriveMissing)
             : result.Games;
+        games = WithOwnedGames(games);
 
         // بناء GameCardViewModels من النتائج
         foreach (var game in games)

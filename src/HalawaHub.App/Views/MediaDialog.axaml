@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:c="using:HalawaHub.App.Controls"
+             xmlns:behaviors="using:HalawaHub.App.Behaviors"
+             x:Class="HalawaHub.App.Views.MediaDialog"
+             x:DataType="vm:MainViewModel"
+             IsVisible="{Binding IsMediaOpen}">
+    <!-- عارض لقطات الشاشة: الأسهم للتنقل، Esc أو الضغط خارج الصورة للإغلاق -->
+    <Panel>
+        <Border Background="#E6000000" PointerPressed="Scrim_PointerPressed"/>
+        <Grid RowDefinitions="Auto,*" Margin="40,24,40,40" FlowDirection="LeftToRight">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,12">
+                <TextBlock Text="{Binding MediaCounter}" Foreground="#F5EDED" FontSize="13" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Classes="btn" Margin="0,0,8,0" Content="‹" FontSize="18" Width="48" Command="{Binding MediaPrevCommand}"
+                        ToolTip.Tip="{l:Loc mediaPrev}" AutomationProperties.Name="{l:Loc mediaPrev}"/>
+                <Button Grid.Column="2" Classes="btn" Margin="0,0,8,0" Content="›" FontSize="18" Width="48" Command="{Binding MediaNextCommand}"
+                        ToolTip.Tip="{l:Loc mediaNext}" AutomationProperties.Name="{l:Loc mediaNext}"/>
+                <Button Grid.Column="3" Classes="btn" Width="48" Command="{Binding CloseMediaCommand}"
+                        ToolTip.Tip="{l:Loc close}" AutomationProperties.Name="{l:Loc close}">
+                    <c:VectorIcon Data="{StaticResource IconX}" Size="18"/>
+                </Button>
+            </Grid>
+            <Image Name="MediaImage" Grid.Row="1" Stretch="Uniform" IsHitTestVisible="False" behaviors:AsyncImage.DecodeWidth="1920"
+                   behaviors:AsyncImage.SourceUrl="{Binding MediaUrl}"/>
+        </Grid>
+    </Panel>
+</UserControl>

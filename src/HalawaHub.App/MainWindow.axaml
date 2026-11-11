@@ -33,6 +33,7 @@
 
         <views:GameDialog/>
         <views:SettingsDialog/>
+        <views:MediaDialog/>
         <views:WhatsNewDialog/>
         <views:NotificationsDialog/>
         <views:QuickSearchDialog/>

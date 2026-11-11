@@ -14,7 +14,7 @@ public static class PlatformCatalog
     {
         "Steam" => new(true, true, true, false, true),
         "Epic Games" => new(true, true, false, true, false),
-        "GOG" or "Riot Games" or "Xbox / Microsoft Store" => new(true, true, false, false, false),
+        "GOG" or "Riot Games" or "Xbox / Microsoft Store" or "Ubisoft" or "EA" or "Rockstar" => new(true, true, false, false, false),
         "Heroic" or "Lutris" => new(true, true, false, false, false),
         ManualGames.Platform => new(true, true, false, false, false),
         _ => new(true, false, false, false, false)

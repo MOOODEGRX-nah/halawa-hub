@@ -116,9 +116,9 @@ public class GameCardViewModel : INotifyPropertyChanged
 
     /// شارة واحدة على البطاقة، بالأولوية: القرص، تعمل، إصلاح، تحديث
     public string StatusBadgeText => Loc.Instance[
-        IsDriveMissing ? "stDrive" : IsRunning ? "stRunning" : NeedsRepair ? "stRepair" : IsUpdating ? "stUpdating" : HasUpdate ? "stUpdate" : "stNone"];
+        !Game.IsInstalled ? "statusNotInstalled" : IsDriveMissing ? "stDrive" : IsRunning ? "stRunning" : NeedsRepair ? "stRepair" : IsUpdating ? "stUpdating" : HasUpdate ? "stUpdate" : "stNone"];
 
-    public bool HasStatusBadge => _status != GameStatus.None;
+    public bool HasStatusBadge => _status != GameStatus.None || !Game.IsInstalled;
 
     /// كل الحالات للنافذة، مفصولة بنقطة
     public string StatusDetailsText
@@ -137,7 +137,7 @@ public class GameCardViewModel : INotifyPropertyChanged
     }
 
     /// لون الشارة: 0 رمادي (القرص)، 1 أخضر (تعمل)، 2 أحمر (إصلاح)، 3 كهرماني (تحديث)
-    public int StatusTone => IsDriveMissing ? 0 : IsRunning ? 1 : NeedsRepair ? 2 : HasStatusBadge ? 3 : 4;
+    public int StatusTone => !Game.IsInstalled || IsDriveMissing ? 0 : IsRunning ? 1 : NeedsRepair ? 2 : HasStatusBadge ? 3 : 4;
 
     public bool HasStatusActions => CanOpenInLauncher || CanVerify;
 
@@ -217,6 +217,7 @@ public class GameCardViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(PlayTimeText));
         OnPropertyChanged(nameof(FavoriteLabel));
         OnPropertyChanged(nameof(PlatformShort));
+        OnPropertyChanged(nameof(PlayLabel));
         NotifyStatusChanged();
         foreach (var tool in Tools) tool.NotifyLanguageChanged();
     }
@@ -273,7 +274,25 @@ public class GameCardViewModel : INotifyPropertyChanged
     public string Platform => Game.Platform;
 
     /// اسم مختصر للشارة وشريط المنصات: "Xbox / Microsoft Store" يصير "Xbox"
-    public string PlatformShort => ShortenPlatform(Game.Platform);
+    /// اسم المنصة، ومعه "+N" إن كانت اللعبة مدموجة من منصات أخرى
+    public string PlatformShort => ShortenPlatform(Game.Platform) + (_alternates.Count > 0 ? " +" + _alternates.Count : "");
+
+    private IReadOnlyList<GameCardViewModel> _alternates = Array.Empty<GameCardViewModel>();
+
+    /// نسخ اللعبة نفسها على منصات أخرى (7.4)؛ تُعرض عند التشغيل
+    public IReadOnlyList<GameCardViewModel> Alternates => _alternates;
+
+    public void SetAlternates(IReadOnlyList<GameCardViewModel> alternates)
+    {
+        if (_alternates.Count == 0 && alternates.Count == 0) return;
+        _alternates = alternates;
+        OnPropertyChanged(nameof(Alternates));
+        OnPropertyChanged(nameof(PlatformShort));
+        OnPropertyChanged(nameof(PlayLabel));
+    }
+
+    /// "تشغيل"، أو "تثبيت" للعبة Steam مملوكة غير مثبتة
+    public string PlayLabel => Loc.Instance[Game.IsInstalled ? "play" : "installGame"];
 
     public static string ShortenPlatform(string platform) => platform switch
     {

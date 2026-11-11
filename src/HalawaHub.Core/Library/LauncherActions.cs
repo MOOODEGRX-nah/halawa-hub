@@ -17,6 +17,9 @@ public sealed class LauncherActions
     public Func<string, bool> FileExists { get; init; } = File.Exists;
     public Func<string?> EpicLauncherExe { get; init; } = FindEpicLauncher;
     public Func<string?> GogGalaxyExe { get; init; } = FindGogGalaxy;
+
+    /// الملف التنفيذي المسجَّل لبروتوكول مشغّل (uplay, origin2, rockstar)
+    public Func<string, string?> ProtocolExe { get; init; } = FindProtocolExe;
     public bool Windows { get; init; } = OperatingSystem.IsWindows();
 
     public static LauncherActions System { get; } = new();
@@ -28,6 +31,9 @@ public sealed class LauncherActions
         "GOG" => "GOG Galaxy",
         "Riot Games" => "Riot Client",
         "Xbox / Microsoft Store" => "Microsoft Store",
+        "Ubisoft" => "Ubisoft Connect",
+        "EA" => "EA app",
+        "Rockstar" => "Rockstar Games Launcher",
         _ => platform
     };
 
@@ -44,6 +50,12 @@ public sealed class LauncherActions
                 return new LauncherCommand(galaxy);
             case "Riot Games" when !string.IsNullOrEmpty(game.ExecutablePath) && FileExists(game.ExecutablePath):
                 return new LauncherCommand(game.ExecutablePath);
+            case "Ubisoft" when Windows && ProtocolExe("uplay") is { } ubi && FileExists(ubi):
+                return new LauncherCommand(ubi);
+            case "EA" when Windows && ProtocolExe("origin2") is { } ea && FileExists(ea):
+                return new LauncherCommand(ea);
+            case "Rockstar" when Windows && ProtocolExe("rockstar") is { } rs && FileExists(rs):
+                return new LauncherCommand(rs);
             case "Xbox / Microsoft Store" when Windows:
                 return new LauncherCommand("ms-windows-store://downloadsandupdates");
             default:
@@ -90,6 +102,20 @@ public sealed class LauncherActions
         }
         var space = command.IndexOf(' ');
         return space > 0 ? command[..space] : command;
+    }
+
+    private static string? FindProtocolExe(string scheme)
+    {
+        if (!OperatingSystem.IsWindows()) return null;
+        try
+        {
+            using var key = Registry.ClassesRoot.OpenSubKey(scheme + @"shellopenmmand");
+            return ExeFromCommand(key?.GetValue(null) as string);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static string? FindEpicLauncher()

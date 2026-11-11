@@ -22,6 +22,9 @@ public class PlatformColorConverter : IValueConverter
             "Xbox / Microsoft Store" => "#22C55E",
             "Heroic" => "#38BDF8",
             "Lutris" => "#F97316",
+            "Ubisoft" => "#3B82F6",
+            "EA" => "#F87171",
+            "Rockstar" => "#FBBF24",
             _ => "#777777"
         }));
     }

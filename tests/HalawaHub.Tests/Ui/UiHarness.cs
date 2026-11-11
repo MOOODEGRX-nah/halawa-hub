@@ -61,6 +61,7 @@ internal sealed class UiHarness : IDisposable
         cfg.SortMode = "name";
         cfg.SortReverse = false;
         cfg.ShowPlayTimeOnCards = true;
+        cfg.MergeDuplicates = true;
         ConfigService.Save(cfg);
 
         var library = new Mock<ILibraryService>();

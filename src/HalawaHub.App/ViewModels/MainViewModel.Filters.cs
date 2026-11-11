@@ -20,7 +20,7 @@ public partial class MainViewModel
             NavAll, NavFavorite, NavInstalled, NavRecent,
             platform: SelectedPlatform, includeHidden: ShowHiddenGames, reverse: SortReverse);
         var inCollection = ActiveCollectionFilter();
-        foreach (var card in filtered.Where(inCollection))
+        foreach (var card in MergeCards(filtered.Where(inCollection)))
             FilteredGames.Add(card);
 
         IsPageEmpty = !IsRefreshing && FilteredGames.Count == 0;

@@ -101,4 +101,19 @@ public class AppConfig
 
     /// معالج أول تشغيل: يُكتب true فقط عند إنشاء الملف لأول مرة، فالملفات القديمة (بلا الحقل) لا تراه
     public bool ShowOnboarding { get; set; }
+
+    // ===== المرحلة 7 =====
+
+    /// مفتاح Steam Web API (اختياري) لعرض ألعاب Steam المملوكة غير المثبتة. في الذاكرة فقط؛ يُحفظ مشفّرًا.
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string SteamWebApiKey { get; set; } = "";
+
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? SteamWebApiKeyRef { get; set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    internal string? SavedSteamWebApiKey { get; set; }
+
+    /// دمج اللعبة نفسها من أكثر من منصة في بطاقة واحدة
+    public bool MergeDuplicates { get; set; } = true;
 }

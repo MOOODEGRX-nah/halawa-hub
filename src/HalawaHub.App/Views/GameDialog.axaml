@@ -6,6 +6,7 @@
              xmlns:conv="using:HalawaHub.App.Converters"
              xmlns:core="using:HalawaHub.Core.Covers"
              xmlns:news="using:HalawaHub.Core.News"
+             xmlns:store="using:HalawaHub.Core.Store"
              xmlns:behaviors="using:HalawaHub.App.Behaviors"
              xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
              x:Class="HalawaHub.App.Views.GameDialog"
@@ -68,6 +69,9 @@
                             <StackPanel Spacing="4">
                                 <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
                                         Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="0" Content="{l:Loc general}"/>
+                                <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=6}"
+                                        IsVisible="{Binding DetailsGame.HasNews, FallbackValue=False}"
+                                        Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="6" Content="{l:Loc details}"/>
                                 <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
                                         Command="{Binding SelectGameDialogSectionCommand}" CommandParameter="1" Content="{l:Loc files}"/>
                                 <Button Classes="si" Classes.on="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
@@ -294,6 +298,56 @@
                                          AutomationProperties.Name="{l:Loc launch}"/>
                                 <TextBlock Classes="lbl" Text="{l:Loc launchNote}" IsVisible="{Binding SupportsLaunchParameters}"/>
                                 <TextBlock Classes="lbl" Text="{l:Loc launchUrlNote}" TextWrapping="Wrap" IsVisible="{Binding !SupportsLaunchParameters}"/>
+                            </StackPanel>
+
+                            <!-- التفاصيل: بيانات متجر Steam (ألعاب Steam فقط) -->
+                            <StackPanel Name="StoreDetails" Spacing="14" DataContext="{Binding #Root.DataContext}" x:DataType="vm:MainViewModel"
+                                        IsVisible="{Binding GameDialogSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=6}">
+                                <TextBlock Classes="lbl" Text="{l:Loc storeLoading}" IsVisible="{Binding IsStoreLoading}"/>
+                                <TextBlock Classes="lbl" Text="{l:Loc storeNone}" IsVisible="{Binding HasNoStoreInfo}" TextWrapping="Wrap"/>
+                                <StackPanel Spacing="14" IsVisible="{Binding HasStoreInfo}">
+                                    <Border CornerRadius="10" ClipToBounds="True" Width="460" Height="215" HorizontalAlignment="Left" IsVisible="{Binding HasStoreHeader}"
+                                            FlowDirection="LeftToRight" Background="{DynamicResource ChipBrush}">
+                                        <Image Stretch="UniformToFill" behaviors:AsyncImage.DecodeWidth="920" behaviors:AsyncImage.SourceUrl="{Binding StoreHeader}"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding StoreDescription}" FontSize="14" TextWrapping="Wrap" MaxWidth="720" HorizontalAlignment="Left"/>
+                                    <Border Classes="st" Padding="10,4" CornerRadius="8" BorderThickness="1" HorizontalAlignment="Left" IsVisible="{Binding HasDeckBadge}"
+                                            BorderBrush="{Binding DeckTone, Converter={x:Static conv:StatusToneBrushConverter.Instance}}">
+                                        <TextBlock Name="DeckBadge" Text="{Binding DeckText}" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{Binding DeckTone, Converter={x:Static conv:StatusToneBrushConverter.Instance}}"/>
+                                    </Border>
+                                    <Border Classes="kv"><StackPanel Orientation="Horizontal"><TextBlock Classes="k" Text="{l:Loc storeDeveloper}"/><TextBlock Text="{Binding StoreDeveloper}" TextWrapping="Wrap"/></StackPanel></Border>
+                                    <Border Classes="kv"><StackPanel Orientation="Horizontal"><TextBlock Classes="k" Text="{l:Loc storePublisher}"/><TextBlock Text="{Binding StorePublisher}" TextWrapping="Wrap"/></StackPanel></Border>
+                                    <Border Classes="kv"><StackPanel Orientation="Horizontal"><TextBlock Classes="k" Text="{l:Loc storeRelease}"/><TextBlock Text="{Binding StoreRelease}"/></StackPanel></Border>
+
+                                    <StackPanel Spacing="6" IsVisible="{Binding HasScreenshots}">
+                                        <TextBlock Classes="lbl" Text="{l:Loc storeMedia}"/>
+                                        <ItemsControl ItemsSource="{Binding StoreScreenshots}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="store:SteamScreenshot">
+                                                    <Button Classes="shot" Width="176" Height="99" Padding="0" CornerRadius="8" Margin="0,0,10,10"
+                                                            BorderThickness="1" BorderBrush="{DynamicResource BorderBrushCard}" Background="{DynamicResource PageBrush}"
+                                                            Command="{Binding #Root.((vm:MainViewModel)DataContext).OpenMediaCommand}" CommandParameter="{Binding}">
+                                                        <Image Stretch="UniformToFill" behaviors:AsyncImage.DecodeWidth="352" behaviors:AsyncImage.SourceUrl="{Binding ThumbnailUrl}"/>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6" IsVisible="{Binding HasWindowsReq}">
+                                        <TextBlock Classes="lbl" Text="{l:Loc storeReqWindows}"/>
+                                        <Border Classes="code"><TextBlock Text="{Binding StoreWindowsReq}" TextWrapping="Wrap" FlowDirection="LeftToRight" HorizontalAlignment="Left"/></Border>
+                                    </StackPanel>
+                                    <StackPanel Spacing="6" IsVisible="{Binding HasLinuxReq}">
+                                        <TextBlock Classes="lbl" Text="{l:Loc storeReqLinux}"/>
+                                        <Border Classes="code"><TextBlock Text="{Binding StoreLinuxReq}" TextWrapping="Wrap" FlowDirection="LeftToRight" HorizontalAlignment="Left"/></Border>
+                                    </StackPanel>
+                                    <TextBlock Classes="lbl" FontSize="12" Text="{l:Loc storeSource}"/>
+                                </StackPanel>
                             </StackPanel>
 
                             <!-- الأخبار: ألعاب Steam فقط -->

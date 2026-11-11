@@ -52,7 +52,7 @@ public partial class MainViewModel
 
     // ترتيب شريط المنصات في التصميم، ومنصات الإضافات تأتي بعدها
     private static readonly string[] PlatformOrder =
-        { "Steam", "Epic Games", "GOG", "Riot Games", "Xbox / Microsoft Store", "Heroic", "Lutris" };
+        { "Steam", "Epic Games", "GOG", "Riot Games", "Xbox / Microsoft Store", "Ubisoft", "EA", "Rockstar", "Heroic", "Lutris" };
 
     private const int ChipWidth = 150;
     private const int MaxRecentSearches = 5;
@@ -100,6 +100,8 @@ public partial class MainViewModel
         RebuildSubscriptionRows();
         if (IsSettingsVisible && SettingsSection == SectionPlatforms) RefreshPlatformRows();
         if (FreeGames.Count > 0) _ = LoadFreeGamesAsync();
+        RaiseStore();
+        if (IsDetailsOpen && GameDialogSection == DetailsSection && DetailsGame != null) _ = LoadStoreDetailsAsync(DetailsGame);
         OnPropertyChanged(nameof(GameDialogTitle));
         OnPropertyChanged(nameof(SettingsTitle));
     }
@@ -385,6 +387,7 @@ public partial class MainViewModel
             OnPropertyChanged(nameof(GameDialogTitle));
             if (value == 1) DetailsGame?.EnsureSizeRequested();
             if (value == NewsSection && DetailsGame != null) _ = LoadGameNewsAsync(DetailsGame);
+            if (value == DetailsSection && DetailsGame != null) _ = LoadStoreDetailsAsync(DetailsGame);
             OnPropertyChanged(nameof(GameDialogPillIndex));
         }
     }
@@ -396,13 +399,11 @@ public partial class MainViewModel
         3 => "launch",
         NewsSection => "news",
         ToolsSection => "tools",
+        DetailsSection => "details",
         _ => "general"
     }];
 
-    public int GameDialogSectionCount => 4 + (DetailsGame?.HasNews == true ? 1 : 0) + (DetailsGame?.HasTools == true ? 1 : 0);
 
-    /// موضع القسم في الشريط الجانبي (الأدوات تأتي مكان الأخبار إن لم تكن للعبة أخبار)
-    public int GameDialogPillIndex => _gameDialogSection == ToolsSection && DetailsGame?.HasNews != true ? NewsSection : _gameDialogSection;
 
     private void OpenDetails(GameCardViewModel? card)
     {
@@ -421,6 +422,7 @@ public partial class MainViewModel
     {
         if (!IsDetailsOpen) return;
         IsDetailsOpen = false;
+        CloseMediaCommand.Execute(null);
 
         // اسم مخصص تغيّر أو إخفاء: نعيد الترتيب بعد إغلاق النافذة لا أثناء الكتابة
         ApplyFilter();

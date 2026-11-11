@@ -74,6 +74,7 @@ public static class ConfigService
     }
 
     internal const string SteamGridDbSecretName = "steamgriddb-api-key";
+    internal const string SteamWebSecretName = "steam-web-api-key";
 
     /// <summary>
     /// المفتاح من مخزن الأسرار. ملف قديم فيه المفتاح نصًا صريحًا يُرحَّل فورًا:
@@ -81,10 +82,24 @@ public static class ConfigService
     /// </summary>
     private static void LoadSecrets(string path, AppConfig config)
     {
+        // مفتاح Steam Web API (اختياري): لم يُحفظ يومًا نصًا صريحًا، فلا ترحيل له
+        if (!string.IsNullOrEmpty(config.SteamWebApiKeyRef) && SecretStore.Load(config.SteamWebApiKeyRef) is { } webKey)
+        {
+            config.SteamWebApiKey = webKey;
+            config.SavedSteamWebApiKey = webKey;
+        }
+
         if (!string.IsNullOrEmpty(config.LegacyPlainSteamGridDbApiKey))
         {
             config.SteamGridDbApiKey = config.LegacyPlainSteamGridDbApiKey!;
-            config.LegacyPlainSteamGridDbApiKey = null;
+            if (config.SavedSteamWebApiKey != config.SteamWebApiKey && !(config.SavedSteamWebApiKey == null && config.SteamWebApiKey.Length == 0))
+        {
+            var webRef = SecretStore.Save(SteamWebSecretName, config.SteamWebApiKey);
+            config.SteamWebApiKeyRef = webRef.Length == 0 ? null : webRef;
+            config.SavedSteamWebApiKey = config.SteamWebApiKey;
+        }
+
+        config.LegacyPlainSteamGridDbApiKey = null;
             Log.Info("config.json: migrating the SteamGridDB key to the secret store");
             SaveTo(path, config);
             return;
@@ -105,6 +120,13 @@ public static class ConfigService
 
     private static void ProtectSecrets(AppConfig config)
     {
+        if (config.SavedSteamWebApiKey != config.SteamWebApiKey && !(config.SavedSteamWebApiKey == null && config.SteamWebApiKey.Length == 0))
+        {
+            var webRef = SecretStore.Save(SteamWebSecretName, config.SteamWebApiKey);
+            config.SteamWebApiKeyRef = webRef.Length == 0 ? null : webRef;
+            config.SavedSteamWebApiKey = config.SteamWebApiKey;
+        }
+
         config.LegacyPlainSteamGridDbApiKey = null;
         if (config.SavedSteamGridDbApiKey == config.SteamGridDbApiKey && config.SteamGridDbApiKeyRef != null) return;
         if (config.SavedSteamGridDbApiKey == null && config.SteamGridDbApiKey.Length == 0) return;

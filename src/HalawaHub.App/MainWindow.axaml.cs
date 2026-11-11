@@ -97,6 +97,15 @@ public partial class MainWindow : Window
             return;
         }
 
+        // عارض اللقطات: الأسهم للتنقل و Esc للإغلاق
+        if (vm.IsMediaOpen && e.Key is Key.Left or Key.Right or Key.Escape)
+        {
+            if (e.Key == Key.Escape) vm.CloseMediaCommand.Execute(null);
+            else vm.StepMedia(e.Key == Key.Right ? 1 : -1);
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key != Key.Escape) return;
 
         if (vm.IsNotificationsOpen)

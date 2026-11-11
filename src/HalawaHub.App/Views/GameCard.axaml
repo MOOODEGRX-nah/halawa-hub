@@ -128,7 +128,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <c:VectorIcon Data="{StaticResource IconPlay}" Size="16" IsFilled="True"
                                               StrokeBrush="{x:Null}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{l:Loc play}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding PlayLabel}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>

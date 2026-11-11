@@ -348,6 +348,9 @@ public partial class MainViewModel : INotifyPropertyChanged
             new XboxLibraryProvider(),
             new HeroicLibraryProvider(),
             new LutrisLibraryProvider(),
+            new UbisoftLibraryProvider(),
+            new EaLibraryProvider(),
+            new RockstarLibraryProvider(),
             new ManualGamesProvider()
         };
 
@@ -414,6 +417,7 @@ public partial class MainViewModel : INotifyPropertyChanged
             AskAboutPendingPlugins();
             StartWizardIfFirstRun();
             _ = LoadFreeGamesAsync();
+            _ = RefreshOwnedGamesAsync();
         }
     }
 

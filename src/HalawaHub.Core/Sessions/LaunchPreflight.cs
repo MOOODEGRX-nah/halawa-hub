@@ -103,6 +103,8 @@ public sealed class LaunchPreflight
         "heroic" => "Heroic",
         "lutris" => "Lutris",
         "goggalaxy" => "GOG Galaxy",
+        "uplay" => "Ubisoft Connect",
+        "origin2" => "EA app",
         _ => game.Platform
     };
 

@@ -316,7 +316,7 @@
                                             <TextBlock Grid.Column="2" Text="{Binding PlayTimeText}" FontSize="13" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Grid.Column="3" Text="{Binding SizeOnDiskText}" FontSize="13" Foreground="{DynamicResource MutedBrush}"
                                                        FlowDirection="LeftToRight" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                            <Button Grid.Column="4" Classes="btn pri" Height="34" Padding="14,0" Content="{l:Loc play}"
+                                            <Button Grid.Column="4" Classes="btn pri" Height="34" Padding="14,0" Content="{Binding PlayLabel}"
                                                     Command="{Binding #Root.((vm:MainViewModel)DataContext).LaunchGameCommand}" CommandParameter="{Binding}"/>
                                         </Grid>
                                     </Button>

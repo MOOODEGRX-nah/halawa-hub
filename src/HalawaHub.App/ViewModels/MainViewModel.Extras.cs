@@ -20,6 +20,9 @@ public sealed class NotificationItem
     public string Text => Render();
     public DateTime At { get; init; } = DateTime.Now;
     public string TimeText => At.ToString("HH:mm", CultureInfo.InvariantCulture);
+    /// ما يفتحه الضغط على الإشعار (صفحة العروض مثلًا)، أو لا شيء
+    public Action? Open { get; init; }
+    public bool CanOpen => Open != null;
 }
 
 public sealed class SubscriptionRow
@@ -73,7 +76,14 @@ public partial class MainViewModel
         private set { if (_isNotificationsOpen == value) return; _isNotificationsOpen = value; OnPropertyChanged(nameof(IsNotificationsOpen)); }
     }
 
-    private RelayCommand? _toggleNotificationsCommand, _dismissNotificationCommand, _clearNotificationsCommand;
+    private RelayCommand? _toggleNotificationsCommand, _dismissNotificationCommand, _clearNotificationsCommand, _openNotificationCommand;
+
+    public RelayCommand OpenNotificationCommand => _openNotificationCommand ??= new RelayCommand(p =>
+    {
+        if (p is not NotificationItem { Open: { } open }) return;
+        IsNotificationsOpen = false;
+        open();
+    });
 
     public RelayCommand ToggleNotificationsCommand => _toggleNotificationsCommand ??= new RelayCommand(_ =>
     {
@@ -111,10 +121,10 @@ public partial class MainViewModel
     internal void NotifyKey(string category, string key, params object[] args) =>
         Notify(category, () => Loc.Instance.Format(key, args));
 
-    internal void Notify(string category, Func<string> render)
+    internal void Notify(string category, Func<string> render, Action? open = null)
     {
         if (!CategoryEnabled(category) || string.IsNullOrWhiteSpace(render())) return;
-        Notifications.Insert(0, new NotificationItem { Category = category, Render = render });
+        Notifications.Insert(0, new NotificationItem { Category = category, Render = render, Open = open });
         while (Notifications.Count > MaxNotifications) Notifications.RemoveAt(Notifications.Count - 1);
         if (!IsNotificationsOpen) UnreadNotifications++;
         OnPropertyChanged(nameof(HasNoNotifications));
@@ -272,8 +282,29 @@ public partial class MainViewModel
 
     public ObservableCollection<FreeGameItem> FreeGames { get; } = new();
 
-    /// يظهر في تبويب "الرئيسي" فقط، وإن فشل الجلب يختفي القسم كله
-    public bool ShowFreeGamesStrip => _config.ShowFreeGames && FreeGames.Count > 0 && SelectedNavItem == NavAll && !IsListLayout;
+    /// صفحة العروض: المجانيات هنا بدل شريط فوق المكتبة
+    public bool HasFreeGames => FreeGames.Count > 0;
+    public bool HasNoDeals => !HasFreeGames;
+    public string DealsEmptyText => Loc.Instance[_config.ShowFreeGames ? "dealsEmpty" : "dealsOff"];
+
+    private void RaiseDeals()
+    {
+        OnPropertyChanged(nameof(HasFreeGames));
+        OnPropertyChanged(nameof(HasNoDeals));
+        OnPropertyChanged(nameof(DealsEmptyText));
+    }
+
+    /// إشعار واحد عند ظهور مجانيات لم يرها المستخدم من قبل، والضغط عليه يفتح صفحة العروض
+    private void NotifyNewFreeGames()
+    {
+        var urls = FreeGames.Select(g => g.Url).ToList();
+        var fresh = urls.Count(u => !_config.SeenFreeGames.Contains(u));
+        if (fresh == 0) return;
+        _config.SeenFreeGames = urls;
+        SaveConfig();
+        Notify("free", () => Loc.Instance.Format("ntFree", fresh), () => GoDealsCommand.Execute(null));
+    }
+
 
     public bool ShowFreeGames
     {
@@ -284,7 +315,8 @@ public partial class MainViewModel
             _config.ShowFreeGames = value;
             SaveConfig();
             OnPropertyChanged(nameof(ShowFreeGames));
-            OnPropertyChanged(nameof(ShowFreeGamesStrip));
+            if (!value) FreeGames.Clear();
+            RaiseDeals();
             if (value && FreeGames.Count == 0) _ = LoadFreeGamesAsync();
         }
     }
@@ -325,6 +357,7 @@ public partial class MainViewModel
             Log.Error("free games load failed", ex);
             FreeGames.Clear();
         }
-        OnPropertyChanged(nameof(ShowFreeGamesStrip));
+        RaiseDeals();
+        NotifyNewFreeGames();
     }
 }

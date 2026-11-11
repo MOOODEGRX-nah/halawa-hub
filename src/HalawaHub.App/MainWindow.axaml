@@ -19,6 +19,7 @@
         <Grid Name="PageContent" RowDefinitions="Auto,*" Margin="28,0">
             <views:TopBar Grid.Row="0"/>
             <views:LibraryView Grid.Row="1" IsVisible="{Binding IsLibraryPage}"/>
+            <views:DealsView Grid.Row="1" IsVisible="{Binding IsDealsPage}"/>
             <views:ComingSoonView Grid.Row="1" IsVisible="{Binding IsDeveloperPage}"/>
         </Grid>
 

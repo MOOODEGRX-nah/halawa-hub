@@ -95,6 +95,8 @@ public class AppConfig
     public bool NotifyLaunchFailed { get; set; } = true;
     public bool NotifyScan { get; set; } = true;
     public bool NotifyAppUpdate { get; set; } = true;
+    /// روابط المجانيات التي أُشعر بها المستخدم من قبل (حتى لا يتكرر الإشعار مع كل تشغيل)
+    public System.Collections.Generic.List<string> SeenFreeGames { get; set; } = new();
 
     /// قسم "مجانية هذا الأسبوع" من Epic في الصفحة الرئيسية
     public bool ShowFreeGames { get; set; } = true;

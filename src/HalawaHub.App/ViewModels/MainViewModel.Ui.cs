@@ -119,12 +119,14 @@ public partial class MainViewModel
             _topNavIndex = value;
             OnPropertyChanged(nameof(TopNavIndex));
             OnPropertyChanged(nameof(IsLibraryPage));
+            OnPropertyChanged(nameof(IsDealsPage));
             OnPropertyChanged(nameof(IsDeveloperPage));
         }
     }
 
     public bool IsLibraryPage => TopNavIndex == 0;
-    public bool IsDeveloperPage => TopNavIndex == 1;
+    public bool IsDealsPage => TopNavIndex == 1;
+    public bool IsDeveloperPage => TopNavIndex == 2;
 
     // ===== تبويبات المكتبة =====
 

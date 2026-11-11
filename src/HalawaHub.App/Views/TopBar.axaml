@@ -88,20 +88,23 @@
             </Border>
         </Border>
 
-        <!-- المكتبة / المطورين -->
-        <Border Grid.Column="1" Width="400" Height="56" CornerRadius="20"
+        <!-- المكتبة / العروض / المطورين -->
+        <Border Grid.Column="1" Width="520" Height="56" CornerRadius="20"
                 Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrushCard}"
                 BorderThickness="1" BoxShadow="0 6 18 0 #73000000">
             <Panel>
-                <c:SlidingPill ItemCount="2" SelectedIndex="{Binding TopNavIndex}" Inset="6" Margin="0,6">
+                <c:SlidingPill ItemCount="3" SelectedIndex="{Binding TopNavIndex}" Inset="6" Margin="0,6">
                     <Border CornerRadius="14" Background="{DynamicResource RedGradient}"
                             BoxShadow="{DynamicResource GlowTopOn}"/>
                 </c:SlidingPill>
-                <Grid ColumnDefinitions="*,*" Margin="6">
+                <Grid ColumnDefinitions="*,*,*" Margin="6">
                     <Button Grid.Column="0" Classes="tbtn" Classes.on="{Binding IsLibraryPage}"
                             Command="{Binding GoLibraryCommand}"
                             Content="{l:Loc library}"/>
-                    <Button Grid.Column="1" Classes="tbtn" Classes.on="{Binding IsDeveloperPage}"
+                    <Button Grid.Column="1" Classes="tbtn" Classes.on="{Binding IsDealsPage}"
+                            Command="{Binding GoDealsCommand}"
+                            Content="{l:Loc deals}"/>
+                    <Button Grid.Column="2" Classes="tbtn" Classes.on="{Binding IsDeveloperPage}"
                             Command="{Binding GoDeveloperCommand}" AutomationProperties.Name="{l:Loc developer}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="{l:Loc developer}" VerticalAlignment="Center"/>

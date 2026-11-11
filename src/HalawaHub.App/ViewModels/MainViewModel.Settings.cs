@@ -159,7 +159,6 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(IsGridLayout));
         OnPropertyChanged(nameof(GridGames));
         OnPropertyChanged(nameof(ListGames));
-        OnPropertyChanged(nameof(ShowFreeGamesStrip));
         if (IsListLayout) RequestListSizes();
     }
 

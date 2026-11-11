@@ -7,6 +7,7 @@ using Avalonia.Headless.XUnit;
 using FluentAssertions;
 using HalawaHub.App.Services;
 using HalawaHub.App.ViewModels;
+using HalawaHub.App.Views;
 using HalawaHub.Core.Models;
 using HalawaHub.Core.Store;
 using HalawaHub.Tests.Ui;
@@ -347,20 +348,48 @@ public class EpicFreeGamesTests
     }
 
     [AvaloniaFact]
-    public async Task Strip_ShowsOnHome_AndHidesWhenTheFetchFails()
+    public async Task FreeGames_LiveOnTheDealsPage_NotAboveTheLibrary()
     {
         using var ui = new UiHarness(Loc.English);
+        ui.Vm.ClearNotificationsCommand.Execute(null);
         ui.Vm.FetchFreeGamesOverride = () => Task.FromResult<string?>(Feed.Replace("2026-11-12T16:00:00.000Z", DateTime.UtcNow.AddDays(2).ToString("o")).Replace("2026-11-05T16:00:00.000Z", DateTime.UtcNow.AddDays(-2).ToString("o")));
         await ui.Vm.LoadFreeGamesAsync();
         ui.Vm.FreeGames.Should().NotBeEmpty();
-        ui.Vm.ShowFreeGamesStrip.Should().BeTrue();
+        ui.Vm.HasFreeGames.Should().BeTrue();
+        Avalonia.Controls.ControlExtensions.FindControl<Avalonia.Controls.Control>(ui.All<LibraryView>().Single(), "FreeGamesStrip").Should().BeNull("the strip took a whole band of the library");
 
-        ui.Vm.SelectLibraryTab(1);
-        ui.Vm.ShowFreeGamesStrip.Should().BeFalse("only on the home tab");
-        ui.Vm.SelectLibraryTab(0);
+        // إشعار واحد للمجانيات الجديدة، ولا يتكرر عند إعادة الجلب
+        var note = ui.Vm.Notifications.Single(n => n.Category == "free");
+        note.CanOpen.Should().BeTrue();
+        await ui.Vm.LoadFreeGamesAsync();
+        ui.Vm.Notifications.Count(n => n.Category == "free").Should().Be(1);
+
+        // الضغط على الإشعار يفتح صفحة العروض
+        ui.Vm.OpenNotificationCommand.Execute(note);
+        ui.Settle();
+        ui.Vm.IsDealsPage.Should().BeTrue();
+        ui.Vm.IsNotificationsOpen.Should().BeFalse();
+        ui.All<DealsView>().Should().ContainSingle();
+        ui.All<LibraryView>().Should().BeEmpty();
+        ui.ButtonWithText(ui.Vm.FreeGames[0].Title).Should().NotBeNull();
 
         ui.Vm.FetchFreeGamesOverride = () => Task.FromResult<string?>(null);
         await ui.Vm.LoadFreeGamesAsync();
-        ui.Vm.ShowFreeGamesStrip.Should().BeFalse();
+        ui.Vm.HasNoDeals.Should().BeTrue("a failed fetch shows the empty text, not stale games");
+        ui.Vm.GoLibraryCommand.Execute(null);
+    }
+
+    [AvaloniaFact]
+    public void TopBar_HasThreePages_LibraryDealsDeveloper()
+    {
+        using var ui = new UiHarness(Loc.English);
+        ui.Click(ui.ButtonWithText("Deals"));
+        ui.Vm.TopNavIndex.Should().Be(1);
+        ui.Vm.IsDealsPage.Should().BeTrue();
+        ui.Click(ui.ButtonWithText("Developer"));
+        ui.Vm.TopNavIndex.Should().Be(2);
+        ui.Vm.IsDeveloperPage.Should().BeTrue();
+        ui.Click(ui.ButtonWithText("Library"));
+        ui.Vm.IsLibraryPage.Should().BeTrue();
     }
 }

@@ -250,34 +250,6 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <!-- مجانية هذا الأسبوع (Epic): يختفي القسم إن فشل الجلب -->
-        <StackPanel Name="FreeGamesStrip" Grid.Row="3" Spacing="8" Margin="0,0,0,18" IsVisible="{Binding ShowFreeGamesStrip}">
-            <TextBlock Classes="lbl" Text="{l:Loc freeThisWeek}"/>
-            <ItemsControl ItemsSource="{Binding FreeGames}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:FreeGameItem">
-                        <Button Classes="btn" Height="64" Padding="0" Margin="0,0,10,6" HorizontalContentAlignment="Stretch"
-                                Command="{Binding #Root.((vm:MainViewModel)DataContext).OpenUrlCommand}" CommandParameter="{Binding Url}">
-                            <Grid ColumnDefinitions="Auto,*">
-                                <Border Width="110" Height="62" CornerRadius="9,0,0,9" ClipToBounds="True" Background="{DynamicResource ChipBrush}"
-                                        FlowDirection="LeftToRight">
-                                    <Image Stretch="UniformToFill" IsVisible="{Binding HasImage}"
-                                           behaviors:AsyncImage.DecodeWidth="220" behaviors:AsyncImage.SourceUrl="{Binding ImageUrl}"/>
-                                </Border>
-                                <StackPanel Grid.Column="1" Margin="12,0,14,0" VerticalAlignment="Center" MaxWidth="220">
-                                    <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{Binding EndsText}" FontSize="11" Foreground="{DynamicResource MutedBrush}"/>
-                                </StackPanel>
-                            </Grid>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
-
         <!-- صفحات المكتبة -->
         <Panel Name="PageHost" Grid.Row="4" ClipToBounds="True" Margin="0,-6,0,0">
             <ScrollViewer Name="PageScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">

@@ -59,7 +59,6 @@ public partial class MainViewModel : INotifyPropertyChanged
             _selectedNavItem = string.IsNullOrEmpty(value) ? NavAll : value;
             OnPropertyChanged(nameof(SelectedNavItem));
             OnPropertyChanged(nameof(LibraryTabIndex));
-            OnPropertyChanged(nameof(ShowFreeGamesStrip));
             ApplyFilter();
         }
     }
@@ -308,6 +307,7 @@ public partial class MainViewModel : INotifyPropertyChanged
     public RelayCommand VerifyApiKeyCommand { get; }
     public RelayCommand CloseChangelogCommand { get; }
     public RelayCommand GoLibraryCommand { get; }
+    public RelayCommand GoDealsCommand { get; }
     public RelayCommand GoDeveloperCommand { get; }
     public RelayCommand SelectPlatformCommand { get; }
     public RelayCommand SelectGameDialogSectionCommand { get; }
@@ -389,7 +389,8 @@ public partial class MainViewModel : INotifyPropertyChanged
         VerifyApiKeyCommand = new RelayCommand(_ => { _ = VerifyApiKeyAsync(); }, _ => !string.IsNullOrWhiteSpace(SteamGridDbApiKey));
         CloseChangelogCommand = new RelayCommand(_ => IsChangelogOpen = false);
         GoLibraryCommand = new RelayCommand(_ => TopNavIndex = 0);
-        GoDeveloperCommand = new RelayCommand(_ => TopNavIndex = 1);
+        GoDealsCommand = new RelayCommand(_ => TopNavIndex = 1);
+        GoDeveloperCommand = new RelayCommand(_ => TopNavIndex = 2);
         SelectPlatformCommand = new RelayCommand(param => { if (param is PlatformChip chip) SelectedPlatform = chip.Key; });
         SelectGameDialogSectionCommand = new RelayCommand(param => { if (int.TryParse(param as string, out var i)) { ResetCoverSearch(); GameDialogSection = i; } });
         SelectSettingsSectionCommand = new RelayCommand(param => { if (int.TryParse(param as string, out var i)) SettingsSection = i; });

@@ -393,7 +393,12 @@ public class MotionTests
         ui.WaitFor(() => !ui.Vm.IsRefreshing);
 
         var check = ui.Window.GetVisualDescendants().OfType<VectorIcon>().First(v => v.Classes.Contains("rf-b"));
-        ShouldHaveMoved(Sample(ui, 350, () => check.Opacity), "check appearing", minimumSteps: 2);
+        // بعد الفحص يعمل خيط الواجهة قليلًا (حالات، مجموعات)، فقد تكتمل علامة ✓ قبل أول عيّنة على جهاز بطيء.
+        // ننتظر رؤية الظهور نفسه، وإن فاتنا نعيد الفحص (البوابة مفتوحة فينتهي فورًا) ونقيس من جديد.
+        var appearing = SampleUntil(() => check.Opacity,
+            v => DistinctCount(v) >= 2 && v[^1] >= 0.999, "check appearing",
+            retrigger: () => { ui.WaitFor(() => !ui.Vm.IsRefreshDone); ui.Vm.RefreshCommand.Execute(null); });
+        ShouldHaveMoved(appearing, "check appearing", minimumSteps: 2);
         check.Opacity.Should().Be(1);
     }
 
@@ -464,7 +469,9 @@ public class MotionTests
         // كل قياس ينتظر الحركة نفسها بدل وقت ثابت: على جهاز CI بطيء قد تنتهي حركة الإغلاق
         // (0.22 ثانية) قبل أول عينة، فنعيدها ونقيس المحاولة الجديدة
         List<double> Opening(Border box, Action open, Action close, string what) => SampleUntil(() => ScaleOf(box),
-            v => v.Max() > 1 && Math.Abs(v[^1] - 1) < 0.001 && box.Opacity == 1, what,
+            // قيمتان مختلفتان على الأقل: عيّنة واحدة تلتقط آخر لحظة من الحركة (1.001) لا تثبت أنها تحركت،
+            // فننتظر حتى تُعاد الحركة (retrigger) ونقيسها كاملة
+            v => DistinctCount(v) >= 2 && v.Max() > 1 && Math.Abs(v[^1] - 1) < 0.001 && box.Opacity == 1, what,
             retrigger: () => { close(); Sample(ui, 500, () => 0); open(); });
 
         List<double> Closing(Border box, Action open, Action close, string what) => SampleUntil(() => box.Opacity,

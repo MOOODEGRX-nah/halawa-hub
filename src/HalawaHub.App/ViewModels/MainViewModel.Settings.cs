@@ -144,6 +144,10 @@ public partial class MainViewModel
     public bool IsListLayout => LibraryLayoutIndex == 1;
     public bool IsGridLayout => !IsListLayout;
 
+    /// كل عرض يأخذ الألعاب فقط حين يكون ظاهرًا: العرض المخفي كان يبني عناصره كلها أيضًا (ضعف الذاكرة)
+    public System.Collections.IEnumerable? GridGames => IsGridLayout ? FilteredGames : null;
+    public System.Collections.IEnumerable? ListGames => IsListLayout ? FilteredGames : null;
+
     public void SetLibraryLayout(string layout)
     {
         layout = layout == "list" ? "list" : "grid";
@@ -153,6 +157,8 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(LibraryLayoutIndex));
         OnPropertyChanged(nameof(IsListLayout));
         OnPropertyChanged(nameof(IsGridLayout));
+        OnPropertyChanged(nameof(GridGames));
+        OnPropertyChanged(nameof(ListGames));
         OnPropertyChanged(nameof(ShowFreeGamesStrip));
         if (IsListLayout) RequestListSizes();
     }

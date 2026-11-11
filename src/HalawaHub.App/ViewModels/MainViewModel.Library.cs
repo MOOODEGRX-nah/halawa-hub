@@ -70,7 +70,7 @@ public partial class MainViewModel
                 var before = _scanCount++ == 0 ? null : Games.Select(g => g.Game.Platform + "|" + g.Game.Id).ToHashSet();
                 ApplyScanResult(result, allTools);
                 if (before != null)
-                    Notify("scan", Loc.Instance.Format("ntScan", Games.Count, Games.Count(g => !before.Contains(g.Game.Platform + "|" + g.Game.Id))));
+                    NotifyKey("scan", "ntScan", Games.Count, Games.Count(g => !before.Contains(g.Game.Platform + "|" + g.Game.Id)));
                 _ = FlashRefreshDoneAsync();
             }
         }

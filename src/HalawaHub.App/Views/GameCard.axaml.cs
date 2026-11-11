@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using Avalonia;
 using Avalonia.Animation.Easings;
 using Avalonia.Controls;
@@ -19,17 +20,24 @@ public partial class GameCard : UserControl
     {
         InitializeComponent();
 
-        DataContextChanged += (_, _) =>
-        {
-            if (_card != null) _card.PropertyChanged -= OnCardChanged;
-            _card = DataContext as GameCardViewModel;
-            if (_card != null) _card.PropertyChanged += OnCardChanged;
-        };
+        // الاشتراك في أحداث اللعبة فقط والبطاقة داخل النافذة. اللعبة (GameCardViewModel) تعيش طوال
+        // عمر المكتبة، والبطاقة المرسومة تُنشأ من جديد مع كل فلترة أو ترتيب؛ اشتراك لا يُلغى عند
+        // الإزالة كان يُبقي كل البطاقات القديمة في الذاكرة (تسريب يكبر مع كل تبديل تبويب).
+        DataContextChanged += (_, _) => Rebind();
+        AttachedToVisualTree += (_, _) => { _attached = true; Rebind(); };
+        DetachedFromVisualTree += (_, _) => { _attached = false; Rebind(); };
 
-        var item = this.FindControl<Button>("SettingsItem")!;
-        var sliders = this.FindControl<SlidersIcon>("MenuSliders")!;
-        item.PointerEntered += (_, _) => sliders.IsFlipped = true;
-        item.PointerExited += (_, _) => sliders.IsFlipped = false;
+    }
+
+    private bool _attached;
+
+    private void Rebind()
+    {
+        var target = _attached ? DataContext as GameCardViewModel : null;
+        if (ReferenceEquals(target, _card)) return;
+        if (_card != null) _card.PropertyChanged -= OnCardChanged;
+        _card = target;
+        if (_card != null) _card.PropertyChanged += OnCardChanged;
     }
 
     private MainViewModel? MainVm => TopLevel.GetTopLevel(this)?.DataContext as MainViewModel;
@@ -71,11 +79,25 @@ public partial class GameCard : UserControl
         if (_card != null) MainVm?.CreateDesktopShortcut(_card);
     }
 
-    private async void CopyId_Click(object? sender, RoutedEventArgs e)
+    private void CopyId_Click(object? sender, RoutedEventArgs e)
     {
-        if (_card == null) return;
-        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
-        if (clipboard != null) await clipboard.SetTextAsync(_card.Game.Id);
-        MainVm?.OnGameIdCopied(_card);
+        var card = _card;
+        if (card == null) return;
+        SafeUi.Run(async () =>
+        {
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard != null) await clipboard.SetTextAsync(card.Game.Id);
+            MainVm?.OnGameIdCopied(card);
+        }, "copy game id");
+    }
+
+    // القائمة تُبنى عند أول فتح، فعناصرها غير موجودة وقت إنشاء البطاقة: نصل لأيقونة المنزلقات من الزر نفسه
+    private void SettingsItem_PointerEntered(object? sender, Avalonia.Input.PointerEventArgs e) => FlipSliders(sender, true);
+    private void SettingsItem_PointerExited(object? sender, Avalonia.Input.PointerEventArgs e) => FlipSliders(sender, false);
+
+    private static void FlipSliders(object? sender, bool flipped)
+    {
+        if ((sender as Control)?.GetVisualDescendants().OfType<SlidersIcon>().FirstOrDefault() is { } sliders)
+            sliders.IsFlipped = flipped;
     }
 }

@@ -136,7 +136,7 @@ public sealed class EaLibraryProvider : IGameLibraryProvider
             yield return new GameInfo
             {
                 Id = offerId ?? e.KeyName, Name = name, Platform = Platform, InstallPath = dir,
-                ExecutablePath = offerId != null ? $"origin2://game/launch?offerIds={offerId}" : "origin2://library/open",
+                ExecutablePath = offerId != null ? $"origin2://game/launch?offerIds={Uri.EscapeDataString(offerId)}" : "origin2://library/open",
                 IsInstalled = _dirExists(dir)
             };
         }

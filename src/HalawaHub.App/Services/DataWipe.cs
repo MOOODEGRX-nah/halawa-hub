@@ -28,10 +28,29 @@ public static class DataWipe
     /// يُستدعى من Program.Main قبل أي شيء آخر. يرجع true إذا حذف شيئًا.
     public static bool RunIfScheduled() => RunIfScheduled(AppPaths.DataDirectory);
 
+    /// جذر قرص أو مجلد المستخدم نفسه: لا يُمسح أبدًا
+    internal static bool IsUnsafeFolder(string dir)
+    {
+        var seps = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+        var full = Path.GetFullPath(dir).TrimEnd(seps);
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).TrimEnd(seps);
+        return full.Length == 0 || Path.GetPathRoot(full)?.TrimEnd(seps) == full
+            || string.Equals(full, home, StringComparison.OrdinalIgnoreCase);
+    }
+
     internal static bool RunIfScheduled(string dataDir)
     {
         var marker = Path.Combine(dataDir, MarkerName);
         if (!File.Exists(marker)) return false;
+
+        // حماية: لا نمسح أبدًا جذر قرص أو مجلد المستخدم نفسه إن وُجِّه مجلد البيانات إليه خطأً
+        var full = Path.GetFullPath(dataDir);
+        if (IsUnsafeFolder(full))
+        {
+            Log.Error($"data wipe refused for an unsafe folder: {full}");
+            try { File.Delete(marker); } catch { /* best effort */ }
+            return false;
+        }
 
         try { HalawaHub.Core.Security.SecretStore.Delete("steamgriddb-api-key"); } catch { /* best effort */ }
         try { HalawaHub.Core.Security.SecretStore.Delete("steam-web-api-key"); } catch { /* best effort */ }

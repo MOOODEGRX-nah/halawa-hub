@@ -71,7 +71,7 @@ public partial class MainViewModel
         foreach (var (card, status) in results)
         {
             card.Status = WithSession(card, status);
-            if (card.HasUpdate) NotifyOnce("update", card.Game.Platform + "|" + card.Game.Id, Loc.Instance.Format("ntGameUpdate", card.Name));
+            if (card.HasUpdate) NotifyOnce("update", card.Game.Platform + "|" + card.Game.Id, "ntGameUpdate", card.Name);
         }
     }
 

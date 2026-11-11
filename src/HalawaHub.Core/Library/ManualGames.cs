@@ -44,6 +44,20 @@ public static class ManualGames
     /// null إذا كان الملف غير مدعوم أو تالفًا
     public static ManualGameRecord? FromFile(string file, Func<string, string?>? resolveLnk = null)
     {
+        try
+        {
+            return FromFileCore(file, resolveLnk);
+        }
+        catch (Exception ex)
+        {
+            // ملف مقفل أو بلا صلاحية قراءة: نرفضه برسالة بدل أن يسقط البرنامج
+            Log.Error($"manual game file unreadable: {file}", ex);
+            return null;
+        }
+    }
+
+    private static ManualGameRecord? FromFileCore(string file, Func<string, string?>? resolveLnk)
+    {
         if (string.IsNullOrWhiteSpace(file) || !File.Exists(file)) return null;
         var ext = Path.GetExtension(file).ToLowerInvariant();
         var name = Path.GetFileNameWithoutExtension(file);

@@ -320,7 +320,7 @@ public class GameCardViewModel : INotifyPropertyChanged
     /// على لينكس نطلب إلغاء التثبيت من Steam فقط: Heroic وLutris لا يوفران بروتوكولًا
     /// له، فلا نعرض زرًا لا يعمل. سلوك ويندوز كما هو (رسالة توضيحية).
     /// </summary>
-    public bool CanUninstall => LauncherActions.System.Uninstall(Game) != null;
+    public bool CanUninstall => Game.IsInstalled && LauncherActions.System.Uninstall(Game) != null;
 
     /// Epic: لا رابط للإزالة، فالزر يفتح المشغّل ويقول ذلك
     public string UninstallLabel => Loc.Instance[LauncherActions.System.Uninstall(Game) is { OpensLauncher: true } ? "uninstallInLauncher" : "uninstall"];
@@ -407,6 +407,11 @@ public class GameCardViewModel : INotifyPropertyChanged
 
     // ===== قائمة البطاقة =====
 
+    private bool _menuBuilt;
+
+    /// محتوى قائمة البطاقة: null حتى تُفتح أول مرة، فلا تُبنى أزرارها لكل بطاقة في المكتبة
+    public GameCardViewModel? MenuContent => _menuBuilt ? this : null;
+
     private bool _isMenuOpen;
     public bool IsMenuOpen
     {
@@ -415,6 +420,11 @@ public class GameCardViewModel : INotifyPropertyChanged
         {
             if (_isMenuOpen == value) return;
             _isMenuOpen = value;
+            if (value && !_menuBuilt)
+            {
+                _menuBuilt = true;
+                OnPropertyChanged(nameof(MenuContent));
+            }
             OnPropertyChanged(nameof(IsMenuOpen));
         }
     }

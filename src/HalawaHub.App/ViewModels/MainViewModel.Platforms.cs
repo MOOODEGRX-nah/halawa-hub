@@ -16,6 +16,9 @@ public sealed class PlatformRow
     public required int GameCount { get; init; }
     public required PlatformCapabilities Caps { get; init; }
 
+    /// مشغّل حقيقي (لا قائمة "أضفتها بنفسك")؛ معالج أول تشغيل يعرض المشغّلات فقط
+    public bool IsLauncher { get; init; } = true;
+
     public string DetectedText => Loc.Instance[Detected ? "platDetected" : "platNotFound"];
     public string GamesText => Loc.Instance.Format("platGames", GameCount);
     public string CapsText
@@ -70,6 +73,7 @@ public partial class MainViewModel
                 return new PlatformRow
                 {
                     Name = GameCardViewModel.ShortenPlatform(p.PlatformName),
+                    IsLauncher = p.PlatformName != ManualGames.Platform,
                     Detected = detected || (p.PlatformName == ManualGames.Platform),
                     PathText = path ?? "—",
                     GameCount = counts.TryGetValue(p.PlatformName, out var n) ? n : 0,
@@ -79,6 +83,10 @@ public partial class MainViewModel
 
             PlatformRows.Clear();
             foreach (var row in rows) PlatformRows.Add(row!);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("platform detection failed", ex);
         }
         finally
         {

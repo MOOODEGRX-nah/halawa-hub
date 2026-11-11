@@ -679,7 +679,7 @@ public class MotionTests
         var vm = ui.Vm;
         Sample(ui, 200, () => 0);
 
-        // هالة زر البحث تنبض باستمرار
+        // هالة زر البحث تنبض عند ظهور النافذة (ثم تسكن بعد ثوانٍ حتى لا تُشغل المعالج والبرنامج خامل)
         var halo = ui.Window.GetVisualDescendants().OfType<Border>().First(b => b.Classes.Contains("halo"));
         ShouldHaveMoved(Sample(ui, 300, () => ScaleOf(halo)), "search halo");
 

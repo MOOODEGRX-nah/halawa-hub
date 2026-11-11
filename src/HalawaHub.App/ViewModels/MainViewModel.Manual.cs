@@ -49,13 +49,22 @@ public partial class MainViewModel
             return;
         }
 
-        var all = ManualGames.Load(ManualGamesPath);
-        var record = all.FirstOrDefault(r => r.Id == card.Game.Id);
-        if (record == null) return;
-        record.Target = fresh.Target;
-        record.Arguments = fresh.Arguments;
-        record.InstallDir = fresh.InstallDir;
-        ManualGames.Save(ManualGamesPath, all);
+        try
+        {
+            var all = ManualGames.Load(ManualGamesPath);
+            var record = all.FirstOrDefault(r => r.Id == card.Game.Id);
+            if (record == null) return;
+            record.Target = fresh.Target;
+            record.Arguments = fresh.Arguments;
+            record.InstallDir = fresh.InstallDir;
+            ManualGames.Save(ManualGamesPath, all);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("manual-games.json: save failed", ex);
+            ShowStatus(Loc.Instance.Format("addGameFailed", card.Name));
+            return;
+        }
 
         CloseDetails();
         await RefreshLibraryAndWaitAsync();
@@ -63,9 +72,18 @@ public partial class MainViewModel
 
     public async Task RemoveManualGameAsync(GameCardViewModel card)
     {
-        var all = ManualGames.Load(ManualGamesPath);
-        if (all.RemoveAll(r => r.Id == card.Game.Id) == 0) return;
-        ManualGames.Save(ManualGamesPath, all);
+        try
+        {
+            var all = ManualGames.Load(ManualGamesPath);
+            if (all.RemoveAll(r => r.Id == card.Game.Id) == 0) return;
+            ManualGames.Save(ManualGamesPath, all);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("manual-games.json: save failed", ex);
+            ShowStatus(Loc.Instance.Format("addGameFailed", card.Name));
+            return;
+        }
         CloseDetails();
         await RefreshLibraryAndWaitAsync();
     }

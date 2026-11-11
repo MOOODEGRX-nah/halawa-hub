@@ -282,7 +282,7 @@
         <Panel Name="PageHost" Grid.Row="4" ClipToBounds="True" Margin="0,-6,0,0">
             <ScrollViewer Name="PageScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <Panel Margin="0,6,0,40">
-                    <ItemsControl Name="GamesList" ItemsSource="{Binding FilteredGames}" IsVisible="{Binding IsGridLayout}">
+                    <ItemsControl Name="GamesList" ItemsSource="{Binding GridGames}" IsVisible="{Binding IsGridLayout}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate><c:AutoFillGrid MinCell="{Binding #Root.((vm:MainViewModel)DataContext).CardMinWidth}"/></ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
@@ -300,7 +300,7 @@
                             <TextBlock Grid.Column="2" Classes="lbl" Text="{l:Loc playTime}"/>
                             <TextBlock Grid.Column="3" Classes="lbl" Text="{l:Loc sizeOnDisk}"/>
                         </Grid>
-                        <ItemsControl ItemsSource="{Binding FilteredGames}">
+                        <ItemsControl ItemsSource="{Binding ListGames}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:GameCardViewModel">
                                     <Button Classes="row" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="14,8"

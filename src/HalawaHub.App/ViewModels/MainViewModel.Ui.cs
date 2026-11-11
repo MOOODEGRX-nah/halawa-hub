@@ -93,6 +93,7 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(SecretStorageText));
         RefreshPluginTexts();
         OnPropertyChanged(nameof(WizardNextLabel));
+        RefreshNotificationTexts();
         OnPropertyChanged(nameof(EditTitle));
         OnPropertyChanged(nameof(EditProblem));
         OnPropertyChanged(nameof(ReduceMotionStateText));
@@ -448,7 +449,7 @@ public partial class MainViewModel
 
         try
         {
-            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();
         }
         catch (Exception ex)
         {
@@ -620,7 +621,7 @@ public partial class MainViewModel
         private set
         {
             _updateKind = value;
-            if (value == UpdateCheckKind.Available) NotifyOnce("appupdate", "app", Loc.Instance["ntAppUpdate"]);
+            if (value == UpdateCheckKind.Available) NotifyOnce("appupdate", "app", "ntAppUpdate");
             OnPropertyChanged(nameof(UpdateKind));
             OnPropertyChanged(nameof(UpdateBadge));
             OnPropertyChanged(nameof(UpdateStatusText));

@@ -160,4 +160,89 @@
     <Style Selector="ScrollBar">
         <Setter Property="AllowAutoHide" Value="True"/>
     </Style>
+
+    <!-- أنماط بطاقة اللعبة: هنا مرة واحدة للبرنامج كله. كانت داخل GameCard فتُنشأ نسخة منها لكل بطاقة
+         (25 نمطًا × عدد الألعاب)، وهذا يأكل الذاكرة في المكتبات الكبيرة -->
+    <Style Selector="Border.face">
+        <Setter Property="RenderTransform" Value="translateY(0px)"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2"/>
+                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Panel.card:pointerover Border.face">
+        <Setter Property="RenderTransform" Value="translateY(-4px)"/>
+        <Setter Property="BoxShadow" Value="{DynamicResource GlowCardHover}"/>
+    </Style>
+    <!-- إعداد "حركة الغلاف عند المرور" مطفأ -->
+    <Style Selector="Panel.nohover Panel.card:pointerover Border.face">
+        <Setter Property="RenderTransform" Value="translateY(0px)"/>
+        <Setter Property="BoxShadow" Value="0 0 0 0 #00000000"/>
+    </Style>
+
+    <Style Selector="Button.eb">
+        <Setter Property="Width" Value="44"/>
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="CornerRadius" Value="22"/>
+    </Style>
+    <Style Selector="Button.eb.open /template/ Border#PART_Root">
+        <Setter Property="BoxShadow" Value="{DynamicResource GlowMenuOpen}"/>
+    </Style>
+    <Style Selector="Button.eb">
+        <Setter Property="Transitions">
+            <Transitions><BrushTransition Property="Background" Duration="0:0:0.3"/></Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.eb /template/ Border#PART_Root">
+        <Setter Property="Transitions">
+            <Transitions><BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.3"/></Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Panel.mt">
+        <Setter Property="RenderTransform" Value="scale(1)"/>
+        <Setter Property="Transitions">
+            <Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="{x:Static l:Springs.Pop}"/></Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.eb:pressed Panel.mt">
+        <Setter Property="RenderTransform" Value="scale(0.85)"/>
+    </Style>
+    <Style Selector="Button.eb:pointerover controls|MenuCloseIcon">
+        <Setter Property="Foreground" Value="{DynamicResource RedHoverBrush}"/>
+    </Style>
+    <Style Selector="Button.eb.open">
+        <Setter Property="Background" Value="{DynamicResource MenuOpenGradient}"/>
+    </Style>
+    <Style Selector="Button.eb.open:pointerover controls|MenuCloseIcon">
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <Style Selector="Button.mi">
+        <Setter Property="Height" Value="38"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    </Style>
+    <Style Selector="Button.mi:pointerover">
+        <Setter Property="Background" Value="{DynamicResource MenuHoverBrush}"/>
+    </Style>
+
+    <!-- شارة الحالة: اللون من النبرة -->
+    <Style Selector="Border.st.t0"><Setter Property="BorderBrush" Value="#9C8A8A"/></Style>
+    <Style Selector="Border.st.t0 TextBlock"><Setter Property="Foreground" Value="#9C8A8A"/></Style>
+    <Style Selector="Border.st.t1"><Setter Property="BorderBrush" Value="#34D399"/></Style>
+    <Style Selector="Border.st.t1 TextBlock"><Setter Property="Foreground" Value="#34D399"/></Style>
+    <Style Selector="Border.st.t2"><Setter Property="BorderBrush" Value="#EF4444"/></Style>
+    <Style Selector="Border.st.t2 TextBlock"><Setter Property="Foreground" Value="#EF4444"/></Style>
+    <Style Selector="Border.st.t3"><Setter Property="BorderBrush" Value="#F5A623"/></Style>
+    <Style Selector="Border.st.t3 TextBlock"><Setter Property="Foreground" Value="#F5A623"/></Style>
+
+    <!-- لعبة على قرص غير موصول: تبقى في المكتبة باهتة -->
+    <Style Selector="Border.cover-layer.offline">
+        <Setter Property="Opacity" Value="0.45"/>
+    </Style>
 </Styles>

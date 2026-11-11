@@ -7,7 +7,9 @@
              x:DataType="vm:MainViewModel">
 
     <UserControl.Styles>
-        <Style Selector="Border.halo">
+        <!-- النبض يعمل فقط مع الصنف pulse (يضيفه الكود بضع ثوانٍ عند تفعيل النافذة): حركة دائمة هنا
+             كانت تعيد رسم النافذة 60 مرة في الثانية والبرنامج خامل (ربع نواة تقريبًا) -->
+        <Style Selector="Border.halo.pulse">
             <Setter Property="RenderTransform">
                 <ScaleTransform/>
             </Setter>
@@ -32,6 +34,7 @@
             </Style.Animations>
         </Style>
 
+        <!-- الصنف bob يُضاف فقط والفقاعة ظاهرة: حركة لا نهائية على عنصر مخفي تُبقي خيط الرسم يعمل كل إطار -->
         <Style Selector="TextBlock.bob">
             <Setter Property="RenderTransform">
                 <TranslateTransform/>
@@ -77,7 +80,7 @@
     </UserControl.Styles>
 
     <Panel Name="Box" Width="44" Height="44" Classes.open="{Binding IsSearchOpen}">
-        <Border Classes="halo" Margin="-6" CornerRadius="28" BorderThickness="3" BorderBrush="{DynamicResource SearchHaloBrush}"
+        <Border Name="Halo" Classes="halo" Opacity="0.3" Margin="-6" CornerRadius="28" BorderThickness="3" BorderBrush="{DynamicResource SearchHaloBrush}"
                 IsHitTestVisible="False" IsVisible="{Binding !IsSearchOpen}"/>
 
         <Border Name="Shell" BorderBrush="{DynamicResource AccentAmberGradient}" CornerRadius="22" BorderThickness="2" Background="{DynamicResource SurfaceBrush}"
@@ -110,7 +113,7 @@
         <Border Name="Bubble" Width="26" Height="26" CornerRadius="13" IsHitTestVisible="False"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="9,-30,0,0"
                 IsVisible="{Binding ShowSearchNoMatch}" BoxShadow="{DynamicResource GlowSearchS}" Background="{DynamicResource AccentHoverAmberGradient}">
-            <TextBlock Classes="bob" Text="?" Foreground="White" FontWeight="Bold" FontSize="16" FontFamily="fonts:Inter#Inter"
+            <TextBlock Classes.bob="{Binding ShowSearchNoMatch}" Text="?" Foreground="White" FontWeight="Bold" FontSize="16" FontFamily="fonts:Inter#Inter"
                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Border>
 

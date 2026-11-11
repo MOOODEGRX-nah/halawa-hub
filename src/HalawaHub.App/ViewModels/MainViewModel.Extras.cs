@@ -15,7 +15,9 @@ namespace HalawaHub.App.ViewModels;
 public sealed class NotificationItem
 {
     public required string Category { get; init; }
-    public required string Text { get; init; }
+    /// يُحسب عند العرض، فالإشعار يتبع لغة الواجهة الحالية لا لغة لحظة إنشائه
+    public required Func<string> Render { get; init; }
+    public string Text => Render();
     public DateTime At { get; init; } = DateTime.Now;
     public string TimeText => At.ToString("HH:mm", CultureInfo.InvariantCulture);
 }
@@ -103,19 +105,33 @@ public partial class MainViewModel
     };
 
     /// الفئات: update (تحديث لعبة)، launch (فشل تشغيل)، scan (انتهى الفحص)، appupdate (تحديث Halawa)
-    internal void Notify(string category, string text)
+    internal void Notify(string category, string text) => Notify(category, () => text);
+
+    /// نص بمفتاح ترجمة: يُعاد حسابه إن تغيّرت اللغة
+    internal void NotifyKey(string category, string key, params object[] args) =>
+        Notify(category, () => Loc.Instance.Format(key, args));
+
+    internal void Notify(string category, Func<string> render)
     {
-        if (!CategoryEnabled(category) || string.IsNullOrWhiteSpace(text)) return;
-        Notifications.Insert(0, new NotificationItem { Category = category, Text = text });
+        if (!CategoryEnabled(category) || string.IsNullOrWhiteSpace(render())) return;
+        Notifications.Insert(0, new NotificationItem { Category = category, Render = render });
         while (Notifications.Count > MaxNotifications) Notifications.RemoveAt(Notifications.Count - 1);
         if (!IsNotificationsOpen) UnreadNotifications++;
         OnPropertyChanged(nameof(HasNoNotifications));
     }
 
     /// مرة واحدة في الجلسة لكل مفتاح (لعبة لها تحديث تُفحص حالتها مرارًا)
-    private void NotifyOnce(string category, string key, string text)
+    private void NotifyOnce(string category, string key, string locKey, params object[] args)
     {
-        if (_notifiedOnce.Add(category + ":" + key)) Notify(category, text);
+        if (_notifiedOnce.Add(category + ":" + key)) NotifyKey(category, locKey, args);
+    }
+
+    /// بعد تغيير اللغة: نعيد عرض الإشعارات بنصوص اللغة الجديدة
+    private void RefreshNotificationTexts()
+    {
+        var items = Notifications.ToList();
+        Notifications.Clear();
+        foreach (var n in items) Notifications.Add(n);
     }
 
     public bool NotifyGameUpdates { get => _config.NotifyGameUpdates; set { _config.NotifyGameUpdates = value; SaveConfig(); OnPropertyChanged(nameof(NotifyGameUpdates)); } }

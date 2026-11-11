@@ -68,16 +68,16 @@ public partial class GameDialog : UserControl
     private void Scrim_PointerPressed(object? sender, PointerPressedEventArgs e) =>
         _vm?.CloseDetailsCommand.Execute(null);
 
-    private async void CopyPath_Click(object? sender, RoutedEventArgs e)
+    private void CopyPath_Click(object? sender, RoutedEventArgs e) => SafeUi.Run(async () =>
     {
         var path = _vm?.DetailsGame?.InstallPath;
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
         if (!string.IsNullOrEmpty(path) && clipboard != null)
             await clipboard.SetTextAsync(path);
-    }
+    }, "copy path");
 
     // منتقي الملفات تفاعل مع النظام، فمكانه طبقة الواجهة لا الـ ViewModel
-    private async void ChangeCover_Click(object? sender, RoutedEventArgs e)
+    private void ChangeCover_Click(object? sender, RoutedEventArgs e) => SafeUi.Run(async () =>
     {
         var card = _vm?.DetailsGame;
         var storage = TopLevel.GetTopLevel(this)?.StorageProvider;
@@ -92,20 +92,20 @@ public partial class GameDialog : UserControl
 
         if (files.Count > 0)
             card.SetCustomCover(files[0].Path.LocalPath);
-    }
+    }, "change cover");
 
-    private async void ChangeManualFile_Click(object? sender, RoutedEventArgs e)
+    private void ChangeManualFile_Click(object? sender, RoutedEventArgs e) => SafeUi.Run(async () =>
     {
         var card = _vm?.DetailsGame;
         if (card == null || !card.IsManual) return;
         var file = await GamePickers.PickGameFileAsync(this);
         if (file != null) await _vm!.ChangeManualGameFileAsync(card, file);
-    }
+    }, "change manual game file");
 
-    private async void RemoveManual_Click(object? sender, RoutedEventArgs e)
+    private void RemoveManual_Click(object? sender, RoutedEventArgs e) => SafeUi.Run(async () =>
     {
         var card = _vm?.DetailsGame;
         if (card == null || !card.IsManual) return;
         await _vm!.RemoveManualGameAsync(card);
-    }
+    }, "remove manual game");
 }

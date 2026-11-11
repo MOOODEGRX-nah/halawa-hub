@@ -56,7 +56,7 @@
                             <ItemsControl ItemsSource="{Binding PlatformRows}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:PlatformRow">
-                                        <Border Margin="0,0,0,6" Padding="12,8" CornerRadius="10" Background="{DynamicResource PageBrush}"
+                                        <Border Margin="0,0,0,6" Padding="12,8" CornerRadius="10" Background="{DynamicResource PageBrush}" IsVisible="{Binding IsLauncher}"
                                                 BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1">
                                             <Grid ColumnDefinitions="*,Auto">
                                                 <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"/>

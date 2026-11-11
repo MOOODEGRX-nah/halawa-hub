@@ -242,4 +242,47 @@ public partial class SearchBox : UserControl
             new Setter(RotateTransform.AngleProperty, angle),
         }
     };
+
+    // ===== هالة زر البحث: تنبض بضع ثوانٍ عند ظهور النافذة أو تفعيلها ثم تسكن =====
+
+    internal static readonly TimeSpan HaloPulseTime = TimeSpan.FromSeconds(6);
+    private int _haloToken;
+    private Avalonia.Controls.TopLevel? _haloRoot;
+
+    internal bool IsHaloPulsing => this.FindControl<Border>("Halo")?.Classes.Contains("pulse") == true;
+
+    protected override void OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _haloRoot = Avalonia.Controls.TopLevel.GetTopLevel(this);
+        if (_haloRoot is Avalonia.Controls.Window window) window.Activated += OnWindowActivated;
+        PulseHalo();
+    }
+
+    protected override void OnDetachedFromVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        if (_haloRoot is Avalonia.Controls.Window window) window.Activated -= OnWindowActivated;
+        _haloRoot = null;
+        _haloToken++;
+        base.OnDetachedFromVisualTree(e);
+    }
+
+    private void OnWindowActivated(object? sender, EventArgs e) => PulseHalo();
+
+    internal async void PulseHalo()
+    {
+        var halo = this.FindControl<Border>("Halo");
+        if (halo == null || !MotionSettings.Enabled) return;
+        var token = ++_haloToken;
+        halo.Classes.Add("pulse");
+        try
+        {
+            await System.Threading.Tasks.Task.Delay(HaloPulseTime);
+        }
+        catch
+        {
+            return;
+        }
+        if (token == _haloToken) halo.Classes.Remove("pulse");
+    }
 }

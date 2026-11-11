@@ -8,90 +8,6 @@
              x:Class="HalawaHub.App.Views.GameCard"
              x:DataType="vm:GameCardViewModel">
 
-    <UserControl.Styles>
-        <Style Selector="Border.face">
-            <Setter Property="RenderTransform" Value="translateY(0px)"/>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2"/>
-                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
-                </Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="Panel.card:pointerover Border.face">
-            <Setter Property="RenderTransform" Value="translateY(-4px)"/>
-            <Setter Property="BoxShadow" Value="{DynamicResource GlowCardHover}"/>
-        </Style>
-        <!-- إعداد "حركة الغلاف عند المرور" مطفأ -->
-        <Style Selector="Panel.nohover Panel.card:pointerover Border.face">
-            <Setter Property="RenderTransform" Value="translateY(0px)"/>
-            <Setter Property="BoxShadow" Value="0 0 0 0 #00000000"/>
-        </Style>
-
-        <Style Selector="Button.eb">
-            <Setter Property="Width" Value="44"/>
-            <Setter Property="Height" Value="44"/>
-            <Setter Property="CornerRadius" Value="22"/>
-        </Style>
-        <Style Selector="Button.eb.open /template/ Border#PART_Root">
-            <Setter Property="BoxShadow" Value="{DynamicResource GlowMenuOpen}"/>
-        </Style>
-        <Style Selector="Button.eb">
-            <Setter Property="Transitions">
-                <Transitions><BrushTransition Property="Background" Duration="0:0:0.3"/></Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="Button.eb /template/ Border#PART_Root">
-            <Setter Property="Transitions">
-                <Transitions><BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.3"/></Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="Panel.mt">
-            <Setter Property="RenderTransform" Value="scale(1)"/>
-            <Setter Property="Transitions">
-                <Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="{x:Static l:Springs.Pop}"/></Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="Button.eb:pressed Panel.mt">
-            <Setter Property="RenderTransform" Value="scale(0.85)"/>
-        </Style>
-        <Style Selector="Button.eb:pointerover c|MenuCloseIcon">
-            <Setter Property="Foreground" Value="{DynamicResource RedHoverBrush}"/>
-        </Style>
-        <Style Selector="Button.eb.open">
-            <Setter Property="Background" Value="{DynamicResource MenuOpenGradient}"/>
-        </Style>
-        <Style Selector="Button.eb.open:pointerover c|MenuCloseIcon">
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
-
-        <Style Selector="Button.mi">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        </Style>
-        <Style Selector="Button.mi:pointerover">
-            <Setter Property="Background" Value="{DynamicResource MenuHoverBrush}"/>
-        </Style>
-
-        <!-- شارة الحالة: اللون من النبرة -->
-        <Style Selector="Border.st.t0"><Setter Property="BorderBrush" Value="#9C8A8A"/></Style>
-        <Style Selector="Border.st.t0 TextBlock"><Setter Property="Foreground" Value="#9C8A8A"/></Style>
-        <Style Selector="Border.st.t1"><Setter Property="BorderBrush" Value="#34D399"/></Style>
-        <Style Selector="Border.st.t1 TextBlock"><Setter Property="Foreground" Value="#34D399"/></Style>
-        <Style Selector="Border.st.t2"><Setter Property="BorderBrush" Value="#EF4444"/></Style>
-        <Style Selector="Border.st.t2 TextBlock"><Setter Property="Foreground" Value="#EF4444"/></Style>
-        <Style Selector="Border.st.t3"><Setter Property="BorderBrush" Value="#F5A623"/></Style>
-        <Style Selector="Border.st.t3 TextBlock"><Setter Property="Foreground" Value="#F5A623"/></Style>
-
-        <!-- لعبة على قرص غير موصول: تبقى في المكتبة باهتة -->
-        <Style Selector="Border.cover-layer.offline">
-            <Setter Property="Opacity" Value="0.45"/>
-        </Style>
-    </UserControl.Styles>
 
     <Panel Name="CardRoot" Classes="card">
         <!-- وجه البطاقة: الغلاف أو التدرج مع الحرف -->
@@ -165,6 +81,10 @@
                 Width="176" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,8,0"
                 Background="{DynamicResource MenuBrush}" BorderBrush="{DynamicResource MenuBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="6"
                 BoxShadow="0 12 32 0 #99000000" RenderTransformOrigin="100%,0%">
+            <!-- تُبنى القائمة عند أول فتح فقط (MenuContent فارغ قبله): أربعة أزرار جاهزة في كل بطاقة كانت ثلث وزنها تقريبًا -->
+            <ContentControl Name="MenuHost" Content="{Binding MenuContent}">
+            <ContentControl.ContentTemplate>
+            <DataTemplate x:DataType="vm:GameCardViewModel">
             <StackPanel>
                 <Button Classes="mi" Click="Favorite_Click" AutomationProperties.Name="{Binding FavoriteLabel}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -175,7 +95,7 @@
                         <TextBlock Text="{Binding FavoriteLabel}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
-                <Button Name="SettingsItem" Classes="mi" Click="Settings_Click" AutomationProperties.Name="{l:Loc gameSettings}">
+                <Button Name="SettingsItem" Classes="mi" Click="Settings_Click" PointerEntered="SettingsItem_PointerEntered" PointerExited="SettingsItem_PointerExited" AutomationProperties.Name="{l:Loc gameSettings}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <Panel Width="16" Height="16" VerticalAlignment="Center">
                             <c:SlidersIcon Name="MenuSliders" Small="True" Foreground="{DynamicResource MenuTextBrush}" Ring="{DynamicResource MenuBrush}"
@@ -197,6 +117,9 @@
                     </StackPanel>
                 </Button>
             </StackPanel>
+            </DataTemplate>
+            </ContentControl.ContentTemplate>
+            </ContentControl>
         </Border>
     </Panel>
 </UserControl>

@@ -52,7 +52,7 @@ public class SettingsPhaseUiTests
         ui.Vm.SettingsTitle.Should().Be("General");
 
         ui.Vm.SelectSettingsSectionCommand.Execute(MainViewModel.SectionUpdates.ToString());
-        ui.Vm.SettingsPillIndex.Should().Be(7);
+        ui.Vm.SettingsPillIndex.Should().Be(System.Array.IndexOf(MainViewModel.SettingsOrder, MainViewModel.SectionUpdates));
         ui.Vm.SelectSettingsSectionCommand.Execute(MainViewModel.SectionTools.ToString());
         ui.Vm.SettingsTitle.Should().Be("Tools");
         ui.ButtonWithText("Delete all Halawa data").Should().NotBeNull();

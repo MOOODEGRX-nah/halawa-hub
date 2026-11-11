@@ -245,14 +245,14 @@ public class UiFlowTests
     }
 
     [AvaloniaFact]
-    public void Settings_HasTenSections_AndClosesFromBackdrop()
+    public void Settings_HasAllSections_AndClosesFromBackdrop()
     {
         using var ui = new UiHarness(Loc.English);
         ui.Vm.OpenSettingsCommand.Execute(null);
         ui.Vm.SelectSettingsSectionCommand.Execute("0");
         ui.Settle();
 
-        foreach (var name in new[] { "Library", "Appearance", "Platforms", "Language", "API keys", "Plugins", "Updates", "Tools", "Build info", "General" })
+        foreach (var name in new[] { "Library", "Collections", "Appearance", "Platforms", "Subscriptions", "Language", "API keys", "Plugins", "Updates", "Tools", "Build info", "General" })
         {
             ui.Click(ui.All<Button>().First(b => b.Classes.Contains("si") && (b.Content as string) == name));
             ui.Vm.SettingsTitle.Should().Be(name);

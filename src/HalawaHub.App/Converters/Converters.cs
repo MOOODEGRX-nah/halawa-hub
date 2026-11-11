@@ -81,3 +81,22 @@ public class StatusToneBrushConverter : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
+
+/// مفتاح أيقونة مجموعة ("star") → شكلها من موارد البرنامج (IconStar)
+public class IconKeyConverter : IValueConverter
+{
+    public static readonly IconKeyConverter Instance = new();
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var key = value as string;
+        if (string.IsNullOrEmpty(key)) key = "star";
+        var name = "Icon" + char.ToUpperInvariant(key[0]) + key[1..];
+        var app = Avalonia.Application.Current;
+        if (app != null && app.TryGetResource(name, null, out var g) && g != null) return g;
+        return app != null && app.TryGetResource("IconStar", null, out var star) ? star : null;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}

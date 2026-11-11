@@ -59,6 +59,7 @@ public partial class MainViewModel : INotifyPropertyChanged
             _selectedNavItem = string.IsNullOrEmpty(value) ? NavAll : value;
             OnPropertyChanged(nameof(SelectedNavItem));
             OnPropertyChanged(nameof(LibraryTabIndex));
+            OnPropertyChanged(nameof(ShowFreeGamesStrip));
             ApplyFilter();
         }
     }
@@ -334,6 +335,8 @@ public partial class MainViewModel : INotifyPropertyChanged
         _pluginLoader = new PluginLoader(pluginsDir);
         _pluginLoader.LoadPlugins();
         BuildPluginItems();
+        LoadCollections();
+        LoadSubscriptions();
 
         // منصات مدمجة بالنواة كبداية، وأي منصة إضافية تُضاف كـ Plugin لاحقًا
         _builtInProviders = new List<IGameLibraryProvider>
@@ -409,6 +412,8 @@ public partial class MainViewModel : INotifyPropertyChanged
             _ = InitializeBackgroundTasksAsync();
             _ = RecoverActiveSessionAsync();
             AskAboutPendingPlugins();
+            StartWizardIfFirstRun();
+            _ = LoadFreeGamesAsync();
         }
     }
 

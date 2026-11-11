@@ -4,6 +4,7 @@
              xmlns:l="using:HalawaHub.App.Services"
              xmlns:c="using:HalawaHub.App.Controls"
              xmlns:conv="using:HalawaHub.App.Converters"
+             xmlns:behaviors="using:HalawaHub.App.Behaviors"
              xmlns:views="using:HalawaHub.App.Views"
              x:Class="HalawaHub.App.Views.LibraryView"
              x:Name="Root"
@@ -95,9 +96,28 @@
             <Setter Property="Opacity" Value="1"/>
             <Setter Property="RenderTransform" Value="scale(1)"/>
         </Style>
+        <!-- شريحة مجموعة -->
+        <Style Selector="Button.cchip">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="CornerRadius" Value="17"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushCard}"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ChipTextBrush}"/>
+        </Style>
+        <Style Selector="Button.cchip:pointerover">
+            <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+        </Style>
+        <Style Selector="Button.cchip.on, Button.cchip.on:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentDeepBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentDeepBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
         <!-- التبويبات والبحث والتحديث -->
         <Border Grid.Row="0" ZIndex="10" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,6,0,0">
             <Grid>
@@ -126,6 +146,15 @@
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" Margin="0,0,16,0" VerticalAlignment="Center">
                 <!-- إضافة لعبة يدويًا -->
+                <!-- الإشعارات -->
+                <Panel VerticalAlignment="Center">
+                    <Button Name="BellButton" Classes="ib" Command="{Binding ToggleNotificationsCommand}"
+                            ToolTip.Tip="{l:Loc notifications}" AutomationProperties.Name="{l:Loc notifications}">
+                        <c:VectorIcon Data="{StaticResource IconBell}" Size="18"/>
+                    </Button>
+                    <Ellipse Width="9" Height="9" Fill="{DynamicResource AmberBrush}" IsHitTestVisible="False"
+                             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,2,0" IsVisible="{Binding HasUnreadNotifications}"/>
+                </Panel>
                 <Button Name="AddGameButton" Classes="ib" VerticalAlignment="Center"
                         Click="AddGame_Click" ToolTip.Tip="{l:Loc addGame}" AutomationProperties.Name="{l:Loc addGame}">
                     <c:VectorIcon Data="{StaticResource IconPlus}" Size="18"/>
@@ -201,8 +230,56 @@
             </Panel>
         </Border>
 
+        <!-- شريط المجموعات: الضغط يفلتر بالمجموعة، والضغط ثانية يلغي -->
+        <ItemsControl Name="CollectionsBar" Grid.Row="2" ItemsSource="{Binding VisibleCollections}" Margin="0,-10,0,16"
+                      IsVisible="{Binding HasVisibleCollections}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:CollectionItemViewModel">
+                    <Button Classes="cchip" Classes.on="{Binding IsActive}" Margin="0,0,8,6"
+                            Command="{Binding #Root.((vm:MainViewModel)DataContext).SelectCollectionCommand}" CommandParameter="{Binding Id}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <c:VectorIcon Data="{Binding Icon, Converter={x:Static conv:IconKeyConverter.Instance}}" Size="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Count}" FontSize="12" Opacity="0.75" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- مجانية هذا الأسبوع (Epic): يختفي القسم إن فشل الجلب -->
+        <StackPanel Name="FreeGamesStrip" Grid.Row="3" Spacing="8" Margin="0,0,0,18" IsVisible="{Binding ShowFreeGamesStrip}">
+            <TextBlock Classes="lbl" Text="{l:Loc freeThisWeek}"/>
+            <ItemsControl ItemsSource="{Binding FreeGames}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:FreeGameItem">
+                        <Button Classes="btn" Height="64" Padding="0" Margin="0,0,10,6" HorizontalContentAlignment="Stretch"
+                                Command="{Binding #Root.((vm:MainViewModel)DataContext).OpenUrlCommand}" CommandParameter="{Binding Url}">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Border Width="110" Height="62" CornerRadius="9,0,0,9" ClipToBounds="True" Background="{DynamicResource ChipBrush}"
+                                        FlowDirection="LeftToRight">
+                                    <Image Stretch="UniformToFill" IsVisible="{Binding HasImage}"
+                                           behaviors:AsyncImage.DecodeWidth="220" behaviors:AsyncImage.SourceUrl="{Binding ImageUrl}"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="12,0,14,0" VerticalAlignment="Center" MaxWidth="220">
+                                    <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding EndsText}" FontSize="11" Foreground="{DynamicResource MutedBrush}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
         <!-- صفحات المكتبة -->
-        <Panel Name="PageHost" Grid.Row="2" ClipToBounds="True" Margin="0,-6,0,0">
+        <Panel Name="PageHost" Grid.Row="4" ClipToBounds="True" Margin="0,-6,0,0">
             <ScrollViewer Name="PageScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <Panel Margin="0,6,0,40">
                     <ItemsControl Name="GamesList" ItemsSource="{Binding FilteredGames}" IsVisible="{Binding IsGridLayout}">

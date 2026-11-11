@@ -21,7 +21,7 @@ public static class ConfigService
         if (!File.Exists(path))
         {
             // أول تشغيل فعلًا — ننشئ افتراضي
-            var defaults = new AppConfig();
+            var defaults = new AppConfig { ShowOnboarding = true };
             SaveTo(path, defaults);
             return defaults;
         }

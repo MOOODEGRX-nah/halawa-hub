@@ -87,4 +87,18 @@ public class AppConfig
 
     /// SteamID64 للحساب المختار؛ فارغ = آخر حساب سجّل الدخول
     public string SteamAccountId { get; set; } = "";
+
+    // ===== المرحلة 6 =====
+
+    /// فئات الإشعارات داخل البرنامج
+    public bool NotifyGameUpdates { get; set; } = true;
+    public bool NotifyLaunchFailed { get; set; } = true;
+    public bool NotifyScan { get; set; } = true;
+    public bool NotifyAppUpdate { get; set; } = true;
+
+    /// قسم "مجانية هذا الأسبوع" من Epic في الصفحة الرئيسية
+    public bool ShowFreeGames { get; set; } = true;
+
+    /// معالج أول تشغيل: يُكتب true فقط عند إنشاء الملف لأول مرة، فالملفات القديمة (بلا الحقل) لا تراه
+    public bool ShowOnboarding { get; set; }
 }

@@ -67,7 +67,10 @@ public partial class MainViewModel
 
             if (ran && result != null)
             {
+                var before = _scanCount++ == 0 ? null : Games.Select(g => g.Game.Platform + "|" + g.Game.Id).ToHashSet();
                 ApplyScanResult(result, allTools);
+                if (before != null)
+                    Notify("scan", Loc.Instance.Format("ntScan", Games.Count, Games.Count(g => !before.Contains(g.Game.Platform + "|" + g.Game.Id))));
                 _ = FlashRefreshDoneAsync();
             }
         }
@@ -118,6 +121,7 @@ public partial class MainViewModel
         _ = RefreshStatusesAsync();
         FirstSeenService.SaveIfChanged();
         _ = RefreshSteamPlaytimeAsync();
+        RefreshCollectionCounts();
         if (IsListLayout) RequestListSizes();
 
         // لو فيه مفتاح SteamGridDB مُعد، نكمّل أغلفة المنصات اللي ما عندها مصدر مباشر

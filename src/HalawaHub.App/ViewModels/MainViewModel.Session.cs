@@ -166,6 +166,7 @@ public partial class MainViewModel
         var message = Loc.Instance.Format(key, name);
         if (key == "launchTimeout" && _lastLaunchHint is { } hint) message += " " + hint;
         ShowStatus(message);
+        Notify("launch", message);
     }
 
     private string? _lastLaunchHint;
@@ -316,6 +317,7 @@ public partial class MainViewModel
         {
             Log.Info($"launch blocked for {game.Name}: {problem} ({detail})");
             ShowStatus(problemMessage!);
+            Notify("launch", problemMessage!);
             return;
         }
 
@@ -375,7 +377,9 @@ public partial class MainViewModel
         catch (Exception ex)
         {
             Log.Error($"launch failed for {game.Name}", ex);
-            ShowStatus(Loc.Instance.Format("launchFailed", card.Name, ex.Message));
+            var failed = Loc.Instance.Format("launchFailed", card.Name, ex.Message);
+            ShowStatus(failed);
+            Notify("launch", failed);
         }
     }
 

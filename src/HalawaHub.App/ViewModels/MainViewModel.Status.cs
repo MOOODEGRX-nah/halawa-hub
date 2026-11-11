@@ -69,7 +69,10 @@ public partial class MainViewModel
         if (only == null && token != _statusRefreshToken) return;
 
         foreach (var (card, status) in results)
+        {
             card.Status = WithSession(card, status);
+            if (card.HasUpdate) NotifyOnce("update", card.Game.Platform + "|" + card.Game.Id, Loc.Instance.Format("ntGameUpdate", card.Name));
+        }
     }
 
     /// اللعبة التي يتتبعها Halawa الآن "تعمل" حتى لو لم يقل مشغّلها ذلك

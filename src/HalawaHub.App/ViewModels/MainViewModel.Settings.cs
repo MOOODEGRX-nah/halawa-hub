@@ -15,12 +15,13 @@ namespace HalawaHub.App.ViewModels;
 public partial class MainViewModel
 {
     public const int SectionUpdates = 0, SectionLanguage = 1, SectionApi = 2, SectionAppearance = 3, SectionGeneral = 4,
-        SectionAbout = 5, SectionPlugins = 6, SectionLibrary = 7, SectionPlatforms = 8, SectionTools = 9;
+        SectionAbout = 5, SectionPlugins = 6, SectionLibrary = 7, SectionPlatforms = 8, SectionTools = 9,
+        SectionCollections = 10, SectionSubscriptions = 11;
 
     /// ترتيب الظهور في الشريط الجانبي
     internal static readonly int[] SettingsOrder =
     {
-        SectionGeneral, SectionLibrary, SectionAppearance, SectionPlatforms, SectionLanguage,
+        SectionGeneral, SectionLibrary, SectionCollections, SectionAppearance, SectionPlatforms, SectionSubscriptions, SectionLanguage,
         SectionApi, SectionPlugins, SectionUpdates, SectionTools, SectionAbout
     };
 
@@ -152,6 +153,7 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(LibraryLayoutIndex));
         OnPropertyChanged(nameof(IsListLayout));
         OnPropertyChanged(nameof(IsGridLayout));
+        OnPropertyChanged(nameof(ShowFreeGamesStrip));
         if (IsListLayout) RequestListSizes();
     }
 

@@ -77,6 +77,10 @@
         <Style Selector="Button.sw.on">
             <Setter Property="BorderBrush" Value="{DynamicResource TextBrush}"/>
         </Style>
+        <Style Selector="Button.ib.pick.on /template/ Border#PART_Root">
+            <Setter Property="BorderBrush" Value="{DynamicResource RedHoverBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
         <Style Selector="TextBlock.row">
             <Setter Property="FontSize" Value="15"/>
         </Style>
@@ -135,10 +139,14 @@
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="4" Content="{l:Loc sGeneral}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=7}"
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="7" Content="{l:Loc sLibrary}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=10}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="10" Content="{l:Loc sCollections}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}"
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="3" Content="{l:Loc sAppearance}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=8}"
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="8" Content="{l:Loc sPlatforms}"/>
+                                    <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=11}"
+                                            Command="{Binding SelectSettingsSectionCommand}" CommandParameter="11" Content="{l:Loc sSubscriptions}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
                                             Command="{Binding SelectSettingsSectionCommand}" CommandParameter="1" Content="{l:Loc sLanguage}"/>
                                     <Button Classes="si" Classes.on="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
@@ -257,7 +265,7 @@
                                 </StackPanel>
 
                                 <!-- عام -->
-                                <StackPanel Spacing="16" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}">
+                                <StackPanel Spacing="10" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=4}">
                                     <c:CappedWidth Cap="480">
                                     <Grid ColumnDefinitions="*,Auto" Margin="0,4">
                                         <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
@@ -337,6 +345,47 @@
                                                       AutomationProperties.Name="{l:Loc closeSteam}"/>
                                     </Grid>
                                     </c:CappedWidth>
+                                    <TextBlock Classes="lbl" Text="{l:Loc notifications}" Margin="0,8,0,0"/>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc ntfUpdate}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc ntfUpdateNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding NotifyGameUpdates, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc ntfUpdate}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc ntfLaunch}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc ntfLaunchNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding NotifyLaunchFailed, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc ntfLaunch}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc ntfScan}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc ntfScanNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding NotifyScan, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc ntfScan}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc ntfApp}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc ntfAppNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding NotifyAppUpdate, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc ntfApp}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
                                 </StackPanel>
 
                                 <!-- المكتبة -->
@@ -403,6 +452,16 @@
                                         </StackPanel>
                                         <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowHiddenGames, Mode=TwoWay}"
                                                       AutomationProperties.Name="{l:Loc showHidden}"/>
+                                    </Grid>
+                                    </c:CappedWidth>
+                                    <c:CappedWidth Cap="480">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Classes="row" Text="{l:Loc showFree}"/>
+                                            <TextBlock Classes="note" Text="{l:Loc showFreeNote}"/>
+                                        </StackPanel>
+                                        <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding ShowFreeGames, Mode=TwoWay}"
+                                                      AutomationProperties.Name="{l:Loc showFree}"/>
                                     </Grid>
                                     </c:CappedWidth>
                                 </StackPanel>
@@ -521,6 +580,182 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
+                                </StackPanel>
+
+                                <!-- المجموعات -->
+                                <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=10}">
+                                    <!-- القائمة -->
+                                    <StackPanel Spacing="12" IsVisible="{Binding IsCollectionListVisible}">
+                                        <TextBlock Classes="note" Text="{l:Loc colNote}"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <Button Classes="btn pri" Content="{l:Loc colNewManual}" Command="{Binding NewManualCollectionCommand}"/>
+                                            <Button Classes="btn" Content="{l:Loc colNewSmart}" Command="{Binding NewSmartCollectionCommand}"/>
+                                        </StackPanel>
+                                        <TextBlock Classes="lbl" Text="{l:Loc colEmpty}" IsVisible="{Binding HasNoCollections}"/>
+                                        <ItemsControl Name="CollectionRows" ItemsSource="{Binding Collections}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:CollectionItemViewModel">
+                                                    <Border Classes="colrow" Height="56" Margin="0,0,0,8" Padding="8,0,12,0" CornerRadius="10"
+                                                            Background="{DynamicResource PageBrush}" BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1">
+                                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                                                            <!-- مقبض السحب لإعادة الترتيب -->
+                                                            <Border Classes="grip" Width="26" Height="40" Background="Transparent" Cursor="SizeNorthSouth"
+                                                                    ToolTip.Tip="{l:Loc colDrag}" VerticalAlignment="Center">
+                                                                <TextBlock Text="⋮⋮" FontSize="14" Foreground="{DynamicResource SubtleBrush}"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <c:VectorIcon Grid.Column="1" Data="{Binding Icon, Converter={x:Static conv:IconKeyConverter.Instance}}"
+                                                                          Size="18" Margin="4,0,12,0" VerticalAlignment="Center"/>
+                                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                    <TextBlock Text="{Binding KindText}" FontSize="11" Foreground="{DynamicResource MutedBrush}"/>
+                                                                    <TextBlock Text="{Binding CountText}" FontSize="11" Foreground="{DynamicResource MutedBrush}"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                                <Button Classes="btn" Height="34" Padding="12,0" Content="{l:Loc colEditBtn}"
+                                                                        Command="{Binding #Root.((vm:MainViewModel)DataContext).EditCollectionCommand}" CommandParameter="{Binding}"/>
+                                                                <Button Classes="btn" Height="34" Padding="12,0" Content="{Binding HideLabel}"
+                                                                        Command="{Binding #Root.((vm:MainViewModel)DataContext).ToggleCollectionHiddenCommand}" CommandParameter="{Binding}"/>
+                                                                <Button Classes="btn" Height="34" Padding="12,0" Content="{l:Loc colDelete}"
+                                                                        Command="{Binding #Root.((vm:MainViewModel)DataContext).DeleteCollectionCommand}" CommandParameter="{Binding}"/>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock Classes="note" Text="{l:Loc colBuiltIn}"/>
+                                    </StackPanel>
+
+                                    <!-- المحرر -->
+                                    <StackPanel Spacing="12" IsVisible="{Binding IsEditingCollection}">
+                                        <TextBlock Classes="row" FontWeight="SemiBold" Text="{Binding EditTitle}"/>
+                                        <StackPanel Spacing="6">
+                                            <TextBlock Classes="lbl" Text="{l:Loc colName}"/>
+                                            <TextBox Name="CollectionNameBox" Classes="inp" Text="{Binding EditName, Mode=TwoWay}" MaxWidth="420" HorizontalAlignment="Left"
+                                                     MinWidth="320" AutomationProperties.Name="{l:Loc colName}"/>
+                                        </StackPanel>
+                                        <StackPanel Spacing="6">
+                                            <TextBlock Classes="lbl" Text="{l:Loc colIcon}"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Classes="ib pick" Margin="0,0,8,0" Command="{Binding PickCollectionIconCommand}" CommandParameter="star" AutomationProperties.Name="star"
+                                                        Classes.on="{Binding EditIcon, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=star}">
+                                                    <c:VectorIcon Data="{StaticResource IconStar}" Size="18"/>
+                                                </Button>
+                                                <Button Classes="ib pick" Margin="0,0,8,0" Command="{Binding PickCollectionIconCommand}" CommandParameter="heart" AutomationProperties.Name="heart"
+                                                        Classes.on="{Binding EditIcon, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=heart}">
+                                                    <c:VectorIcon Data="{StaticResource IconHeart}" Size="18"/>
+                                                </Button>
+                                                <Button Classes="ib pick" Margin="0,0,8,0" Command="{Binding PickCollectionIconCommand}" CommandParameter="play" AutomationProperties.Name="play"
+                                                        Classes.on="{Binding EditIcon, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=play}">
+                                                    <c:VectorIcon Data="{StaticResource IconPlay}" Size="18"/>
+                                                </Button>
+                                                <Button Classes="ib pick" Margin="0,0,8,0" Command="{Binding PickCollectionIconCommand}" CommandParameter="sparkle" AutomationProperties.Name="sparkle"
+                                                        Classes.on="{Binding EditIcon, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=sparkle}">
+                                                    <c:VectorIcon Data="{StaticResource IconSparkle}" Size="18"/>
+                                                </Button>
+                                                <Button Classes="ib pick" Margin="0,0,8,0" Command="{Binding PickCollectionIconCommand}" CommandParameter="wrench" AutomationProperties.Name="wrench"
+                                                        Classes.on="{Binding EditIcon, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=wrench}">
+                                                    <c:VectorIcon Data="{StaticResource IconWrench}" Size="18"/>
+                                                </Button>
+                                                <Button Classes="ib pick" Margin="0,0,8,0" Command="{Binding PickCollectionIconCommand}" CommandParameter="bell" AutomationProperties.Name="bell"
+                                                        Classes.on="{Binding EditIcon, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=bell}">
+                                                    <c:VectorIcon Data="{StaticResource IconBell}" Size="18"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- شروط المجموعة الذكية -->
+                                        <StackPanel Spacing="10" IsVisible="{Binding EditIsSmart}">
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <TextBlock Classes="lbl" Text="{l:Loc colMatch}" VerticalAlignment="Center"/>
+                                                <Border Classes="choice">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <Button Classes="ch" Classes.on="{Binding EditMatchIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                                                Command="{Binding SetMatchCommand}" CommandParameter="all" Content="{l:Loc colAll}"/>
+                                                        <Button Classes="ch" Classes.on="{Binding EditMatchIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                                                Command="{Binding SetMatchCommand}" CommandParameter="any" Content="{l:Loc colAny}"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+                                            <ItemsControl ItemsSource="{Binding EditRules}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:RuleEditorViewModel">
+                                                        <WrapPanel Margin="0,0,0,8">
+                                                            <ComboBox Width="170" Height="40" Margin="0,0,8,0" ItemsSource="{Binding FieldOptions}" SelectedItem="{Binding Field, Mode=TwoWay}"/>
+                                                            <ComboBox Width="170" Height="40" Margin="0,0,8,0" ItemsSource="{Binding OpOptions}" SelectedItem="{Binding Op, Mode=TwoWay}"/>
+                                                            <ComboBox Width="150" Height="40" Margin="0,0,8,0" ItemsSource="{Binding PlatformOptions}" SelectedItem="{Binding Platform, Mode=TwoWay}"
+                                                                      IsVisible="{Binding IsPlatform}"/>
+                                                            <TextBox Classes="inp" Width="150" Margin="0,0,8,0" Text="{Binding Value, Mode=TwoWay}" Watermark="{Binding ValueHint}"
+                                                                     IsVisible="{Binding NeedsText}"/>
+                                                            <Button Classes="x" VerticalAlignment="Center" ToolTip.Tip="{l:Loc colRemoveRule}" AutomationProperties.Name="{l:Loc colRemoveRule}"
+                                                                    Command="{Binding #Root.((vm:MainViewModel)DataContext).RemoveRuleCommand}" CommandParameter="{Binding}">
+                                                                <c:VectorIcon Data="{StaticResource IconX}" Size="16"/>
+                                                            </Button>
+                                                        </WrapPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            <Button Classes="btn" HorizontalAlignment="Left" Content="{l:Loc colAddRule}" Command="{Binding AddRuleCommand}"/>
+                                        </StackPanel>
+                                        <TextBlock Classes="note" Text="{l:Loc colManualNote}" IsVisible="{Binding !EditIsSmart}"/>
+
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <Button Name="SaveCollectionButton" Classes="btn pri" Content="{l:Loc colSave}" Command="{Binding SaveCollectionCommand}"/>
+                                            <Button Classes="btn" Content="{l:Loc cancel}" Command="{Binding CancelCollectionEditCommand}"/>
+                                        </StackPanel>
+                                        <TextBlock Classes="note" Foreground="{DynamicResource AmberBrush}" Text="{Binding EditProblem}"
+                                                   IsVisible="{Binding EditProblem, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- الاشتراكات -->
+                                <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=11}">
+                                    <TextBlock Classes="note" Text="{l:Loc subNote}"/>
+                                    <Border Classes="kv">
+                                        <TextBlock Name="SubscriptionsTotal" Text="{Binding SubscriptionsTotalText}" FontWeight="SemiBold"/>
+                                    </Border>
+                                    <TextBlock Classes="lbl" Text="{l:Loc subEmpty}" IsVisible="{Binding HasNoSubscriptions}"/>
+                                    <ItemsControl ItemsSource="{Binding Subscriptions}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:SubscriptionRow">
+                                                <Border Margin="0,0,0,8" Padding="14,10" CornerRadius="10" Background="{DynamicResource PageBrush}"
+                                                        BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1">
+                                                    <Grid ColumnDefinitions="*,Auto,Auto">
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{Binding RenewalText}" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+                                                        </StackPanel>
+                                                        <TextBlock Grid.Column="1" Text="{Binding CostText}" FontSize="13" Margin="12,0" VerticalAlignment="Center"/>
+                                                        <Button Grid.Column="2" Classes="x" ToolTip.Tip="{l:Loc subRemove}" AutomationProperties.Name="{l:Loc subRemove}"
+                                                                Command="{Binding #Root.((vm:MainViewModel)DataContext).RemoveSubscriptionCommand}" CommandParameter="{Binding}">
+                                                            <c:VectorIcon Data="{StaticResource IconX}" Size="16"/>
+                                                        </Button>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Classes="row" Text="{l:Loc subAdd}"/>
+                                    <WrapPanel>
+                                        <TextBox Classes="inp" Width="200" Margin="0,0,8,8" Text="{Binding NewSubName, Mode=TwoWay}" Watermark="{l:Loc subNamePh}"/>
+                                        <TextBox Classes="inp" Width="110" Margin="0,0,8,8" Text="{Binding NewSubCost, Mode=TwoWay}" Watermark="{l:Loc subCostPh}"
+                                                 FlowDirection="LeftToRight"/>
+                                        <TextBox Classes="inp" Width="150" Margin="0,0,8,8" Text="{Binding NewSubDate, Mode=TwoWay}" Watermark="YYYY-MM-DD"
+                                                 FlowDirection="LeftToRight" AutomationProperties.Name="{l:Loc subDate}"/>
+                                        <Border Classes="choice" Margin="0,0,8,8">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <Button Classes="ch" Classes.on="{Binding NewSubCycleIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                                        Command="{Binding SetSubCycleCommand}" CommandParameter="monthly" Content="{l:Loc subMonthly}"/>
+                                                <Button Classes="ch" Classes.on="{Binding NewSubCycleIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                                        Command="{Binding SetSubCycleCommand}" CommandParameter="yearly" Content="{l:Loc subYearly}"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Button Classes="btn pri" Margin="0,0,8,8" Content="{l:Loc subAddBtn}" Command="{Binding AddSubscriptionCommand}"/>
+                                    </WrapPanel>
+                                    <TextBlock Classes="note" Text="{l:Loc subDateNote}"/>
                                 </StackPanel>
 
                                 <!-- الأدوات -->

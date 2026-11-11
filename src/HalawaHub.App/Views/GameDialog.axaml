@@ -150,6 +150,23 @@
                                                   AutomationProperties.Name="{l:Loc hide}"/>
                                 </Grid>
                                 </c:CappedWidth>
+                                <!-- المجموعات اليدوية التي تضم هذه اللعبة -->
+                                <StackPanel Spacing="6" IsVisible="{Binding #Root.((vm:MainViewModel)DataContext).HasManualCollections}">
+                                    <TextBlock Classes="lbl" Text="{l:Loc sCollections}"/>
+                                    <ItemsControl ItemsSource="{Binding #Root.((vm:MainViewModel)DataContext).GameMemberships}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:CollectionMembership">
+                                                <c:CappedWidth Cap="560">
+                                                <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                                    <TextBlock Text="{Binding Name}" FontSize="15" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                                    <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding IsMember, Mode=TwoWay}"
+                                                                  AutomationProperties.Name="{Binding Name}"/>
+                                                </Grid>
+                                                </c:CappedWidth>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                                 <!-- يظهر فقط بعد اللعب: لا يضيف شيئًا لأول فتح -->
                                 <c:CappedWidth Cap="560" IsVisible="{Binding HasPlayTime}">
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,6">

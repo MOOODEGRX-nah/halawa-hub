@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:c="using:HalawaHub.App.Controls"
+             x:Class="HalawaHub.App.Views.NotificationsDialog"
+             x:Name="Root"
+             x:DataType="vm:MainViewModel"
+             IsVisible="{Binding IsNotificationsOpen}">
+    <Panel>
+        <Border Background="{DynamicResource ScrimBrush}" PointerPressed="Scrim_PointerPressed"/>
+        <Border Width="520" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center"
+                CornerRadius="14" Padding="26,22" Background="{DynamicResource DialogBrush}"
+                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1" BoxShadow="0 30 80 0 #B3000000">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+                    <TextBlock Classes="h2" Text="{l:Loc notifications}" Foreground="{DynamicResource RedHoverBrush}"/>
+                    <Button Grid.Column="1" Classes="x" Command="{Binding ToggleNotificationsCommand}"
+                            ToolTip.Tip="{l:Loc close}" AutomationProperties.Name="{l:Loc close}">
+                        <c:VectorIcon Data="{StaticResource IconX}" Size="18"/>
+                    </Button>
+                </Grid>
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <TextBlock Classes="lbl" Text="{l:Loc ntEmpty}" IsVisible="{Binding HasNoNotifications}"/>
+                        <ItemsControl ItemsSource="{Binding Notifications}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:NotificationItem">
+                                    <Border Margin="0,0,0,8" Padding="12,10" CornerRadius="10" Background="{DynamicResource PageBrush}"
+                                            BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1">
+                                        <Grid ColumnDefinitions="*,Auto,Auto">
+                                            <TextBlock Text="{Binding Text}" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding TimeText}" FontSize="11" Margin="10,0" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource SubtleBrush}" FlowDirection="LeftToRight"/>
+                                            <Button Grid.Column="2" Classes="x" ToolTip.Tip="{l:Loc ntDismiss}" AutomationProperties.Name="{l:Loc ntDismiss}"
+                                                    Command="{Binding #Root.((vm:MainViewModel)DataContext).DismissNotificationCommand}" CommandParameter="{Binding}">
+                                                <c:VectorIcon Data="{StaticResource IconX}" Size="14"/>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+                <Button Grid.Row="2" Classes="btn" HorizontalAlignment="Left" Margin="0,12,0,0" Content="{l:Loc ntClear}"
+                        Command="{Binding ClearNotificationsCommand}" IsVisible="{Binding !HasNoNotifications}"/>
+            </Grid>
+        </Border>
+    </Panel>
+</UserControl>

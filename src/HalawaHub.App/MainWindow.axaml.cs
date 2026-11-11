@@ -99,6 +99,13 @@ public partial class MainWindow : Window
 
         if (e.Key != Key.Escape) return;
 
+        if (vm.IsNotificationsOpen)
+        {
+            vm.CloseNotifications();
+            e.Handled = true;
+            return;
+        }
+
         if (vm.IsQuickSearchOpen)
         {
             vm.CloseQuickSearch();

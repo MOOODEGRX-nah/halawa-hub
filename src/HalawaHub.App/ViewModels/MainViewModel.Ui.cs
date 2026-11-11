@@ -92,6 +92,14 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(ApiKeyStatusText));
         OnPropertyChanged(nameof(SecretStorageText));
         RefreshPluginTexts();
+        OnPropertyChanged(nameof(WizardNextLabel));
+        OnPropertyChanged(nameof(EditTitle));
+        OnPropertyChanged(nameof(EditProblem));
+        OnPropertyChanged(nameof(ReduceMotionStateText));
+        RefreshCollectionCounts();
+        RebuildSubscriptionRows();
+        if (IsSettingsVisible && SettingsSection == SectionPlatforms) RefreshPlatformRows();
+        if (FreeGames.Count > 0) _ = LoadFreeGamesAsync();
         OnPropertyChanged(nameof(GameDialogTitle));
         OnPropertyChanged(nameof(SettingsTitle));
     }
@@ -403,6 +411,7 @@ public partial class MainViewModel
         _gameDialogSection = -1;
         ResetCoverSearch();
         DetailsGame = card;
+        BuildGameMemberships(card);
         GameDialogSection = 0;
         IsDetailsOpen = true;
         OnPropertyChanged(nameof(GameDialogSectionCount));
@@ -576,6 +585,8 @@ public partial class MainViewModel
         7 => "sLibrary",
         8 => "sPlatforms",
         9 => "sTools",
+        10 => "sCollections",
+        11 => "sSubscriptions",
         _ => "sUpdates"
     }];
 
@@ -607,6 +618,7 @@ public partial class MainViewModel
         private set
         {
             _updateKind = value;
+            if (value == UpdateCheckKind.Available) NotifyOnce("appupdate", "app", Loc.Instance["ntAppUpdate"]);
             OnPropertyChanged(nameof(UpdateKind));
             OnPropertyChanged(nameof(UpdateBadge));
             OnPropertyChanged(nameof(UpdateStatusText));

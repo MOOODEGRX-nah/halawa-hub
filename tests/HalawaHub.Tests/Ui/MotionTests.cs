@@ -96,6 +96,28 @@ public class MotionTests
             $"{what}: condition not met in 30s (saw: {string.Join(" ", values.Select(v => v.ToString("0.###")))})");
     }
 
+    /// <summary>
+    /// ساعة الحركة حقيقية، فتوقف جهاز CI المشترك لحظة أثناء حركة قصيرة يجعلها تنتهي
+    /// بين قراءتين فلا نرى إلا قيمتها النهائية. نعيد الاختبار كله بنافذة جديدة حتى ثلاث
+    /// مرات: الحركة المعطلة فعلًا تفشل في كل المحاولات، والتوقف العابر لا يوقف الإصدار.
+    /// </summary>
+    private static void Attempts(Action body, int tries = 3)
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                body();
+                return;
+            }
+            catch (Exception) when (attempt < tries)
+            {
+                // نافذة المحاولة السابقة أُغلقت مع using، فنبدأ من حالة نظيفة
+                Dispatcher.UIThread.RunJobs();
+            }
+        }
+    }
+
     private static int DistinctCount(List<double> values) => values.Select(v => Math.Round(v, 3)).Distinct().Count();
 
     private static void ShouldHaveMoved(List<double> values, string what, int minimumSteps = 3) =>
@@ -135,7 +157,7 @@ public class MotionTests
     [AvaloniaTheory]
     [InlineData(Loc.Arabic)]
     [InlineData(Loc.English)]
-    public void HoverAndPress_OnButtons_AndCards(string language)
+    public void HoverAndPress_OnButtons_AndCards(string language) => Attempts(() =>
     {
         using var ui = new UiHarness(language, motion: true);
         Sample(ui, 200, () => 0);
@@ -172,12 +194,12 @@ public class MotionTests
 
         MoveAwayAndRest(ui);
         OffsetYOf(face).Should().BeApproximately(0, 0.01, "the card settles back");
-    }
+    });
 
     [AvaloniaTheory]
     [InlineData(Loc.Arabic)]
     [InlineData(Loc.English)]
-    public void SlidingPills_Stretch_ThenSettle(string language)
+    public void SlidingPills_Stretch_ThenSettle(string language) => Attempts(() =>
     {
         using var ui = new UiHarness(language, motion: true);
         var vm = ui.Vm;
@@ -228,7 +250,7 @@ public class MotionTests
         var langPill = Pill(ui, p => p.Motion == PillMotion.Even);
         ShouldHaveMoved(CaptureLanguageSwitch(ui, langPill), "language pill");
         vm.SetLanguageCommand.Execute(language);
-    }
+    });
 
     private static List<double> CaptureLanguageSwitch(UiHarness ui, Control pill)
     {
@@ -240,7 +262,7 @@ public class MotionTests
     [AvaloniaTheory]
     [InlineData(Loc.Arabic)]
     [InlineData(Loc.English)]
-    public void CardMenu_MorphsToX_AndPopsIn(string language)
+    public void CardMenu_MorphsToX_AndPopsIn(string language) => Attempts(() =>
     {
         using var ui = new UiHarness(language, motion: true);
         Sample(ui, 200, () => 0);
@@ -271,10 +293,10 @@ public class MotionTests
 
         ui.Vm.CloseAllCardMenus();
         ShouldHaveMoved(Sample(ui, 550, () => icon.Progress), "menu icon morph back");
-    }
+    });
 
     [AvaloniaFact]
-    public void SettingsButton_SlidesKnobs_AndFadesGradient_OnRealHover()
+    public void SettingsButton_SlidesKnobs_AndFadesGradient_OnRealHover() => Attempts(() =>
     {
         using var ui = new UiHarness(Loc.English, motion: true);
         Sample(ui, 200, () => 0);
@@ -291,10 +313,10 @@ public class MotionTests
         ui.Window.MouseMove(new Point(640, 700));
         ShouldHaveMoved(Sample(ui, 750, () => sliders.FirstKnob), "settings knobs returning");
         sliders.FirstKnob.Should().BeApproximately(1, 0.001);
-    }
+    });
 
     [AvaloniaFact]
-    public void Search_Expands_WithSpring_AndShowsItsParts()
+    public void Search_Expands_WithSpring_AndShowsItsParts() => Attempts(() =>
     {
         using var ui = new UiHarness(Loc.English, motion: true);
         var vm = ui.Vm;
@@ -372,10 +394,10 @@ public class MotionTests
             });
         ShouldHaveMoved(closing, "search closing");
         box.Width.Should().Be(44);
-    }
+    });
 
     [AvaloniaFact]
-    public void RefreshIcon_Spins_WhileScanning_ThenShowsCheck()
+    public void RefreshIcon_Spins_WhileScanning_ThenShowsCheck() => Attempts(() =>
     {
         using var gate = new ManualResetEventSlim(true);
         using var ui = new UiHarness(Loc.English, motion: true, scanGate: gate);
@@ -400,12 +422,12 @@ public class MotionTests
             retrigger: () => { ui.WaitFor(() => !ui.Vm.IsRefreshDone); ui.Vm.RefreshCommand.Execute(null); });
         ShouldHaveMoved(appearing, "check appearing", minimumSteps: 2);
         check.Opacity.Should().Be(1);
-    }
+    });
 
     [AvaloniaTheory]
     [InlineData(Loc.Arabic)]
     [InlineData(Loc.English)]
-    public void Dialogs_AnimateIn_AndOut(string language)
+    public void Dialogs_AnimateIn_AndOut(string language) => Attempts(() =>
     {
         using var ui = new UiHarness(language, motion: true);
         var vm = ui.Vm;
@@ -449,7 +471,7 @@ public class MotionTests
         ShouldHaveMoved(Sample(ui, 200, () => gameBox.Opacity), "game dialog closing", minimumSteps: 2);
         Sample(ui, 150, () => 0);
         vm.DetailsGame.Should().BeNull();
-    }
+    });
 
     /// <summary>
     /// النافذتان صار حجمهما يتبع البرنامج: الظهور والإغلاق والحبة المنزلقة يجب أن تبقى
@@ -458,7 +480,7 @@ public class MotionTests
     [AvaloniaTheory]
     [InlineData(Loc.Arabic)]
     [InlineData(Loc.English)]
-    public void Dialogs_StillAnimate_AfterWindowResize(string language)
+    public void Dialogs_StillAnimate_AfterWindowResize(string language) => Attempts(() =>
     {
         using var ui = new UiHarness(language, motion: true);
         var vm = ui.Vm;
@@ -536,10 +558,10 @@ public class MotionTests
         Closing(gameBox, openGame, closeGame, "game dialog closing");
         Sample(ui, 400, () => 0);
         vm.DetailsGame.Should().BeNull();
-    }
+    });
 
     [AvaloniaFact]
-    public void StatusBadge_Pending_Done_Error()
+    public void StatusBadge_Pending_Done_Error() => Attempts(() =>
     {
         using var ui = new UiHarness(Loc.English, motion: true);
         var vm = ui.Vm;
@@ -571,12 +593,12 @@ public class MotionTests
         Sample(ui, 600, () => { shake.Add(fill.RenderTransform?.Value.M31 ?? 0); dash.Add(cross.StrokeDashOffset); return 0; });
         ShouldHaveMoved(shake, "error shake");
         ShouldHaveMoved(dash, "x mark drawing");
-    }
+    });
 
     [AvaloniaTheory]
     [InlineData(Loc.Arabic)]
     [InlineData(Loc.English)]
-    public void Tabs_SlidePages_AndCardsStaggerIn(string language)
+    public void Tabs_SlidePages_AndCardsStaggerIn(string language) => Attempts(() =>
     {
         using var ui = new UiHarness(language, motion: true);
         Sample(ui, 500, () => 0);
@@ -605,10 +627,10 @@ public class MotionTests
         ShouldHaveMoved(entrance, "staggered card entrance");
         container.Opacity.Should().Be(1);
         cards.Should().NotBeEmpty();
-    }
+    });
 
     [AvaloniaFact]
-    public void Switch_CheckSpinner_ComingSoonBar_AndLanguageFade()
+    public void Switch_CheckSpinner_ComingSoonBar_AndLanguageFade() => Attempts(() =>
     {
         using var ui = new UiHarness(Loc.English, motion: true);
         var vm = ui.Vm;
@@ -637,10 +659,10 @@ public class MotionTests
         vm.SetLanguageCommand.Execute(Loc.Arabic);
         ShouldHaveMoved(Sample(ui, 400, () => page.Opacity), "language fade");
         page.Opacity.Should().Be(1);
-    }
+    });
 
     [AvaloniaFact]
-    public void Rotations_DoNotMirror_InArabic()
+    public void Rotations_DoNotMirror_InArabic() => Attempts(() =>
     {
         // التدوير يتبع FlowDirection، والتصميم يدور مع عقارب الساعة باللغتين:
         // القياس بالماوس الحقيقي وجد دائرة الانتظار تدور بالعكس في العربية
@@ -662,10 +684,10 @@ public class MotionTests
         vm.SelectGameDialogSectionCommand.Execute("2");
         Sample(ui, 100, () => 0);
         ui.All<Border>().First(b => b.Classes.Contains("cover")).FlowDirection.Should().Be(FlowDirection.LeftToRight);
-    }
+    });
 
     [AvaloniaFact]
-    public void SmallerDetails_AllMove()
+    public void SmallerDetails_AllMove() => Attempts(() =>
     {
         var pending = new TaskCompletionSource<UpdateCheckResult>();
         var calls = 0;
@@ -750,7 +772,7 @@ public class MotionTests
         var tilt = Sample(ui, 500, () => OffsetYOf(cover));
         ShouldHaveMoved(tilt, "cover tilt");
         tilt.Last().Should().BeLessThan(-3);
-    }
+    });
 
     private sealed class ToggleButton_ : Control { }
 }

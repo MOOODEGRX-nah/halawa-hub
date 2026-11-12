@@ -418,6 +418,7 @@ public partial class MainViewModel : INotifyPropertyChanged
             AskAboutPendingPlugins();
             StartWizardIfFirstRun();
             _ = LoadFreeGamesAsync();
+            _ = LoadStoreDealsAsync();
             _ = RefreshOwnedGamesAsync();
         }
     }

@@ -7,6 +7,36 @@
              x:DataType="vm:MainViewModel"
              Name="Root">
 
+    <UserControl.Resources>
+        <DataTemplate x:Key="DealCard" x:DataType="vm:DealItem">
+            <Button Classes="btn" Width="250" Height="196" Padding="0" Margin="0,0,14,14"
+                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                    AutomationProperties.Name="{Binding Title}"
+                    Command="{Binding #Root.((vm:MainViewModel)DataContext).OpenUrlCommand}" CommandParameter="{Binding Url}">
+                <StackPanel>
+                    <Panel Height="117">
+                        <Border CornerRadius="9,9,0,0" ClipToBounds="True" Background="{DynamicResource ChipBrush}">
+                            <Image Stretch="UniformToFill" IsVisible="{Binding HasImage}"
+                                   behaviors:AsyncImage.DecodeWidth="500" behaviors:AsyncImage.SourceUrl="{Binding ImageUrl}"/>
+                        </Border>
+                        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Padding="8,3" CornerRadius="8"
+                                Background="#E6166534" FlowDirection="LeftToRight">
+                            <TextBlock Text="{Binding DiscountText}" FontSize="13" FontWeight="Bold" Foreground="#DCFCE7"/>
+                        </Border>
+                    </Panel>
+                    <StackPanel Margin="12,9,12,10" Spacing="4">
+                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" FlowDirection="LeftToRight" HorizontalAlignment="Left">
+                            <TextBlock Text="{Binding PriceText}" FontSize="13" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding OldPriceText}" FontSize="12" TextDecorations="Strikethrough"
+                                       Foreground="{DynamicResource MutedBrush}" IsVisible="{Binding HasOldPrice}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+
     <!-- صفحة العروض: مجانيات Epic الآن، ومكان أي عروض تُضاف لاحقًا. كانت شريطًا يأخذ من ارتفاع المكتبة -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,8,0,40" Spacing="14">
@@ -42,6 +72,27 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </StackPanel>
+
+            <!-- تخفيضات Steam، ثم باقي المتاجر: نفس البطاقة -->
+            <StackPanel Name="SteamDealsSection" Spacing="10" IsVisible="{Binding HasSteamDeals}">
+                <TextBlock Classes="lbl" Text="{l:Loc dealsSteam}"/>
+                <ItemsControl ItemsSource="{Binding SteamDeals}" ItemTemplate="{StaticResource DealCard}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+
+            <StackPanel Name="OtherDealsSection" Spacing="10" IsVisible="{Binding HasOtherDeals}">
+                <TextBlock Classes="lbl" Text="{l:Loc dealsOther}"/>
+                <ItemsControl ItemsSource="{Binding OtherDeals}" ItemTemplate="{StaticResource DealCard}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+
+            <TextBlock Classes="note" Text="{l:Loc dealsPriceNote}" IsVisible="{Binding !HasNoDeals}" Foreground="{DynamicResource SubtleBrush}" FontSize="12"/>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

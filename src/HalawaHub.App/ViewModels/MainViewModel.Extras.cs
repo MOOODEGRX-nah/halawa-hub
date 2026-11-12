@@ -284,13 +284,15 @@ public partial class MainViewModel
 
     /// صفحة العروض: المجانيات هنا بدل شريط فوق المكتبة
     public bool HasFreeGames => FreeGames.Count > 0;
-    public bool HasNoDeals => !HasFreeGames;
+    public bool HasNoDeals => !HasFreeGames && !HasSteamDeals && !HasOtherDeals;
     public string DealsEmptyText => Loc.Instance[_config.ShowFreeGames ? "dealsEmpty" : "dealsOff"];
 
     private void RaiseDeals()
     {
         OnPropertyChanged(nameof(HasFreeGames));
         OnPropertyChanged(nameof(HasNoDeals));
+        OnPropertyChanged(nameof(HasSteamDeals));
+        OnPropertyChanged(nameof(HasOtherDeals));
         OnPropertyChanged(nameof(DealsEmptyText));
     }
 
@@ -318,6 +320,7 @@ public partial class MainViewModel
             if (!value) FreeGames.Clear();
             RaiseDeals();
             if (value && FreeGames.Count == 0) _ = LoadFreeGamesAsync();
+            _ = LoadStoreDealsAsync();
         }
     }
 

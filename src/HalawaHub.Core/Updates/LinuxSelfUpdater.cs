@@ -23,12 +23,11 @@ internal static class LinuxSelfUpdater
 
     public static async Task<bool> ApplyAsync(InstallKind kind, string downloadUrl, string? expectedSha256, Action<string>? onStatus)
     {
-        // ويندوز يكمل بلا تحقق إذا غاب الهاش (للتوافق مع إصدارات قديمة). هنا لا يوجد
-        // قديم نحافظ عليه، فملف لا نستطيع التحقق منه لا يستبدل برنامجًا يعمل.
-        if (string.IsNullOrEmpty(expectedSha256))
+        // ملف لا نستطيع التحقق منه لا يستبدل برنامجًا يعمل (نفس القاعدة على ويندوز)
+        if (!SelfUpdater.IsValidSha256(expectedSha256))
         {
             Log.Error("linux update refused: no checksum for the downloaded file");
-            onStatus?.Invoke(SelfUpdater.StatusChecksumFailed);
+            onStatus?.Invoke(SelfUpdater.StatusChecksumMissing);
             return false;
         }
 
@@ -36,8 +35,8 @@ internal static class LinuxSelfUpdater
         {
             var relaunchPath = kind switch
             {
-                InstallKind.LinuxTarball => await UpdateTarballAsync(downloadUrl, expectedSha256, onStatus),
-                InstallKind.LinuxAppImage => await UpdateAppImageAsync(downloadUrl, expectedSha256, onStatus),
+                InstallKind.LinuxTarball => await UpdateTarballAsync(downloadUrl, expectedSha256!, onStatus),
+                InstallKind.LinuxAppImage => await UpdateAppImageAsync(downloadUrl, expectedSha256!, onStatus),
                 _ => null
             };
             if (relaunchPath == null) return false;
@@ -69,7 +68,7 @@ internal static class LinuxSelfUpdater
             var archive = Path.Combine(staging, "update.tar.gz");
 
             onStatus?.Invoke(SelfUpdater.StatusDownloading);
-            if (!await DownloadVerifiedAsync(downloadUrl, archive, expectedSha256))
+            if (!await DownloadVerifiedAsync(downloadUrl, archive, expectedSha256!))
             {
                 onStatus?.Invoke(SelfUpdater.StatusChecksumFailed);
                 return null;
@@ -175,7 +174,7 @@ internal static class LinuxSelfUpdater
         try
         {
             onStatus?.Invoke(SelfUpdater.StatusDownloading);
-            if (!await DownloadVerifiedAsync(downloadUrl, staged, expectedSha256))
+            if (!await DownloadVerifiedAsync(downloadUrl, staged, expectedSha256!))
             {
                 onStatus?.Invoke(SelfUpdater.StatusChecksumFailed);
                 return null;

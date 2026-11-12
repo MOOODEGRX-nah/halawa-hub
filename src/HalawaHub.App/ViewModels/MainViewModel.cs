@@ -149,8 +149,43 @@ public partial class MainViewModel : INotifyPropertyChanged
         get => _sortMode;
         set
         {
+            if (_sortMode == value) return;
             _sortMode = value;
+            _config.SortMode = value;
+            ConfigService.Save(_config);
             OnPropertyChanged(nameof(SortMode));
+            ApplyFilter();
+        }
+    }
+
+    private bool _showPlayTimeOnCards = true;
+    /// إظهار وقت اللعب وآخر تشغيل على البطاقات
+    public bool ShowPlayTimeOnCards
+    {
+        get => _showPlayTimeOnCards;
+        set
+        {
+            if (_showPlayTimeOnCards == value) return;
+            _showPlayTimeOnCards = value;
+            _config.ShowPlayTimeOnCards = value;
+            ConfigService.Save(_config);
+            foreach (var card in Games) card.ShowStats = value;
+            OnPropertyChanged(nameof(ShowPlayTimeOnCards));
+        }
+    }
+
+    private bool _sortReverse;
+    /// عكس اتجاه الترتيب الحالي
+    public bool SortReverse
+    {
+        get => _sortReverse;
+        set
+        {
+            if (_sortReverse == value) return;
+            _sortReverse = value;
+            _config.SortReverse = value;
+            ConfigService.Save(_config);
+            OnPropertyChanged(nameof(SortReverse));
             ApplyFilter();
         }
     }
@@ -272,6 +307,7 @@ public partial class MainViewModel : INotifyPropertyChanged
     public RelayCommand VerifyApiKeyCommand { get; }
     public RelayCommand CloseChangelogCommand { get; }
     public RelayCommand GoLibraryCommand { get; }
+    public RelayCommand GoDealsCommand { get; }
     public RelayCommand GoDeveloperCommand { get; }
     public RelayCommand SelectPlatformCommand { get; }
     public RelayCommand SelectGameDialogSectionCommand { get; }
@@ -298,6 +334,9 @@ public partial class MainViewModel : INotifyPropertyChanged
         var pluginsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
         _pluginLoader = new PluginLoader(pluginsDir);
         _pluginLoader.LoadPlugins();
+        BuildPluginItems();
+        LoadCollections();
+        LoadSubscriptions();
 
         // منصات مدمجة بالنواة كبداية، وأي منصة إضافية تُضاف كـ Plugin لاحقًا
         _builtInProviders = new List<IGameLibraryProvider>
@@ -308,7 +347,11 @@ public partial class MainViewModel : INotifyPropertyChanged
             new RiotLibraryProvider(),
             new XboxLibraryProvider(),
             new HeroicLibraryProvider(),
-            new LutrisLibraryProvider()
+            new LutrisLibraryProvider(),
+            new UbisoftLibraryProvider(),
+            new EaLibraryProvider(),
+            new RockstarLibraryProvider(),
+            new ManualGamesProvider()
         };
 
         _config = ConfigService.Load();
@@ -316,6 +359,11 @@ public partial class MainViewModel : INotifyPropertyChanged
         // قبل إنشاء أي نص: اللغة المحفوظة، والملفات القديمة بدون الحقل تفتح بالعربية
         Loc.Instance.Language = _config.Language;
         _showHiddenGames = _config.ShowHiddenGames;
+        _sortMode = string.IsNullOrEmpty(_config.SortMode) ? "name" : _config.SortMode;
+        _sortReverse = _config.SortReverse;
+        _showPlayTimeOnCards = _config.ShowPlayTimeOnCards;
+        // تبويب المكتبة عند الفتح (إعداد عام)
+        if (_config.StartTab > 0 && _config.StartTab < LibraryTabs.Length) _selectedNavItem = LibraryTabs[_config.StartTab];
         foreach (var search in _config.RecentSearches ?? new List<string>())
             RecentSearches.Add(search);
 
@@ -341,7 +389,8 @@ public partial class MainViewModel : INotifyPropertyChanged
         VerifyApiKeyCommand = new RelayCommand(_ => { _ = VerifyApiKeyAsync(); }, _ => !string.IsNullOrWhiteSpace(SteamGridDbApiKey));
         CloseChangelogCommand = new RelayCommand(_ => IsChangelogOpen = false);
         GoLibraryCommand = new RelayCommand(_ => TopNavIndex = 0);
-        GoDeveloperCommand = new RelayCommand(_ => TopNavIndex = 1);
+        GoDealsCommand = new RelayCommand(_ => TopNavIndex = 1);
+        GoDeveloperCommand = new RelayCommand(_ => TopNavIndex = 2);
         SelectPlatformCommand = new RelayCommand(param => { if (param is PlatformChip chip) SelectedPlatform = chip.Key; });
         SelectGameDialogSectionCommand = new RelayCommand(param => { if (int.TryParse(param as string, out var i)) { ResetCoverSearch(); GameDialogSection = i; } });
         SelectSettingsSectionCommand = new RelayCommand(param => { if (int.TryParse(param as string, out var i)) SettingsSection = i; });
@@ -352,13 +401,26 @@ public partial class MainViewModel : INotifyPropertyChanged
         PickCoverCandidateCommand = new RelayCommand(param => { _ = PickCoverCandidateAsync(param as CoverCandidate); });
         RestoreCoverCommand = new RelayCommand(_ => DetailsGame?.RestoreOriginalCover());
 
+        // الاختبارات بلا حالة Steam حقيقية ولا ذاكرة مكتبة مشتركة
+        StatusProbe = startBackgroundTasks ? GameStatusProbe.System : null;
+        LibraryCachePath = startBackgroundTasks ? LibraryCacheService.DefaultPath : null;
+        SteamPathProvider = startBackgroundTasks ? SteamLibraryProvider.GetSteamPath : null;
+
         // لا ننتظر الفحص هنا: النافذة تُفتح فورًا والمكتبة تمتلئ بعد ذلك
         _ = RefreshLibraryAsync();
 
         // مهام الخلفية عند فتح البرنامج، بالترتيب الصح (فحص التحديث أول عشان
         // خبر "تحديث متوفر" يظهر صح بقائمة الأخبار)
         if (startBackgroundTasks)
+        {
             _ = InitializeBackgroundTasksAsync();
+            _ = RecoverActiveSessionAsync();
+            AskAboutPendingPlugins();
+            StartWizardIfFirstRun();
+            _ = LoadFreeGamesAsync();
+            _ = LoadStoreDealsAsync();
+            _ = RefreshOwnedGamesAsync();
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

@@ -59,6 +59,7 @@ public class DialogSizingTests
         if (dialog == "settings")
         {
             ui.Vm.OpenSettingsCommand.Execute(null);
+            ui.Vm.SelectSettingsSectionCommand.Execute("0");
             ui.Settle();
             var settings = ui.Window.GetVisualDescendants().OfType<SettingsDialog>().Single();
             return (settings, BoxOf(settings), 230, new Size(900, 540));
@@ -117,7 +118,9 @@ public class DialogSizingTests
 
         foreach (var c in box.GetVisualDescendants().OfType<Control>()
                      .Where(c => c is TextBlock or Button && c.IsEffectivelyVisible && c.Bounds.Width > 0)
-                     .Where(c => !c.GetVisualAncestors().Contains(body)))
+                     .Where(c => !c.GetVisualAncestors().Contains(body))
+                     // قائمة الأقسام الجانبية منطقة تمرير أيضًا (10 أقسام لا تتسع في أصغر نافذة)
+                     .Where(c => !c.GetVisualAncestors().Any(a => a is ScrollViewer { Name: "NavScroll" })))
             boxRect.Contains(InWindow(ui, c)).Should().BeTrue($"'{(c as TextBlock)?.Text ?? c.Name ?? c.GetType().Name}' is cut off");
     }
 

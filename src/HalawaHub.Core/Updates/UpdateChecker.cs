@@ -62,8 +62,8 @@ public class UpdateChecker
             var assetName = GetAssetNameForCurrentOs();
             var info = ParseRelease(json, AppInfo.Version, assetName);
 
-            // ويندوز يبقى على سلوكه، أما لينكس فلا يثبّت ملفًا بلا هاش
-            if (info != null && !OperatingSystem.IsWindows())
+            // لا يُثبَّت ملف بلا هاش على أي نظام: بدونه يصبح التحديث إشعارًا وصفحة الإصدار
+            if (info != null)
                 info = await ResolveChecksumAsync(info, assetName);
 
             return info;

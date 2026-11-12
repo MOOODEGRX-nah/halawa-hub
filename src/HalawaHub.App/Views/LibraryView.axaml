@@ -4,6 +4,7 @@
              xmlns:l="using:HalawaHub.App.Services"
              xmlns:c="using:HalawaHub.App.Controls"
              xmlns:conv="using:HalawaHub.App.Converters"
+             xmlns:behaviors="using:HalawaHub.App.Behaviors"
              xmlns:views="using:HalawaHub.App.Views"
              x:Class="HalawaHub.App.Views.LibraryView"
              x:Name="Root"
@@ -15,7 +16,7 @@
             <Setter Property="Padding" Value="6,0"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Transitions">
                 <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.25"/></Transitions>
@@ -25,30 +26,30 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
         <Style Selector="Button.tstab:pointerover">
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
         </Style>
         <Style Selector="Button.tstab.on, Button.tstab.on:pointerover">
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
         </Style>
 
         <Style Selector="Button.chip">
             <Setter Property="Height" Value="36"/>
             <Setter Property="CornerRadius" Value="18"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Transitions">
                 <Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions>
             </Setter>
         </Style>
         <Style Selector="Button.chip:pointerover">
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
         </Style>
         <Style Selector="Button.chip.on, Button.chip.on:pointerover">
             <Setter Property="Foreground" Value="White"/>
         </Style>
         <Style Selector="Border.count">
-            <Setter Property="Background" Value="#2A1313"/>
+            <Setter Property="Background" Value="{DynamicResource ChipBrush}"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Padding" Value="8,1"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -95,11 +96,30 @@
             <Setter Property="Opacity" Value="1"/>
             <Setter Property="RenderTransform" Value="scale(1)"/>
         </Style>
+        <!-- شريحة مجموعة -->
+        <Style Selector="Button.cchip">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="CornerRadius" Value="17"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushCard}"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ChipTextBrush}"/>
+        </Style>
+        <Style Selector="Button.cchip:pointerover">
+            <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+        </Style>
+        <Style Selector="Button.cchip.on, Button.cchip.on:pointerover">
+            <Setter Property="Background" Value="{DynamicResource AccentDeepBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentDeepBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
         <!-- التبويبات والبحث والتحديث -->
-        <Border Grid.Row="0" ZIndex="10" BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,6,0,0">
+        <Border Grid.Row="0" ZIndex="10" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Padding="0,6,0,0">
             <Grid>
                 <!-- التبويبات حتى 600، وتنكمش في النوافذ الضيقة (flex: 0 1 600px) ليبقى مكان للبحث -->
                 <Grid.ColumnDefinitions>
@@ -110,7 +130,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Panel Grid.Column="0" Height="49.5" Margin="0,0,16,0">
-                    <Border BorderBrush="#12FFFFFF" BorderThickness="0,0,0,1.5"/>
+                    <Border BorderBrush="{DynamicResource Wash07Brush}" BorderThickness="0,0,0,1.5"/>
                     <UniformGrid Columns="4" VerticalAlignment="Top">
                         <Button Classes="tstab" Tag="0" Classes.on="{Binding LibraryTabIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}" Click="Tab_Click" Content="{l:Loc home}"/>
                         <Button Classes="tstab" Tag="1" Classes.on="{Binding LibraryTabIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}" Click="Tab_Click" Content="{l:Loc favorites}"/>
@@ -119,23 +139,49 @@
                     </UniformGrid>
                     <c:SlidingPill ItemCount="4" SelectedIndex="{Binding LibraryTabIndex}" EdgeInset="14" Motion="Underline"
                                    Height="5" VerticalAlignment="Bottom" Margin="0,0,0,-1.5" IsHitTestVisible="False">
-                        <Border CornerRadius="2.5" Background="{StaticResource UnderlineGradient}"
-                                BoxShadow="0 0 12 0 #B3EF4444"/>
+                        <Border CornerRadius="2.5" Background="{DynamicResource UnderlineGradient}"
+                                BoxShadow="{DynamicResource GlowUnderline}"/>
                     </c:SlidingPill>
                 </Panel>
 
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" Margin="0,0,16,0" VerticalAlignment="Center">
+                <!-- إضافة لعبة يدويًا -->
+                <!-- الإشعارات -->
+                <Panel VerticalAlignment="Center">
+                    <Button Name="BellButton" Classes="ib" Command="{Binding ToggleNotificationsCommand}"
+                            ToolTip.Tip="{l:Loc notifications}" AutomationProperties.Name="{l:Loc notifications}">
+                        <c:VectorIcon Data="{StaticResource IconBell}" Size="18"/>
+                    </Button>
+                    <Ellipse Width="9" Height="9" Fill="{DynamicResource AmberBrush}" IsHitTestVisible="False"
+                             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,2,0" IsVisible="{Binding HasUnreadNotifications}"/>
+                </Panel>
+                <Button Name="AddGameButton" Classes="ib" VerticalAlignment="Center"
+                        Click="AddGame_Click" ToolTip.Tip="{l:Loc addGame}" AutomationProperties.Name="{l:Loc addGame}">
+                    <c:VectorIcon Data="{StaticResource IconPlus}" Size="18"/>
+                </Button>
+
                 <!-- الترتيب: ليس في التصميم، باقٍ كقائمة صغيرة بجانب البحث -->
-                <Button Grid.Column="2" Classes="ib" Margin="0,0,16,0" VerticalAlignment="Center"
+                <Button Classes="ib" VerticalAlignment="Center"
                         ToolTip.Tip="{l:Loc sortBy}" AutomationProperties.Name="{l:Loc sortBy}">
                     <c:VectorIcon Data="{StaticResource IconSort}" Size="18"/>
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
-                            <MenuItem Header="{l:Loc sortName}" Tag="name" Click="Sort_Click"/>
-                            <MenuItem Header="{l:Loc sortLastPlayed}" Tag="lastplayed" Click="Sort_Click"/>
-                            <MenuItem Header="{l:Loc sortPlatform}" Tag="platform" Click="Sort_Click"/>
+                            <MenuItem Header="{l:Loc sortName}" Tag="name" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=name, Mode=OneWay}"/>
+                            <MenuItem Header="{l:Loc sortLastPlayed}" Tag="lastplayed" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=lastplayed, Mode=OneWay}"/>
+                            <MenuItem Header="{l:Loc sortPlayTime}" Tag="playtime" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=playtime, Mode=OneWay}"/>
+                            <MenuItem Header="{l:Loc sortAdded}" Tag="added" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=added, Mode=OneWay}"/>
+                            <MenuItem Header="{l:Loc sortPlatform}" Tag="platform" Click="Sort_Click" ToggleType="Radio" GroupName="sort"
+                                      IsChecked="{Binding SortMode, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=platform, Mode=OneWay}"/>
+                            <Separator/>
+                            <MenuItem Header="{l:Loc sortReverse}" ToggleType="CheckBox" IsChecked="{Binding SortReverse, Mode=TwoWay}"/>
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>
+                </StackPanel>
 
                 <views:SearchBox Grid.Column="3" VerticalAlignment="Center" Margin="0,0,16,0"/>
 
@@ -156,11 +202,11 @@
         <!-- شريط المنصات -->
         <Border Grid.Row="1" Margin="0,18,0,22" CornerRadius="22" HorizontalAlignment="Left"
                 Width="{Binding PlatformBarWidth}"
-                Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1">
+                Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1">
             <Panel>
                 <c:SlidingPill ItemCount="{Binding PlatformChips.Count}" SelectedIndex="{Binding PlatformChipIndex}"
                                Inset="4" Margin="0,4" IsHitTestVisible="False">
-                    <Border CornerRadius="18" Background="{StaticResource RedGradient}" BoxShadow="0 0 16 0 #80EF4444"/>
+                    <Border CornerRadius="18" Background="{DynamicResource RedGradient}" BoxShadow="{DynamicResource GlowChip}"/>
                 </c:SlidingPill>
                 <ItemsControl ItemsSource="{Binding PlatformChips}" Margin="4">
                     <ItemsControl.ItemsPanel>
@@ -184,13 +230,33 @@
             </Panel>
         </Border>
 
+        <!-- شريط المجموعات: الضغط يفلتر بالمجموعة، والضغط ثانية يلغي -->
+        <ItemsControl Name="CollectionsBar" Grid.Row="2" ItemsSource="{Binding VisibleCollections}" Margin="0,-10,0,16"
+                      IsVisible="{Binding HasVisibleCollections}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:CollectionItemViewModel">
+                    <Button Classes="cchip" Classes.on="{Binding IsActive}" Margin="0,0,8,6"
+                            Command="{Binding #Root.((vm:MainViewModel)DataContext).SelectCollectionCommand}" CommandParameter="{Binding Id}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <c:VectorIcon Data="{Binding Icon, Converter={x:Static conv:IconKeyConverter.Instance}}" Size="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Count}" FontSize="12" Opacity="0.75" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
         <!-- صفحات المكتبة -->
-        <Panel Name="PageHost" Grid.Row="2" ClipToBounds="True" Margin="0,-6,0,0">
+        <Panel Name="PageHost" Grid.Row="4" ClipToBounds="True" Margin="0,-6,0,0">
             <ScrollViewer Name="PageScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <Panel Margin="0,6,0,40">
-                    <ItemsControl Name="GamesList" ItemsSource="{Binding FilteredGames}">
+                    <ItemsControl Name="GamesList" ItemsSource="{Binding GridGames}" IsVisible="{Binding IsGridLayout}">
                         <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate><c:AutoFillGrid/></ItemsPanelTemplate>
+                            <ItemsPanelTemplate><c:AutoFillGrid MinCell="{Binding #Root.((vm:MainViewModel)DataContext).CardMinWidth}"/></ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:GameCardViewModel">
@@ -198,8 +264,52 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    <!-- عرض القائمة: الاسم، المنصة، وقت اللعب، الحجم -->
+                    <StackPanel Name="GamesRows" IsVisible="{Binding IsListLayout}" Spacing="2">
+                        <Grid ColumnDefinitions="*,120,140,110,84" Margin="14,0,14,6">
+                            <TextBlock Classes="lbl" Text="{l:Loc gameName}"/>
+                            <TextBlock Grid.Column="1" Classes="lbl" Text="{l:Loc platform}"/>
+                            <TextBlock Grid.Column="2" Classes="lbl" Text="{l:Loc playTime}"/>
+                            <TextBlock Grid.Column="3" Classes="lbl" Text="{l:Loc sizeOnDisk}"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding ListGames}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:GameCardViewModel">
+                                    <Button Classes="row" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="14,8"
+                                            CornerRadius="10" Margin="0,0,0,4" Background="{DynamicResource SurfaceBrush}"
+                                            Command="{Binding #Root.((vm:MainViewModel)DataContext).OpenDetailsCommand}" CommandParameter="{Binding}">
+                                        <Grid ColumnDefinitions="*,120,140,110,84">
+                                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding StatusBadgeText}" FontSize="11" IsVisible="{Binding HasStatusBadge}" VerticalAlignment="Center"
+                                                           Foreground="{Binding StatusTone, Converter={x:Static conv:StatusToneBrushConverter.Instance}}"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding PlatformShort}" FontSize="13" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding PlayTimeText}" FontSize="13" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding SizeOnDiskText}" FontSize="13" Foreground="{DynamicResource MutedBrush}"
+                                                       FlowDirection="LeftToRight" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                            <Button Grid.Column="4" Classes="btn pri" Height="34" Padding="14,0" Content="{Binding PlayLabel}"
+                                                    Command="{Binding #Root.((vm:MainViewModel)DataContext).LaunchGameCommand}" CommandParameter="{Binding}"/>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                     <TextBlock Text="{l:Loc emptyPage}" IsVisible="{Binding IsPageEmpty}" FontSize="15"
-                               Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center" Margin="0,60"/>
+                               Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" Margin="0,60"/>
+                    <!-- المكتبة كلها فارغة: فحص الجهاز من هنا مباشرة -->
+                    <Button Name="ScanThisPcButton" Classes="btn pri" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,100,0,0"
+                            IsVisible="{Binding IsLibraryEmpty}" Command="{Binding RefreshCommand}" Content="{l:Loc scanThisPc}"/>
+                    <!-- فشل الفحص: السبب وزر إعادة المحاولة -->
+                    <Border Name="ScanErrorBanner" IsVisible="{Binding HasScanError}" VerticalAlignment="Top" HorizontalAlignment="Center"
+                            Margin="0,10,0,0" MaxWidth="640" Padding="16,10" CornerRadius="12"
+                            Background="{DynamicResource MenuBrush}" BorderBrush="{DynamicResource StatusRepairBrush}" BorderThickness="1">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding ScanError}" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13" Margin="0,0,12,0"/>
+                            <Button Grid.Column="1" Classes="btn" Command="{Binding RefreshCommand}" Content="{l:Loc tryAgain}"/>
+                        </Grid>
+                    </Border>
                 </Panel>
             </ScrollViewer>
             <!-- لقطة الصفحة السابقة أثناء الانزلاق بين التبويبات -->

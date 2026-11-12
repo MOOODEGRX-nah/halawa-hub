@@ -14,6 +14,11 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+
+        // الثيم ولون التمييز قبل إنشاء أي نافذة
+        var config = ConfigService.Load();
+        ThemeManager.Apply(this, config.Theme, config.Accent);
+        MotionPreferences.Apply(config.ReduceMotion);
     }
 
     public override void OnFrameworkInitializationCompleted()

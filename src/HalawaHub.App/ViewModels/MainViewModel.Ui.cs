@@ -52,7 +52,7 @@ public partial class MainViewModel
 
     // ترتيب شريط المنصات في التصميم، ومنصات الإضافات تأتي بعدها
     private static readonly string[] PlatformOrder =
-        { "Steam", "Epic Games", "GOG", "Riot Games", "Xbox / Microsoft Store", "Heroic", "Lutris" };
+        { "Steam", "Epic Games", "GOG", "Riot Games", "Xbox / Microsoft Store", "Ubisoft", "EA", "Rockstar", "Heroic", "Lutris" };
 
     private const int ChipWidth = 150;
     private const int MaxRecentSearches = 5;
@@ -90,6 +90,19 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(UpdateStatusText));
         OnPropertyChanged(nameof(InstallButtonText));
         OnPropertyChanged(nameof(ApiKeyStatusText));
+        OnPropertyChanged(nameof(SecretStorageText));
+        RefreshPluginTexts();
+        OnPropertyChanged(nameof(WizardNextLabel));
+        RefreshNotificationTexts();
+        OnPropertyChanged(nameof(EditTitle));
+        OnPropertyChanged(nameof(EditProblem));
+        OnPropertyChanged(nameof(ReduceMotionStateText));
+        RefreshCollectionCounts();
+        RebuildSubscriptionRows();
+        if (IsSettingsVisible && SettingsSection == SectionPlatforms) RefreshPlatformRows();
+        if (FreeGames.Count > 0) _ = LoadFreeGamesAsync();
+        RaiseStore();
+        if (IsDetailsOpen && GameDialogSection == DetailsSection && DetailsGame != null) _ = LoadStoreDetailsAsync(DetailsGame);
         OnPropertyChanged(nameof(GameDialogTitle));
         OnPropertyChanged(nameof(SettingsTitle));
     }
@@ -106,12 +119,14 @@ public partial class MainViewModel
             _topNavIndex = value;
             OnPropertyChanged(nameof(TopNavIndex));
             OnPropertyChanged(nameof(IsLibraryPage));
+            OnPropertyChanged(nameof(IsDealsPage));
             OnPropertyChanged(nameof(IsDeveloperPage));
         }
     }
 
     public bool IsLibraryPage => TopNavIndex == 0;
-    public bool IsDeveloperPage => TopNavIndex == 1;
+    public bool IsDealsPage => TopNavIndex == 1;
+    public bool IsDeveloperPage => TopNavIndex == 2;
 
     // ===== تبويبات المكتبة =====
 
@@ -213,8 +228,30 @@ public partial class MainViewModel
             if (_isPageEmpty == value) return;
             _isPageEmpty = value;
             OnPropertyChanged(nameof(IsPageEmpty));
+            OnPropertyChanged(nameof(IsLibraryEmpty));
         }
     }
+
+    /// المكتبة كلها فارغة (لا مجرد صفحة): يظهر زر "افحص هذا الجهاز"
+    public bool IsLibraryEmpty => _isPageEmpty && Games.Count == 0 && _scanError == null;
+
+    private string? _scanError;
+
+    /// فشل آخر فحص: يظهر شريط فيه السبب وزر "حاول مجددًا"
+    public string? ScanError
+    {
+        get => _scanError;
+        private set
+        {
+            if (_scanError == value) return;
+            _scanError = value;
+            OnPropertyChanged(nameof(ScanError));
+            OnPropertyChanged(nameof(HasScanError));
+            OnPropertyChanged(nameof(IsLibraryEmpty));
+        }
+    }
+
+    public bool HasScanError => _scanError != null;
 
     // ===== الترتيب =====
 
@@ -352,6 +389,9 @@ public partial class MainViewModel
             OnPropertyChanged(nameof(GameDialogSection));
             OnPropertyChanged(nameof(GameDialogTitle));
             if (value == 1) DetailsGame?.EnsureSizeRequested();
+            if (value == NewsSection && DetailsGame != null) _ = LoadGameNewsAsync(DetailsGame);
+            if (value == DetailsSection && DetailsGame != null) _ = LoadStoreDetailsAsync(DetailsGame);
+            OnPropertyChanged(nameof(GameDialogPillIndex));
         }
     }
 
@@ -360,11 +400,13 @@ public partial class MainViewModel
         1 => "files",
         2 => "custom",
         3 => "launch",
-        4 => "tools",
+        NewsSection => "news",
+        ToolsSection => "tools",
+        DetailsSection => "details",
         _ => "general"
     }];
 
-    public int GameDialogSectionCount => DetailsGame?.HasTools == true ? 5 : 4;
+
 
     private void OpenDetails(GameCardViewModel? card)
     {
@@ -373,6 +415,7 @@ public partial class MainViewModel
         _gameDialogSection = -1;
         ResetCoverSearch();
         DetailsGame = card;
+        BuildGameMemberships(card);
         GameDialogSection = 0;
         IsDetailsOpen = true;
         OnPropertyChanged(nameof(GameDialogSectionCount));
@@ -382,6 +425,7 @@ public partial class MainViewModel
     {
         if (!IsDetailsOpen) return;
         IsDetailsOpen = false;
+        CloseMediaCommand.Execute(null);
 
         // اسم مخصص تغيّر أو إخفاء: نعيد الترتيب بعد إغلاق النافذة لا أثناء الكتابة
         ApplyFilter();
@@ -407,7 +451,7 @@ public partial class MainViewModel
 
         try
         {
-            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();
         }
         catch (Exception ex)
         {
@@ -520,7 +564,7 @@ public partial class MainViewModel
         }
     }
 
-    private int _settingsSection;
+    private int _settingsSection = SectionGeneral;
     public int SettingsSection
     {
         get => _settingsSection;
@@ -530,6 +574,8 @@ public partial class MainViewModel
             _settingsSection = value;
             OnPropertyChanged(nameof(SettingsSection));
             OnPropertyChanged(nameof(SettingsTitle));
+            OnPropertyChanged(nameof(SettingsPillIndex));
+            if (value == SectionPlatforms) RefreshPlatformRows();
         }
     }
 
@@ -538,8 +584,14 @@ public partial class MainViewModel
         1 => "sLanguage",
         2 => "sApi",
         3 => "sAppearance",
-        4 => "sStartup",
+        4 => "sGeneral",
         5 => "sBuild",
+        6 => "sPlugins",
+        7 => "sLibrary",
+        8 => "sPlatforms",
+        9 => "sTools",
+        10 => "sCollections",
+        11 => "sSubscriptions",
         _ => "sUpdates"
     }];
 
@@ -571,6 +623,7 @@ public partial class MainViewModel
         private set
         {
             _updateKind = value;
+            if (value == UpdateCheckKind.Available) NotifyOnce("appupdate", "app", "ntAppUpdate");
             OnPropertyChanged(nameof(UpdateKind));
             OnPropertyChanged(nameof(UpdateBadge));
             OnPropertyChanged(nameof(UpdateStatusText));

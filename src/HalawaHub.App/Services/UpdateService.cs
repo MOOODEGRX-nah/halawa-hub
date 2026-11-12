@@ -46,6 +46,7 @@ public class UpdateService : IUpdateService
         SelfUpdater.StatusExtracting => Loc.Instance["updExtracting"],
         SelfUpdater.StatusRestarting => Loc.Instance["updRestarting"],
         SelfUpdater.StatusChecksumFailed => Loc.Instance["updChecksum"],
+        SelfUpdater.StatusChecksumMissing => Loc.Instance["updChecksumMissing"],
         SelfUpdater.StatusUnsupported => Loc.Instance["updUnsupported"],
         _ => status
     };

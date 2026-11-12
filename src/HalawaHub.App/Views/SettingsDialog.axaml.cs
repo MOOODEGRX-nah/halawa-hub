@@ -1,5 +1,8 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -20,6 +23,7 @@ public partial class SettingsDialog : UserControl
     public SettingsDialog()
     {
         InitializeComponent();
+        SetupCollectionDrag();
 
         _box = this.FindControl<Border>("DialogBox")!;
         _scrim = this.FindControl<Border>("Scrim")!;
@@ -97,4 +101,40 @@ public partial class SettingsDialog : UserControl
 
     private void Scrim_PointerPressed(object? sender, PointerPressedEventArgs e) =>
         _vm?.CloseSettingsCommand.Execute(null);
+
+    // ===== سحب المجموعات لإعادة ترتيبها (المقبض ⋮⋮) =====
+
+    private const double CollectionRowPitch = 64; // ارتفاع الصف 56 + فراغ 8
+    private int _dragFrom = -1;
+    private double _dragStartY;
+
+    private void SetupCollectionDrag()
+    {
+        var rows = this.FindControl<ItemsControl>("CollectionRows");
+        if (rows == null) return;
+        rows.AddHandler(PointerPressedEvent, (_, e) =>
+        {
+            if ((e.Source as Control)?.GetSelfAndVisualAncestors().OfType<Border>().Any(b => b.Classes.Contains("grip")) != true) return;
+            var y = e.GetPosition(rows).Y;
+            _dragFrom = (int)(y / CollectionRowPitch);
+            _dragStartY = y;
+            e.Pointer.Capture(rows);
+            e.Handled = true;
+        }, RoutingStrategies.Tunnel);
+        rows.PointerMoved += (_, e) =>
+        {
+            if (_dragFrom < 0 || DataContext is not MainViewModel vm) return;
+            var to = Math.Clamp((int)(e.GetPosition(rows).Y / CollectionRowPitch), 0, vm.Collections.Count - 1);
+            if (to == _dragFrom) return;
+            vm.MoveCollection(_dragFrom, to);
+            _dragFrom = to;
+        };
+        rows.PointerReleased += (_, e) =>
+        {
+            if (_dragFrom < 0) return;
+            _dragFrom = -1;
+            e.Pointer.Capture(null);
+        };
+        rows.PointerCaptureLost += (_, _) => _dragFrom = -1;
+    }
 }

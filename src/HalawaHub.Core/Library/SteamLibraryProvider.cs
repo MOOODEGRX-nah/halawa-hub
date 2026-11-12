@@ -30,7 +30,7 @@ public class SteamLibraryProvider : IGameLibraryProvider
     /// <summary>
     /// Windows: Registry. Linux: مسارات معروفة (native + Flatpak + snap).
     /// </summary>
-    private static string? GetSteamPath()
+    public static string? GetSteamPath()
     {
         if (OperatingSystem.IsWindows())
         {

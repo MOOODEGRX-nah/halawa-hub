@@ -20,5 +20,6 @@ public interface IFilterService
         string navInstalled,
         string navRecent,
         string? platform = null,
-        bool includeHidden = false);
+        bool includeHidden = false,
+        bool reverse = false);
 }

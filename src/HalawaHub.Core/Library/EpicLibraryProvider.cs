@@ -11,7 +11,7 @@ namespace HalawaHub.Core.Library;
 /// </summary>
 public class EpicLibraryProvider : IGameLibraryProvider
 {
-    private static readonly string ManifestsPath = Path.Combine(
+    public static readonly string ManifestsPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
         "Epic", "EpicGamesLauncher", "Data", "Manifests");
 

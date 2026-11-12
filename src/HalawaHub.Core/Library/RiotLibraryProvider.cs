@@ -8,7 +8,7 @@ namespace HalawaHub.Core.Library;
 
 public class RiotLibraryProvider : IGameLibraryProvider
 {
-    private static readonly string MetadataPath = Path.Combine(
+    public static readonly string MetadataPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
         "Riot Games", "Metadata");
 

@@ -50,6 +50,7 @@ public partial class MainViewModel
 
         ClearStatus();
         IsRefreshDone = false;
+        ScanError = null;
         IsRefreshing = true;
 
         var allProviders = _builtInProviders.Concat(_pluginLoader.LibraryProviders).ToList();
@@ -66,14 +67,17 @@ public partial class MainViewModel
 
             if (ran && result != null)
             {
+                var before = _scanCount++ == 0 ? null : Games.Select(g => g.Game.Platform + "|" + g.Game.Id).ToHashSet();
                 ApplyScanResult(result, allTools);
+                if (before != null)
+                    NotifyKey("scan", "ntScan", Games.Count, Games.Count(g => !before.Contains(g.Game.Platform + "|" + g.Game.Id)));
                 _ = FlashRefreshDoneAsync();
             }
         }
         catch (Exception ex)
         {
             Log.Error("فشل فحص المكتبات", ex);
-            ShowStatus(Loc.Instance.Format("scanFailed", ex.Message));
+            ScanError = Loc.Instance.Format("scanFailed", ex.Message);
         }
         finally
         {
@@ -88,14 +92,31 @@ public partial class MainViewModel
         IsRefreshDone = false;
     }
 
+    private LibraryScanResult? _lastScan;
+    private IEnumerable<IGameTool> _lastScanTools = Array.Empty<IGameTool>();
+
+    /// يعيد بناء البطاقات من آخر فحص (بعد وصول قائمة الألعاب المملوكة مثلًا) بلا فحص جديد
+    private void ReapplyLastScan()
+    {
+        if (_lastScan != null) ApplyScanResult(_lastScan, _lastScanTools);
+    }
+
     private void ApplyScanResult(LibraryScanResult result, IEnumerable<IGameTool> allTools)
     {
+        _lastScan = result;
+        _lastScanTools = allTools;
         Games.Clear();
 
+        // ألعاب قرص غير موصول تبقى من آخر فحص بدل أن تختفي
+        IEnumerable<GameInfo> games = LibraryCachePath != null && StatusProbe != null
+            ? LibraryCacheService.MergeOffline(LibraryCachePath, result.Games, StatusProbe.IsDriveMissing)
+            : result.Games;
+        games = WithOwnedGames(games);
+
         // بناء GameCardViewModels من النتائج
-        foreach (var game in result.Games)
+        foreach (var game in games)
         {
-            var card = new GameCardViewModel(game, allTools);
+            var card = new GameCardViewModel(game, allTools) { ShowStats = _showPlayTimeOnCards };
             card.FavoriteChanged += (_, _) =>
             {
                 UpdateHomeViewCollections();
@@ -109,6 +130,11 @@ public partial class MainViewModel
         UpdateHomeViewCollections();
         ApplyFilter();
         RefreshSearchState();
+        _ = RefreshStatusesAsync();
+        FirstSeenService.SaveIfChanged();
+        _ = RefreshSteamPlaytimeAsync();
+        RefreshCollectionCounts();
+        if (IsListLayout) RequestListSizes();
 
         // لو فيه مفتاح SteamGridDB مُعد، نكمّل أغلفة المنصات اللي ما عندها مصدر مباشر
         if (_coverClient.IsConfigured)
@@ -141,7 +167,11 @@ public partial class MainViewModel
     }
 
     /// يحفظ أي تعديل معلق بالإعدادات ويطبق المفتاح الجديد فورًا
-    public void FlushPendingSettings() => _apiKeySaveDebouncer.Flush();
+    public void FlushPendingSettings()
+    {
+        _apiKeySaveDebouncer.Flush();
+        PersistActiveSession();
+    }
 
     internal bool IsCoverClientConfigured => _coverClient.IsConfigured;
 
@@ -149,7 +179,17 @@ public partial class MainViewModel
     {
         ConfigService.Save(_config);
         _coverClient = new SteamGridDbClient(_config.SteamGridDbApiKey);
+        OnPropertyChanged(nameof(SecretStorageText));
     }
+
+    /// أين يُحفظ مفتاح API على هذا الجهاز (يظهر تحت حقل المفتاح)
+    public string SecretStorageText => Loc.Instance[
+        (HalawaHub.Core.Security.SecretStore.BackendOf(_config.SteamGridDbApiKeyRef) ?? HalawaHub.Core.Security.SecretStore.PreferredBackend) switch
+        {
+            HalawaHub.Core.Security.SecretBackend.WindowsDpapi => "secretDpapi",
+            HalawaHub.Core.Security.SecretBackend.SecretService => "secretKeyring",
+            _ => "secretFile"
+        }];
 
     private async void CloseSettings()
     {

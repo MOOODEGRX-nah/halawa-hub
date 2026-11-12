@@ -17,6 +17,9 @@ internal static class TestDataIsolation
         var dir = Path.Combine(Path.GetTempPath(), "HalawaHub-Tests-" + Guid.NewGuid().ToString("N"));
         Environment.SetEnvironmentVariable(AppPaths.DataDirOverrideVariable, dir);
 
+        // الأسرار في ملف مؤقت لا في مخزن مفاتيح المطوّر الحقيقي (لينكس)
+        Environment.SetEnvironmentVariable(HalawaHub.Core.Security.SecretStore.BackendOverrideVariable, "file");
+
         // نفس الشيء لملفات سطح المكتب: زر "تشغيل مع النظام" يكتب في ~/.config/autostart
         // على لينكس، والاختبار لا يجوز أن يغيّر جلسة المطور الحقيقية
         Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", Path.Combine(dir, "xdg-config"));

@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:c="using:HalawaHub.App.Controls"
+             x:Class="HalawaHub.App.Views.ConfirmDialog"
+             x:DataType="vm:MainViewModel"
+             IsVisible="{Binding IsConfirmOpen}">
+    <Panel Background="{DynamicResource ScrimBrush}">
+        <Border Width="520" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center"
+                CornerRadius="14" Padding="26,22" Background="{DynamicResource DialogBrush}"
+                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1" BoxShadow="0 30 80 0 #B3000000">
+            <Grid RowDefinitions="Auto,Auto,*,Auto">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Classes="h2" Text="{Binding Confirm.Title}" Foreground="{DynamicResource RedHoverBrush}"
+                               TextWrapping="Wrap"/>
+                    <Button Grid.Column="1" Classes="x" Command="{Binding CancelConfirmCommand}"
+                            ToolTip.Tip="{l:Loc close}" AutomationProperties.Name="{l:Loc close}">
+                        <c:VectorIcon Data="{StaticResource IconX}" Size="18"/>
+                    </Button>
+                </Grid>
+                <TextBlock Grid.Row="1" Text="{Binding Confirm.Message}" Foreground="{DynamicResource ChipTextBrush}"
+                           FontSize="14" TextWrapping="Wrap" Margin="0,10,0,12"/>
+                <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding Confirm.HasDetails}">
+                    <Border Background="{DynamicResource Wash08Brush}" CornerRadius="10" Padding="12,10">
+                        <ItemsControl ItemsSource="{Binding Confirm.Details}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <SelectableTextBlock Text="{Binding}" FontSize="12" Foreground="{DynamicResource SubtleBrush}"
+                                                         TextWrapping="Wrap" Margin="0,2" FlowDirection="LeftToRight"
+                                                         HorizontalAlignment="Left"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                </ScrollViewer>
+                <ItemsControl Grid.Row="3" ItemsSource="{Binding Confirm.Choices}" Margin="0,16,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ConfirmChoice">
+                            <Button Classes="btn" Classes.pri="{Binding IsPrimary}" Margin="0,0,10,8"
+                                    Content="{Binding Label}"
+                                    Command="{Binding $parent[UserControl].((vm:MainViewModel)DataContext).ChooseConfirmCommand}"
+                                    CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Border>
+    </Panel>
+</UserControl>

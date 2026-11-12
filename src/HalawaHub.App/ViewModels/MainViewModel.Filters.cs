@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using HalawaHub.App.Services;
 using HalawaHub.Core.Models;
 
@@ -17,8 +18,9 @@ public partial class MainViewModel
         var filtered = _filterService.ApplyFilter(
             Games, SearchQuery, SelectedNavItem, SortMode,
             NavAll, NavFavorite, NavInstalled, NavRecent,
-            platform: SelectedPlatform, includeHidden: ShowHiddenGames);
-        foreach (var card in filtered)
+            platform: SelectedPlatform, includeHidden: ShowHiddenGames, reverse: SortReverse);
+        var inCollection = ActiveCollectionFilter();
+        foreach (var card in MergeCards(filtered.Where(inCollection)))
             FilteredGames.Add(card);
 
         IsPageEmpty = !IsRefreshing && FilteredGames.Count == 0;

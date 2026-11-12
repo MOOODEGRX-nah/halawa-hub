@@ -41,7 +41,9 @@ public class DataPersistenceTests
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.SteamGridDbApiKey.Should().Be(original.SteamGridDbApiKey);
+        // المفتاح لا يُكتب نصًا صريحًا في config.json (يُحفظ عبر SecretStore)
+        json.Should().NotContain("test-key-12345");
+        loaded!.SteamGridDbApiKey.Should().BeEmpty();
         loaded.LastSeenVersion.Should().Be(original.LastSeenVersion);
     }
 

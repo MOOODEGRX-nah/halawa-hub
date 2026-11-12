@@ -14,6 +14,11 @@ public static class SelfUpdater
     public const string StatusExtracting = "extracting files...";
     public const string StatusRestarting = "restarting...";
     public const string StatusChecksumFailed = "SHA256 verification failed - install aborted.";
+    public const string StatusChecksumMissing = "no SHA256 for this update - install refused.";
+
+    /// هاش SHA256 صالح: 64 حرفًا ست عشريًا. بدونه لا نثبّت شيئًا على أي نظام.
+    internal static bool IsValidSha256(string? sha) =>
+        sha is { Length: 64 } && sha.All(Uri.IsHexDigit);
     public const string StatusUnsupported = "automatic update is only available on Windows.";
 
     /// <summary>وسيط تمرره نسخة لينكس القديمة للجديدة بعد الاستبدال.</summary>
@@ -39,6 +44,14 @@ public static class SelfUpdater
             return false;
         }
 
+        // ويندوز كان يثبّت بلا تحقق إذا غاب الهاش. لم يعد: لا تثبيت بلا SHA256 صالح
+        if (!IsValidSha256(expectedSha256))
+        {
+            Log.Error("windows update refused: no checksum for the downloaded file");
+            onStatus?.Invoke(StatusChecksumMissing);
+            return false;
+        }
+
         try
         {
             var tempRoot = Path.Combine(Path.GetTempPath(), "HalawaHub-Update");
@@ -56,7 +69,7 @@ public static class SelfUpdater
                 http.DefaultRequestHeaders.UserAgent.ParseAdd("HalawaHub-Updater/1.0");
                 var bytes = await http.GetByteArrayAsync(downloadUrl);
 
-                if (!string.IsNullOrEmpty(expectedSha256))
+                // الهاش مضمون هنا (فُحص أعلاه)
                 {
                     var actual = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
                     if (!string.Equals(actual, expectedSha256, StringComparison.OrdinalIgnoreCase))

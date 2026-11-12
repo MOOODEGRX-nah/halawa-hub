@@ -21,6 +21,11 @@
     <SolidColorBrush x:Key="TextBrush" Color="#F5EDED"/>
     <SolidColorBrush x:Key="MutedBrush" Color="#B8A4A4"/>
     <SolidColorBrush x:Key="ChipTextBrush" Color="#D9C7C7"/>
+    <!-- حالة اللعبة على البطاقة وفي نافذتها -->
+    <SolidColorBrush x:Key="StatusUpdateBrush" Color="#F5A623"/>
+    <SolidColorBrush x:Key="StatusRepairBrush" Color="#EF4444"/>
+    <SolidColorBrush x:Key="StatusRunningBrush" Color="#34D399"/>
+    <SolidColorBrush x:Key="StatusOfflineBrush" Color="#9C8A8A"/>
 
     <LinearGradientBrush x:Key="RedGradient" StartPoint="0%,50%" EndPoint="100%,50%">
         <GradientStop Color="#991B1B" Offset="0"/>
@@ -48,11 +53,14 @@
     <StreamGeometry x:Key="IconX">M6 6l12 12M18 6L6 18</StreamGeometry>
     <StreamGeometry x:Key="IconHeart">M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z</StreamGeometry>
     <StreamGeometry x:Key="IconSort">M3 6h18 M6 12h12 M10 18h4</StreamGeometry>
+    <StreamGeometry x:Key="IconPlus">M12 5v14 M5 12h14</StreamGeometry>
+    <StreamGeometry x:Key="IconCopy">M9 9h11v11H9z M5 15H4V4h11v1</StreamGeometry>
+    <StreamGeometry x:Key="IconShortcut">M14 4h6v6 M20 4l-9 9 M18 14v6H4V6h6</StreamGeometry>
 
     <!-- كل أزرار البرنامج -->
     <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="0"/>
@@ -97,8 +105,8 @@
             <Setter Property="Padding" Value="18,0"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushControl}"/>
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushControl}"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="RenderTransform" Value="scale(1)"/>
             <Setter Property="Transitions">
@@ -109,19 +117,19 @@
             </Setter>
         </Style>
         <Style Selector="^.btn:pointerover">
-            <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
         </Style>
         <Style Selector="^.btn:pressed">
             <Setter Property="RenderTransform" Value="scale(0.95)"/>
         </Style>
         <Style Selector="^.pri">
-            <Setter Property="Background" Value="{StaticResource RedBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource RedBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource RedBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         <Style Selector="^.pri:pointerover">
-            <Setter Property="Background" Value="{StaticResource RedHoverBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource RedHoverBrush}"/>
         </Style>
         <Style Selector="^.btn /template/ Ellipse#PART_Ripple, ^.play /template/ Ellipse#PART_Ripple">
             <Setter Property="IsVisible" Value="True"/>
@@ -142,7 +150,7 @@
         <Style Selector="^.play">
             <Setter Property="Height" Value="44"/>
             <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Background" Value="{StaticResource RedBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource RedBrush}"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -156,7 +164,7 @@
             </Setter>
         </Style>
         <Style Selector="^.play:pointerover">
-            <Setter Property="Background" Value="{StaticResource RedHoverBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource RedHoverBrush}"/>
         </Style>
         <Style Selector="^.play:pressed">
             <Setter Property="RenderTransform" Value="scale(0.93)"/>
@@ -168,9 +176,9 @@
             <Setter Property="Height" Value="44"/>
             <Setter Property="CornerRadius" Value="22"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushControl}"/>
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="Foreground" Value="#E8D8D8"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushControl}"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MenuTextBrush}"/>
             <Setter Property="Transitions">
                 <Transitions>
                     <BrushTransition Property="Background" Duration="0:0:0.3"/>
@@ -179,7 +187,7 @@
             </Setter>
         </Style>
         <Style Selector="^.ib:pointerover">
-            <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
         </Style>
 
         <!-- .x: زر إغلاق النوافذ، يدور عند المرور -->
@@ -187,7 +195,7 @@
             <Setter Property="Width" Value="44"/>
             <Setter Property="Height" Value="44"/>
             <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
             <Setter Property="Transitions">
                 <Transitions>
                     <BrushTransition Property="Background" Duration="0:0:0.2"/>
@@ -196,8 +204,8 @@
             </Setter>
         </Style>
         <Style Selector="^.x:pointerover">
-            <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
         </Style>
         <!-- .si: عنصر الشريط الجانبي في النوافذ -->
         <Style Selector="^.si">
@@ -205,7 +213,7 @@
             <Setter Property="Padding" Value="14,0"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Transitions">
@@ -216,8 +224,8 @@
             </Setter>
         </Style>
         <Style Selector="^.si:pointerover">
-            <Setter Property="Background" Value="#0AFFFFFF"/>
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource Wash04Brush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
         </Style>
         <Style Selector="^.si.on, ^.si.on:pointerover">
             <Setter Property="Background" Value="Transparent"/>
@@ -230,7 +238,7 @@
         <Setter Property="Width" Value="44"/>
         <Setter Property="Height" Value="26"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Background" Value="#3A1518"/>
+        <Setter Property="Background" Value="{DynamicResource MenuBorderBrush}"/>
         <Setter Property="CornerRadius" Value="13"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -242,7 +250,7 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
-                    <Ellipse Name="PART_Thumb" Width="20" Height="20" Fill="#B8A4A4"
+                    <Ellipse Name="PART_Thumb" Width="20" Height="20" Fill="{DynamicResource MutedBrush}"
                              HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3,0,0,0">
                         <Ellipse.Transitions>
                             <Transitions>
@@ -255,7 +263,7 @@
             </ControlTemplate>
         </Setter>
         <Style Selector="^:checked">
-            <Setter Property="Background" Value="#B91C1C"/>
+            <Setter Property="Background" Value="{DynamicResource AccentDeepBrush}"/>
         </Style>
         <Style Selector="^:checked /template/ Ellipse#PART_Thumb">
             <Setter Property="Fill" Value="White"/>

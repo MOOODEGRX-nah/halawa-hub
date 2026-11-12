@@ -6,7 +6,8 @@ namespace HalawaHub.App.Controls;
 
 /// <summary>
 /// شبكة البطاقات: grid-template-columns: repeat(auto-fill, minmax(170px, 1fr))
-/// بفراغ 20 ونسبة 2:3. عدد الأعمدة يتغير مع عرض النافذة.
+/// بفراغ 20 ونسبة 2:3. عدد الأعمدة يتغير مع عرض النافذة، وأقل عرض للبطاقة
+/// (MinCell) يأتي من إعداد "حجم البطاقة": صغير 140، مريح 170، كبير 220.
 /// </summary>
 public class AutoFillGrid : Panel
 {
@@ -14,13 +15,28 @@ public class AutoFillGrid : Panel
     public const double Gap = 20;
     private const double AspectRatio = 1.5;
 
-    internal static int ColumnsFor(double width) =>
-        Math.Max(1, (int)Math.Floor((width + Gap) / (MinCellWidth + Gap)));
+    public static readonly StyledProperty<double> MinCellProperty =
+        AvaloniaProperty.Register<AutoFillGrid, double>(nameof(MinCell), MinCellWidth);
 
-    private static (int Columns, double CellWidth, double CellHeight) Layout(double width)
+    static AutoFillGrid()
     {
-        var columns = ColumnsFor(width);
-        var cell = Math.Max(MinCellWidth, (width - Gap * (columns - 1)) / columns);
+        AffectsMeasure<AutoFillGrid>(MinCellProperty);
+    }
+
+    public double MinCell
+    {
+        get => GetValue(MinCellProperty);
+        set => SetValue(MinCellProperty, value);
+    }
+
+    internal static int ColumnsFor(double width, double minCell = MinCellWidth) =>
+        Math.Max(1, (int)Math.Floor((width + Gap) / (minCell + Gap)));
+
+    private (int Columns, double CellWidth, double CellHeight) Layout(double width)
+    {
+        var min = MinCell > 40 ? MinCell : MinCellWidth;
+        var columns = ColumnsFor(width, min);
+        var cell = Math.Max(min, (width - Gap * (columns - 1)) / columns);
         return (columns, cell, cell * AspectRatio);
     }
 

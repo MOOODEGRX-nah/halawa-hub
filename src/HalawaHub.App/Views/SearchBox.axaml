@@ -7,7 +7,9 @@
              x:DataType="vm:MainViewModel">
 
     <UserControl.Styles>
-        <Style Selector="Border.halo">
+        <!-- النبض يعمل فقط مع الصنف pulse (يضيفه الكود بضع ثوانٍ عند تفعيل النافذة): حركة دائمة هنا
+             كانت تعيد رسم النافذة 60 مرة في الثانية والبرنامج خامل (ربع نواة تقريبًا) -->
+        <Style Selector="Border.halo.pulse">
             <Setter Property="RenderTransform">
                 <ScaleTransform/>
             </Setter>
@@ -32,6 +34,7 @@
             </Style.Animations>
         </Style>
 
+        <!-- الصنف bob يُضاف فقط والفقاعة ظاهرة: حركة لا نهائية على عنصر مخفي تُبقي خيط الرسم يعمل كل إطار -->
         <Style Selector="TextBlock.bob">
             <Setter Property="RenderTransform">
                 <TranslateTransform/>
@@ -51,50 +54,44 @@
             <Setter Property="Margin" Value="0,0,8,8"/>
             <Setter Property="CornerRadius" Value="18"/>
             <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="BorderBrush" Value="#1AFFFFFF"/>
-            <Setter Property="Background" Value="#1C0E0F"/>
-            <Setter Property="Foreground" Value="{StaticResource ChipTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Wash10Brush}"/>
+            <Setter Property="Background" Value="{DynamicResource FieldBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ChipTextBrush}"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Medium"/>
         </Style>
         <Style Selector="Button.sb-chip:pointerover">
-            <Setter Property="BorderBrush" Value="{StaticResource RedBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RedBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
         </Style>
 
         <Style Selector="Button.sb-row">
             <Setter Property="Height" Value="44"/>
             <Setter Property="Padding" Value="4,0"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="BorderBrush" Value="#0FFFFFFF"/>
-            <Setter Property="Foreground" Value="#9C8A8A"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Wash06Brush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubtleBrush}"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
         </Style>
         <Style Selector="Button.sb-row:pointerover">
-            <Setter Property="Background" Value="#1C0E0F"/>
+            <Setter Property="Background" Value="{DynamicResource FieldBrush}"/>
         </Style>
     </UserControl.Styles>
 
     <Panel Name="Box" Width="44" Height="44" Classes.open="{Binding IsSearchOpen}">
-        <Border Classes="halo" Margin="-6" CornerRadius="28" BorderThickness="3" BorderBrush="#99EF4444"
+        <Border Name="Halo" Classes="halo" Opacity="0.3" Margin="-6" CornerRadius="28" BorderThickness="3" BorderBrush="{DynamicResource SearchHaloBrush}"
                 IsHitTestVisible="False" IsVisible="{Binding !IsSearchOpen}"/>
 
-        <Border Name="Shell" CornerRadius="22" BorderThickness="2" Background="{StaticResource SurfaceBrush}"
-                BoxShadow="0 0 12 0 #73EF4444" Opacity="0" IsHitTestVisible="False">
-            <Border.BorderBrush>
-                <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
-                    <GradientStop Color="#B91C1C" Offset="0"/>
-                    <GradientStop Color="#F5A623" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.BorderBrush>
+        <Border Name="Shell" BorderBrush="{DynamicResource AccentAmberGradient}" CornerRadius="22" BorderThickness="2" Background="{DynamicResource SurfaceBrush}"
+                BoxShadow="{DynamicResource GlowS}" Opacity="0" IsHitTestVisible="False">
             <Border.Transitions>
                 <Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.3"/></Transitions>
             </Border.Transitions>
         </Border>
 
-        <Border Name="Fill" CornerRadius="22" Background="{StaticResource RedGradient}"
-                BoxShadow="0 0 16 0 #8CEF4444" IsHitTestVisible="False">
+        <Border Name="Fill" CornerRadius="22" Background="{DynamicResource RedGradient}"
+                BoxShadow="{DynamicResource GlowSearch}" IsHitTestVisible="False">
             <Border.Transitions>
                 <Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.3"/></Transitions>
             </Border.Transitions>
@@ -115,14 +112,8 @@
         <!-- علامة الاستفهام عند عدم وجود نتائج -->
         <Border Name="Bubble" Width="26" Height="26" CornerRadius="13" IsHitTestVisible="False"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="9,-30,0,0"
-                IsVisible="{Binding ShowSearchNoMatch}" BoxShadow="0 0 12 0 #80EF4444">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                    <GradientStop Color="#EF4444" Offset="0"/>
-                    <GradientStop Color="#F5A623" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.Background>
-            <TextBlock Classes="bob" Text="?" Foreground="White" FontWeight="Bold" FontSize="16" FontFamily="fonts:Inter#Inter"
+                IsVisible="{Binding ShowSearchNoMatch}" BoxShadow="{DynamicResource GlowSearchS}" Background="{DynamicResource AccentHoverAmberGradient}">
+            <TextBlock Classes.bob="{Binding ShowSearchNoMatch}" Text="?" Foreground="White" FontWeight="Bold" FontSize="16" FontFamily="fonts:Inter#Inter"
                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Border>
 
@@ -131,7 +122,7 @@
                  IsVisible="{Binding IsSearchOpen}"
                  AutomationProperties.Name="{l:Loc search}"/>
 
-        <Button Name="ClearButton" Width="34" Height="34" CornerRadius="17" Background="#2A1313" Foreground="#E8D8D8"
+        <Button Name="ClearButton" Width="34" Height="34" CornerRadius="17" Background="{DynamicResource ChipBrush}" Foreground="{DynamicResource MenuTextBrush}"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,5,0"
                 IsVisible="{Binding HasSearchText}" Click="Clear_Click"
                 ToolTip.Tip="{l:Loc clear}" AutomationProperties.Name="{l:Loc clear}">
@@ -141,11 +132,11 @@
         <!-- القائمة المنسدلة -->
         <Canvas>
             <Border Name="Dropdown" Canvas.Top="56" Canvas.Right="0" Width="340" Padding="14,12" CornerRadius="16"
-                    Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                    Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1"
                     BoxShadow="0 16 40 0 #99000000" IsVisible="{Binding ShowSearchDropdown}">
                 <StackPanel>
                     <StackPanel IsVisible="{Binding ShowRecentSearches}">
-                        <TextBlock Text="{l:Loc recentLbl}" Foreground="#9C8A8A" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        <TextBlock Text="{l:Loc recentLbl}" Foreground="{DynamicResource SubtleBrush}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,10"/>
                         <ItemsControl Name="RecentList" ItemsSource="{Binding RecentSearches}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
@@ -165,9 +156,9 @@
                                     <StackPanel Orientation="Horizontal" Spacing="12">
                                         <c:VectorIcon Data="{StaticResource IconSearch}" Size="16" VerticalAlignment="Center"/>
                                         <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Before}" Foreground="{StaticResource MutedBrush}" FontSize="16" FontWeight="Medium"/>
-                                            <TextBlock Text="{Binding Match}" Foreground="White" FontSize="16" FontWeight="Bold"/>
-                                            <TextBlock Text="{Binding After}" Foreground="{StaticResource MutedBrush}" FontSize="16" FontWeight="Medium"/>
+                                            <TextBlock Text="{Binding Before}" Foreground="{DynamicResource MutedBrush}" FontSize="16" FontWeight="Medium"/>
+                                            <TextBlock Text="{Binding Match}" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding After}" Foreground="{DynamicResource MutedBrush}" FontSize="16" FontWeight="Medium"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </Button>
@@ -176,9 +167,9 @@
                     </ItemsControl>
 
                     <StackPanel Name="NoMatchPanel" IsVisible="{Binding ShowSearchNoMatch}" Margin="0,14,0,8" Spacing="6">
-                        <TextBlock Text="{Binding SearchNoMatchText}" Foreground="{StaticResource ChipTextBrush}"
+                        <TextBlock Text="{Binding SearchNoMatchText}" Foreground="{DynamicResource ChipTextBrush}"
                                    FontSize="16" FontWeight="Medium" HorizontalAlignment="Center" TextWrapping="Wrap"/>
-                        <TextBlock Text="{l:Loc tryOther}" Foreground="#9C8A8A" FontSize="13" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{l:Loc tryOther}" Foreground="{DynamicResource SubtleBrush}" FontSize="13" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

@@ -33,7 +33,8 @@ public partial class MainWindow
         {
             (DataContext as MainViewModel)?.FlushPendingSettings();
 
-            if (ShouldHideToTray(_allowExit, !_allowExit && IsTrayUsable()))
+            var closeToTray = (DataContext as MainViewModel)?.CloseToTray ?? true;
+            if (closeToTray && ShouldHideToTray(_allowExit, !_allowExit && IsTrayUsable()))
             {
                 e.Cancel = true;
                 Hide();
@@ -76,6 +77,13 @@ public partial class MainWindow
             _trayAvailable = false;
             HalawaHub.Core.Log.Error("تعذر إنشاء أيقونة الصينية", ex);
         }
+    }
+
+    /// خروج حقيقي (لا تصغير للصينية)، مثلًا بعد طلب حذف كل البيانات
+    internal void ExitForReal()
+    {
+        _allowExit = true;
+        Close();
     }
 
     internal void ShowAndFocus()

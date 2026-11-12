@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:conv="using:HalawaHub.App.Converters"
+             x:Class="HalawaHub.App.Views.WizardDialog"
+             x:DataType="vm:MainViewModel"
+             IsVisible="{Binding IsWizardOpen}">
+    <UserControl.Styles>
+        <Style Selector="Button.lang">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="MinWidth" Value="130"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushControl}"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        </Style>
+        <Style Selector="Button.lang.on">
+            <Setter Property="Background" Value="{DynamicResource AccentDeepBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentDeepBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Styles>
+    <Panel Background="{DynamicResource ScrimBrush}">
+        <Border Width="560" MinHeight="380" MaxHeight="600" HorizontalAlignment="Center" VerticalAlignment="Center"
+                CornerRadius="14" Padding="28,24" Background="{DynamicResource DialogBrush}"
+                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1" BoxShadow="0 30 80 0 #B3000000">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                    <TextBlock Classes="h2" Text="{l:Loc wizTitle}" Foreground="{DynamicResource RedHoverBrush}"/>
+                    <TextBlock Grid.Column="1" Text="{Binding WizardStepText}" FontSize="12" VerticalAlignment="Center"
+                               Foreground="{DynamicResource SubtleBrush}" FlowDirection="LeftToRight"/>
+                </Grid>
+
+                <Panel Grid.Row="1">
+                    <!-- 1: اللغة -->
+                    <StackPanel Spacing="14" IsVisible="{Binding WizardStep, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}">
+                        <TextBlock Text="{l:Loc wizLang}" FontSize="15" TextWrapping="Wrap"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button Classes="lang" Classes.on="{Binding LanguageIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                                    Command="{Binding SetLanguageCommand}" CommandParameter="ar">
+                                <TextBlock Text="عربي" FontFamily="avares://Halawa-Hub/Assets/Fonts#Cairo" HorizontalAlignment="Center"/>
+                            </Button>
+                            <Button Classes="lang" Classes.on="{Binding LanguageIndex, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                                    Command="{Binding SetLanguageCommand}" CommandParameter="en">
+                                <TextBlock Text="English" FontFamily="fonts:Inter#Inter" HorizontalAlignment="Center"/>
+                            </Button>
+                        </StackPanel>
+                        <TextBlock Classes="lbl" Text="{l:Loc wizLangNote}" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- 2: المنصات المكتشفة -->
+                    <Grid RowDefinitions="Auto,*" IsVisible="{Binding WizardStep, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}">
+                        <TextBlock Text="{l:Loc wizPlatforms}" FontSize="15" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding PlatformRows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:PlatformRow">
+                                        <Border Margin="0,0,0,6" Padding="12,8" CornerRadius="10" Background="{DynamicResource PageBrush}" IsVisible="{Binding IsLauncher}"
+                                                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding DetectedText}" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- 3: مفتاح SteamGridDB (اختياري) -->
+                    <StackPanel Spacing="12" IsVisible="{Binding WizardStep, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}">
+                        <TextBlock Text="{l:Loc wizKey}" FontSize="15" TextWrapping="Wrap"/>
+                        <TextBox Classes="inp" PasswordChar="•" Text="{Binding SteamGridDbApiKey, Mode=TwoWay}" Watermark="{l:Loc keyPh}"
+                                 AutomationProperties.Name="SteamGridDB"/>
+                        <Button Classes="btn" HorizontalAlignment="Left" Content="{l:Loc getKey}"
+                                Command="{Binding OpenUrlCommand}" CommandParameter="{Binding SteamGridDbKeyUrl}"/>
+                        <TextBlock Classes="lbl" Text="{l:Loc wizKeyNote}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Panel>
+
+                <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,18,0,0">
+                    <Button Classes="btn" Content="{l:Loc wizSkip}" Command="{Binding WizardSkipCommand}"/>
+                    <Button Grid.Column="2" Classes="btn" Margin="0,0,10,0" Content="{l:Loc wizBack}" Command="{Binding WizardBackCommand}"
+                            IsVisible="{Binding WizardCanGoBack}"/>
+                    <Button Grid.Column="3" Classes="btn pri" Content="{Binding WizardNextLabel}" Command="{Binding WizardNextCommand}"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </Panel>
+</UserControl>

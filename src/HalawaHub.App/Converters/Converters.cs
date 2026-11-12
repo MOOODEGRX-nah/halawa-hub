@@ -22,6 +22,9 @@ public class PlatformColorConverter : IValueConverter
             "Xbox / Microsoft Store" => "#22C55E",
             "Heroic" => "#38BDF8",
             "Lutris" => "#F97316",
+            "Ubisoft" => "#3B82F6",
+            "EA" => "#F87171",
+            "Rockstar" => "#FBBF24",
             _ => "#777777"
         }));
     }
@@ -56,4 +59,47 @@ public class StringEqualsConverter : IValueConverter
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is true ? parameter as string : Avalonia.Data.BindingOperations.DoNothing;
+}
+
+/// نبرة حالة اللعبة (GameCardViewModel.StatusTone) → لونها من الثيم
+public class StatusToneBrushConverter : IValueConverter
+{
+    public static readonly StatusToneBrushConverter Instance = new();
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var key = value is int tone
+            ? tone switch
+            {
+                0 => "StatusOfflineBrush",
+                1 => "StatusRunningBrush",
+                2 => "StatusRepairBrush",
+                3 => "StatusUpdateBrush",
+                _ => "TextBrush"
+            }
+            : "TextBrush";
+        return Avalonia.Application.Current?.TryGetResource(key, null, out var brush) == true ? brush : Brushes.White;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// مفتاح أيقونة مجموعة ("star") → شكلها من موارد البرنامج (IconStar)
+public class IconKeyConverter : IValueConverter
+{
+    public static readonly IconKeyConverter Instance = new();
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var key = value as string;
+        if (string.IsNullOrEmpty(key)) key = "star";
+        var name = "Icon" + char.ToUpperInvariant(key[0]) + key[1..];
+        var app = Avalonia.Application.Current;
+        if (app != null && app.TryGetResource(name, null, out var g) && g != null) return g;
+        return app != null && app.TryGetResource("IconStar", null, out var star) ? star : null;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
 }

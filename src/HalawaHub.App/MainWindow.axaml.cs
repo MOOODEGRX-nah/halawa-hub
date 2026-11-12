@@ -10,6 +10,8 @@ namespace HalawaHub.App;
 
 public partial class MainWindow : Window
 {
+    private bool _startMinimizedApplied;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -42,6 +44,22 @@ public partial class MainWindow : Window
         AddHandler(KeyDownEvent, OnAnyKeyDown, RoutingStrategies.Tunnel);
 
         Loc.Instance.LanguageChanged += (_, _) => _ = FadeContentAsync();
+
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is not MainViewModel vm) return;
+            vm.MinimizeRequested += (_, _) => WindowState = WindowState.Minimized;
+            vm.ExitRequested += (_, _) => ExitForReal();
+        };
+
+        // "ابدأ مصغّرًا": للصينية إن كانت تعمل، وإلا لشريط المهام
+        Opened += (_, _) =>
+        {
+            if (DataContext is not MainViewModel { StartMinimized: true } || _startMinimizedApplied) return;
+            _startMinimizedApplied = true;
+            if (IsTrayUsable()) Hide();
+            else WindowState = WindowState.Minimized;
+        };
     }
 
     private async System.Threading.Tasks.Task FadeContentAsync()
@@ -68,9 +86,48 @@ public partial class MainWindow : Window
     /// Esc يغلق الأقرب: القائمة، ثم البحث، ثم النافذة المفتوحة
     private void OnAnyKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Escape || DataContext is not MainViewModel vm) return;
+        if (DataContext is not MainViewModel vm) return;
 
-        if (vm.CloseAllCardMenus())
+        // Ctrl+K: بحث سريع من أي صفحة
+        if (e.Key == Key.K && (e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta)))
+        {
+            if (vm.IsQuickSearchOpen) vm.CloseQuickSearch();
+            else if (!vm.IsConfirmOpen) vm.OpenQuickSearch();
+            e.Handled = true;
+            return;
+        }
+
+        // عارض اللقطات: الأسهم للتنقل و Esc للإغلاق
+        if (vm.IsMediaOpen && e.Key is Key.Left or Key.Right or Key.Escape)
+        {
+            if (e.Key == Key.Escape) vm.CloseMediaCommand.Execute(null);
+            else vm.StepMedia(e.Key == Key.Right ? 1 : -1);
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key != Key.Escape) return;
+
+        if (vm.IsNotificationsOpen)
+        {
+            vm.CloseNotifications();
+            e.Handled = true;
+            return;
+        }
+
+        if (vm.IsQuickSearchOpen)
+        {
+            vm.CloseQuickSearch();
+            e.Handled = true;
+            return;
+        }
+
+        if (vm.IsConfirmOpen)
+        {
+            vm.CancelConfirmCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (vm.CloseAllCardMenus())
         {
             e.Handled = true;
         }

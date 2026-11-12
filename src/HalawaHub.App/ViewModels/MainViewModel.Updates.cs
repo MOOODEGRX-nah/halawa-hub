@@ -88,9 +88,16 @@ public partial class MainViewModel
     {
         if (param is not string url || string.IsNullOrEmpty(url)) return;
 
+        // روابط من خدمات خارجية (أخبار Steam مثلًا): http/https فقط، لا ملفات ولا بروتوكولات أخرى
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp))
+        {
+            Log.Error($"refused to open a non-web link: {url}");
+            return;
+        }
+
         try
         {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose();
         }
         catch { }
     }

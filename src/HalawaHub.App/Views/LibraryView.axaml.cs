@@ -138,6 +138,13 @@ public partial class LibraryView : UserControl
         }
     }.RunAsync(target);
 
+    private void AddGame_Click(object? sender, RoutedEventArgs e) => SafeUi.Run(async () =>
+    {
+        if (_vm == null) return;
+        var file = await GamePickers.PickGameFileAsync(this);
+        if (file != null) await _vm.AddManualGameAsync(file);
+    }, "add game");
+
     private void Sort_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is MenuItem { Tag: string mode }) _vm?.SetSortMode(mode);

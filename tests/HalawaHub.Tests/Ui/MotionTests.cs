@@ -214,9 +214,10 @@ public class MotionTests
 
         // القائمة الجانبية في الإعدادات
         vm.OpenSettingsCommand.Execute(null);
+        vm.SelectSettingsSectionCommand.Execute("0");
         Sample(ui, 500, () => 0);
-        var settingsPill = Pill(ui, p => p.Orientation == Avalonia.Layout.Orientation.Vertical && p.ItemCount == 6);
-        vm.SelectSettingsSectionCommand.Execute("3");
+        var settingsPill = Pill(ui, p => p.Name == "SettingsNavPill");
+        vm.SelectSettingsSectionCommand.Execute("1");
         var heights = Sample(ui, 700, () => settingsPill.Bounds.Height);
         heights.Max().Should().BeGreaterThan(44 * 1.5, "the side pill stretches vertically");
         heights.Last().Should().BeApproximately(44, 1);
@@ -392,7 +393,12 @@ public class MotionTests
         ui.WaitFor(() => !ui.Vm.IsRefreshing);
 
         var check = ui.Window.GetVisualDescendants().OfType<VectorIcon>().First(v => v.Classes.Contains("rf-b"));
-        ShouldHaveMoved(Sample(ui, 350, () => check.Opacity), "check appearing", minimumSteps: 2);
+        // بعد الفحص يعمل خيط الواجهة قليلًا (حالات، مجموعات)، فقد تكتمل علامة ✓ قبل أول عيّنة على جهاز بطيء.
+        // ننتظر رؤية الظهور نفسه، وإن فاتنا نعيد الفحص (البوابة مفتوحة فينتهي فورًا) ونقيس من جديد.
+        var appearing = SampleUntil(() => check.Opacity,
+            v => DistinctCount(v) >= 2 && v[^1] >= 0.999, "check appearing",
+            retrigger: () => { ui.WaitFor(() => !ui.Vm.IsRefreshDone); ui.Vm.RefreshCommand.Execute(null); });
+        ShouldHaveMoved(appearing, "check appearing", minimumSteps: 2);
         check.Opacity.Should().Be(1);
     }
 
@@ -409,6 +415,7 @@ public class MotionTests
         Border Box<TDialog>() where TDialog : UserControl => DialogBoxOf<TDialog>(ui);
 
         vm.OpenSettingsCommand.Execute(null);
+        vm.SelectSettingsSectionCommand.Execute("0");
         Dispatcher.UIThread.RunJobs();
         AvaloniaHeadlessPlatform.ForceRenderTimerTick();
         Dispatcher.UIThread.RunJobs();
@@ -462,7 +469,9 @@ public class MotionTests
         // كل قياس ينتظر الحركة نفسها بدل وقت ثابت: على جهاز CI بطيء قد تنتهي حركة الإغلاق
         // (0.22 ثانية) قبل أول عينة، فنعيدها ونقيس المحاولة الجديدة
         List<double> Opening(Border box, Action open, Action close, string what) => SampleUntil(() => ScaleOf(box),
-            v => v.Max() > 1 && Math.Abs(v[^1] - 1) < 0.001 && box.Opacity == 1, what,
+            // قيمتان مختلفتان على الأقل: عيّنة واحدة تلتقط آخر لحظة من الحركة (1.001) لا تثبت أنها تحركت،
+            // فننتظر حتى تُعاد الحركة (retrigger) ونقيسها كاملة
+            v => DistinctCount(v) >= 2 && v.Max() > 1 && Math.Abs(v[^1] - 1) < 0.001 && box.Opacity == 1, what,
             retrigger: () => { close(); Sample(ui, 500, () => 0); open(); });
 
         List<double> Closing(Border box, Action open, Action close, string what) => SampleUntil(() => box.Opacity,
@@ -488,7 +497,7 @@ public class MotionTests
         Sample(ui, 100, () => 0);
         box.Bounds.Width.Should().Be(900, "80% of 1100 is below the design size, so the design size wins");
 
-        var pill = Pill(ui, p => p.Orientation == Avalonia.Layout.Orientation.Vertical && p.ItemCount == 6);
+        var pill = Pill(ui, p => p.Name == "SettingsNavPill");
         Action toStartup = () => vm.SelectSettingsSectionCommand.Execute("4");
         toStartup();
         PillMove(pill, () => vm.SelectSettingsSectionCommand.Execute("0"), toStartup, "side pill after resize");
@@ -535,6 +544,7 @@ public class MotionTests
         using var ui = new UiHarness(Loc.English, motion: true);
         var vm = ui.Vm;
         vm.OpenSettingsCommand.Execute(null);
+        vm.SelectSettingsSectionCommand.Execute("0");
         vm.SelectSettingsSectionCommand.Execute("2");
         Sample(ui, 500, () => 0);
 
@@ -638,6 +648,7 @@ public class MotionTests
         var vm = ui.Vm;
 
         vm.OpenSettingsCommand.Execute(null);
+        vm.SelectSettingsSectionCommand.Execute("0");
         Sample(ui, 100, () => 0);
         var ring = ui.Window.GetVisualDescendants().OfType<Panel>().First(p => p.Name == "SpinRing");
         ring.FlowDirection.Should().Be(FlowDirection.LeftToRight);
@@ -668,7 +679,7 @@ public class MotionTests
         var vm = ui.Vm;
         Sample(ui, 200, () => 0);
 
-        // هالة زر البحث تنبض باستمرار
+        // هالة زر البحث تنبض عند ظهور النافذة (ثم تسكن بعد ثوانٍ حتى لا تُشغل المعالج والبرنامج خامل)
         var halo = ui.Window.GetVisualDescendants().OfType<Border>().First(b => b.Classes.Contains("halo"));
         ShouldHaveMoved(Sample(ui, 300, () => ScaleOf(halo)), "search halo");
 
@@ -705,6 +716,7 @@ public class MotionTests
 
         // دائرة الانتظار في زر الفحص، ثم الشارة، ثم النص يقفز
         vm.OpenSettingsCommand.Execute(null);
+        vm.SelectSettingsSectionCommand.Execute("0");
         Sample(ui, 500, () => 0);
         vm.CheckForUpdatesNowCommand.Execute(null);
         var spin = ui.Window.GetVisualDescendants().OfType<Panel>().First(p => p.Classes.Contains("spin"));

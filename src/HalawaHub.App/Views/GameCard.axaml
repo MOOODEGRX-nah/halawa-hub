@@ -8,77 +8,13 @@
              x:Class="HalawaHub.App.Views.GameCard"
              x:DataType="vm:GameCardViewModel">
 
-    <UserControl.Styles>
-        <Style Selector="Border.face">
-            <Setter Property="RenderTransform" Value="translateY(0px)"/>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2"/>
-                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
-                </Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="Panel.card:pointerover Border.face">
-            <Setter Property="RenderTransform" Value="translateY(-4px)"/>
-            <Setter Property="BoxShadow" Value="0 12 32 0 #47EF4444"/>
-        </Style>
-
-        <Style Selector="Button.eb">
-            <Setter Property="Width" Value="44"/>
-            <Setter Property="Height" Value="44"/>
-            <Setter Property="CornerRadius" Value="22"/>
-        </Style>
-        <Style Selector="Button.eb.open /template/ Border#PART_Root">
-            <Setter Property="BoxShadow" Value="0 0 18 0 #99EF4444"/>
-        </Style>
-        <Style Selector="Button.eb">
-            <Setter Property="Transitions">
-                <Transitions><BrushTransition Property="Background" Duration="0:0:0.3"/></Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="Button.eb /template/ Border#PART_Root">
-            <Setter Property="Transitions">
-                <Transitions><BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.3"/></Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="Panel.mt">
-            <Setter Property="RenderTransform" Value="scale(1)"/>
-            <Setter Property="Transitions">
-                <Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="{x:Static l:Springs.Pop}"/></Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="Button.eb:pressed Panel.mt">
-            <Setter Property="RenderTransform" Value="scale(0.85)"/>
-        </Style>
-        <Style Selector="Button.eb:pointerover c|MenuCloseIcon">
-            <Setter Property="Foreground" Value="{StaticResource RedHoverBrush}"/>
-        </Style>
-        <Style Selector="Button.eb.open">
-            <Setter Property="Background" Value="{StaticResource MenuOpenGradient}"/>
-        </Style>
-        <Style Selector="Button.eb.open:pointerover c|MenuCloseIcon">
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
-
-        <Style Selector="Button.mi">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        </Style>
-        <Style Selector="Button.mi:pointerover">
-            <Setter Property="Background" Value="#2A1418"/>
-        </Style>
-    </UserControl.Styles>
 
     <Panel Name="CardRoot" Classes="card">
         <!-- وجه البطاقة: الغلاف أو التدرج مع الحرف -->
         <Border Classes="face" CornerRadius="14"
-                BorderBrush="{StaticResource BorderBrushCard}" BorderThickness="1"
+                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1"
                 Background="{Binding PaletteIndex, Converter={x:Static conv:CoverPaletteConverter.Instance}}">
-            <Border CornerRadius="13" ClipToBounds="True">
+            <Border Classes="cover-layer" Classes.offline="{Binding IsDriveMissing}" CornerRadius="13" ClipToBounds="True">
             <Panel>
                 <TextBlock Text="{Binding Letter}" FontSize="84" FontWeight="ExtraBold" Foreground="#1FFFFFFF"
                            HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"
@@ -98,13 +34,17 @@
                         </LinearGradientBrush>
                     </Border.Background>
                     <StackPanel Spacing="10">
-                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
+                        <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="#F5EDED"
                                    TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Name="StatsLine" Text="{Binding StatsText}" FontSize="12" Foreground="#B8A4A4"
+                                       TextTrimming="CharacterEllipsis" IsVisible="{Binding HasStatsLine}"/>
+                        </StackPanel>
                         <Button Classes="play" Click="Play_Click" AutomationProperties.Name="{l:Loc play}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <c:VectorIcon Data="{StaticResource IconPlay}" Size="16" IsFilled="True"
                                               StrokeBrush="{x:Null}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{l:Loc play}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding PlayLabel}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -113,11 +53,20 @@
             </Border>
         </Border>
 
-        <!-- شارة المنصة -->
-        <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Padding="9,3"
-                CornerRadius="8" Background="#C70A0404" IsHitTestVisible="False">
-            <TextBlock Text="{Binding PlatformShort}" FontSize="12" FlowDirection="LeftToRight"/>
-        </Border>
+        <!-- شارة المنصة، وتحتها شارة الحالة (تحديث، إصلاح، تعمل، القرص غير موصول) -->
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Spacing="6" IsHitTestVisible="False">
+            <Border Padding="9,3" CornerRadius="8" Background="#C70A0404" HorizontalAlignment="Left">
+                <TextBlock Text="{Binding PlatformShort}" FontSize="12" FlowDirection="LeftToRight" Foreground="#F5EDED"/>
+            </Border>
+            <Border Name="StatusBadge" Classes="st" Padding="8,3" CornerRadius="8" Background="#E60A0404" HorizontalAlignment="Left"
+                    BorderThickness="1" IsVisible="{Binding HasStatusBadge}"
+                    Classes.t0="{Binding StatusTone, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=0}"
+                    Classes.t1="{Binding StatusTone, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=1}"
+                    Classes.t2="{Binding StatusTone, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}"
+                    Classes.t3="{Binding StatusTone, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=3}">
+                <TextBlock Text="{Binding StatusBadgeText}" FontSize="11" FontWeight="SemiBold"/>
+            </Border>
+        </StackPanel>
 
         <!-- زر القائمة: ≡ يتحول إلى ✕ -->
         <Button Classes="eb" Classes.open="{Binding IsMenuOpen}"
@@ -130,8 +79,12 @@
 
         <Border Name="Menu" Classes="card-menu" IsVisible="{Binding IsMenuOpen}"
                 Width="176" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,8,0"
-                Background="#1A0A0C" BorderBrush="#3A1518" BorderThickness="1" CornerRadius="12" Padding="6"
+                Background="{DynamicResource MenuBrush}" BorderBrush="{DynamicResource MenuBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="6"
                 BoxShadow="0 12 32 0 #99000000" RenderTransformOrigin="100%,0%">
+            <!-- تُبنى القائمة عند أول فتح فقط (MenuContent فارغ قبله): أربعة أزرار جاهزة في كل بطاقة كانت ثلث وزنها تقريبًا -->
+            <ContentControl Name="MenuHost" Content="{Binding MenuContent}">
+            <ContentControl.ContentTemplate>
+            <DataTemplate x:DataType="vm:GameCardViewModel">
             <StackPanel>
                 <Button Classes="mi" Click="Favorite_Click" AutomationProperties.Name="{Binding FavoriteLabel}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -142,16 +95,31 @@
                         <TextBlock Text="{Binding FavoriteLabel}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
-                <Button Name="SettingsItem" Classes="mi" Click="Settings_Click" AutomationProperties.Name="{l:Loc gameSettings}">
+                <Button Name="SettingsItem" Classes="mi" Click="Settings_Click" PointerEntered="SettingsItem_PointerEntered" PointerExited="SettingsItem_PointerExited" AutomationProperties.Name="{l:Loc gameSettings}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <Panel Width="16" Height="16" VerticalAlignment="Center">
-                            <c:SlidersIcon Name="MenuSliders" Small="True" Foreground="#E8D8D8" Ring="#1A0A0C"
+                            <c:SlidersIcon Name="MenuSliders" Small="True" Foreground="{DynamicResource MenuTextBrush}" Ring="{DynamicResource MenuBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Panel>
                         <TextBlock Text="{l:Loc gameSettings}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
+                <Button Classes="mi" Click="Shortcut_Click" AutomationProperties.Name="{l:Loc desktopShortcut}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:VectorIcon Data="{StaticResource IconShortcut}" Size="16" VerticalAlignment="Center"/>
+                        <TextBlock Text="{l:Loc desktopShortcut}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button Classes="mi" Click="CopyId_Click" AutomationProperties.Name="{l:Loc copyId}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <c:VectorIcon Data="{StaticResource IconCopy}" Size="16" VerticalAlignment="Center"/>
+                        <TextBlock Text="{l:Loc copyId}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
+            </DataTemplate>
+            </ContentControl.ContentTemplate>
+            </ContentControl>
         </Border>
     </Panel>
 </UserControl>

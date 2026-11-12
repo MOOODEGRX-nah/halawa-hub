@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:HalawaHub.App.ViewModels"
+             xmlns:l="using:HalawaHub.App.Services"
+             xmlns:c="using:HalawaHub.App.Controls"
+             x:Class="HalawaHub.App.Views.QuickSearchDialog"
+             x:DataType="vm:MainViewModel"
+             IsVisible="{Binding IsQuickSearchOpen}">
+    <UserControl.Styles>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="0,1"/>
+        </Style>
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+        </Style>
+        <Style Selector="ListBox#QuickResults ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter, ListBox#QuickResults ListBoxItem:selected:focus /template/ ContentPresenter#PART_ContentPresenter, ListBox#QuickResults ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SelectedRowBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RedHoverBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Panel>
+        <Border Background="{DynamicResource ScrimBrush}" PointerPressed="Scrim_PointerPressed"/>
+        <Border Width="560" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="20,110,20,20"
+                CornerRadius="14" Padding="14" Background="{DynamicResource DialogBrush}"
+                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1" BoxShadow="0 30 80 0 #B3000000">
+            <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <c:VectorIcon Data="{StaticResource IconSearch}" Size="18" VerticalAlignment="Center" Margin="4,0,10,0"/>
+                    <TextBox Name="QuickInput" Grid.Column="1" Classes="inp" Text="{Binding QuickSearchQuery, Mode=TwoWay}"
+                             Watermark="{l:Loc quickSearchPh}" AutomationProperties.Name="{l:Loc quickSearchPh}"/>
+                    <Border Grid.Column="2" Margin="10,0,0,0" Padding="7,2" CornerRadius="6" Background="{DynamicResource HoverBrush}" VerticalAlignment="Center">
+                        <TextBlock Text="Esc" FontSize="11" Foreground="{DynamicResource MutedBrush}" FlowDirection="LeftToRight"/>
+                    </Border>
+                </Grid>
+                <ListBox Name="QuickResults" ItemsSource="{Binding QuickSearchResults}" SelectedIndex="{Binding QuickSearchIndex, Mode=TwoWay}"
+                         Background="Transparent" MaxHeight="420" Focusable="False">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:GameCardViewModel">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="{Binding Name}" FontSize="14" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                <Border Grid.Column="1" Margin="10,0,0,0" Padding="8,2" CornerRadius="6" Background="{DynamicResource ChipBrush}">
+                                    <TextBlock Text="{Binding PlatformShort}" FontSize="11" FlowDirection="LeftToRight"/>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock Classes="lbl" Text="{l:Loc tryOther}" IsVisible="{Binding HasNoQuickSearchResults}" Margin="6,0"/>
+                <TextBlock Classes="lbl" FontSize="11" Text="{l:Loc quickSearchHint}" Margin="6,0"/>
+            </StackPanel>
+        </Border>
+    </Panel>
+</UserControl>

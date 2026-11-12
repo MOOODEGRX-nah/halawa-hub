@@ -17,5 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\HalawaHub.Core\HalawaHub.Core.csproj" />
     <ProjectReference Include="..\..\src\HalawaHub.App\HalawaHub.App.csproj" />
+    <!-- إضافة المثال تُبنى قبل الاختبارات: dotnet test على الحل لا يبني المشاريع التي ليست اختبارات -->
+    <ProjectReference Include="..\..\src\HalawaHub.Plugins.Sample\HalawaHub.Plugins.Sample.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
 </Project>

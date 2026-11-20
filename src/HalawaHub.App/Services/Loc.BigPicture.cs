@@ -13,6 +13,7 @@ public sealed partial class Loc
 
     private static readonly Dictionary<string, string> BpAr = new()
     {
+        ["bigPicture"] = "الشاشة الكبيرة (التلفاز ويد التحكم)", ["bpAutoMain"] = "الشاشة الكبيرة عند توصيل يد تحكم",
         ["bp"] = "الشاشة الكبيرة", ["bpHome"] = "الرئيسي", ["bpLibrary"] = "المكتبة", ["bpSearch"] = "البحث", ["bpSettings"] = "الإعدادات",
         ["bpCont"] = "تابع اللعب", ["bpFavs"] = "المفضل", ["bpInstalled"] = "المثبتة", ["bpRecent"] = "المضاف حديثًا",
         ["bpPlay"] = "تشغيل", ["bpDetails"] = "التفاصيل", ["bpAddFav"] = "أضف للمفضلة", ["bpInFav"] = "في المفضلة",
@@ -57,6 +58,7 @@ public sealed partial class Loc
 
     private static readonly Dictionary<string, string> BpEn = new()
     {
+        ["bigPicture"] = "Big Picture (TV and controller)", ["bpAutoMain"] = "Big Picture when a controller connects",
         ["bp"] = "Big Picture", ["bpHome"] = "Home", ["bpLibrary"] = "Library", ["bpSearch"] = "Search", ["bpSettings"] = "Settings",
         ["bpCont"] = "Continue playing", ["bpFavs"] = "Favorites", ["bpInstalled"] = "Installed", ["bpRecent"] = "Recently Added",
         ["bpPlay"] = "Play", ["bpDetails"] = "Details", ["bpAddFav"] = "Add to favorites", ["bpInFav"] = "In favorites",

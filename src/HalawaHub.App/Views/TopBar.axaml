@@ -76,6 +76,13 @@
             <Setter Property="Background" Value="{DynamicResource SettingsHoverGradient}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
         </Style>
+        <!-- .bpb: زر الشاشة الكبيرة يكبر رسمه عند المرور -->
+        <Style Selector="Button.bpb c|VectorIcon">
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+            <Setter Property="Transitions"><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" Easing="{x:Static l:Springs.Pop}"/></Transitions></Setter>
+        </Style>
+        <Style Selector="Button.bpb:pointerover c|VectorIcon"><Setter Property="RenderTransform" Value="scale(1.15)"/></Style>
+        <Style Selector="Button.bpb:pointerover"><Setter Property="BorderBrush" Value="#7F1D1D"/></Style>
     </UserControl.Styles>
 
     <Grid ColumnDefinitions="*,Auto,*" Margin="0,16">
@@ -117,8 +124,15 @@
             </Panel>
         </Border>
 
+        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+        <!-- الشاشة الكبيرة (التلفاز ويد التحكم) -->
+        <Button Name="BigPictureButton" Classes="ib bpb" Width="44" Height="44" Command="{Binding OpenBigPictureCommand}"
+                ToolTip.Tip="{l:Loc bigPicture}" AutomationProperties.Name="{l:Loc bigPicture}">
+            <c:VectorIcon Size="20" StrokeWidth="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                          Data="M4.5 4h15a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z M8 21h8 M12 17v4 M9.5 9.5v3 M8 11h3 M14.4 10a.1 .1 0 1 0 .2 0a.1 .1 0 1 0 -.2 0 M15.9 12a.1 .1 0 1 0 .2 0a.1 .1 0 1 0 -.2 0"/>
+        </Button>
         <!-- الإعدادات: المقابض تنزلق عند المرور -->
-        <Panel Grid.Column="2" HorizontalAlignment="Right" Width="44" Height="44">
+        <Panel Width="44" Height="44">
             <Button Name="SettingsButton" Classes="ib slb" Classes.on="{Binding IsSettingsVisible}"
                     Command="{Binding OpenSettingsCommand}"
                     ToolTip.Tip="{l:Loc settings}"
@@ -130,5 +144,6 @@
                      HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,2,0"
                      IsVisible="{Binding IsUpdateAvailable}"/>
         </Panel>
+        </StackPanel>
     </Grid>
 </UserControl>

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HalawaHub.App.BigPicture.Input;
 
@@ -26,6 +27,11 @@ public sealed partial class BigPictureViewModel
     }
 
     public string ContextPadText => T(_pad != null ? "bpController" : "bpNoController");
+
+    /// "حجم النص: كبير": اللوحة نفسها أصغر (1745 بدل 1920) فيكبر كل شيء بنحو 10% عند التحجيم
+    public double CanvasWidth => Settings.TextSize == "large" ? 1745 : 1920;
+    public double CanvasHeight => Math.Round(CanvasWidth * 1080 / 1920);
+    public double ResultsWidth => Settings.TextSize == "large" ? 500 : 600;
 
     public bool IsHomeTab => TabScreen == BpScreen.Home;
     public bool IsLibraryTab => TabScreen == BpScreen.Library;

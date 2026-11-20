@@ -10,7 +10,33 @@ public partial class MainViewModel
 {
     internal AppConfig Config => _config;
 
-    internal void SaveBigPictureSettings() => SaveConfig();
+    internal void SaveBigPictureSettings()
+    {
+        SaveConfig();
+        OnPropertyChanged(nameof(BigPictureOnController));
+        BigPictureSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// زر الشاشة الكبيرة في الشريط العلوي
+    public event EventHandler? BigPictureRequested;
+    /// تغيّر إعداد يخص يد التحكم (فتح عند التوصيل...)
+    public event EventHandler? BigPictureSettingsChanged;
+
+    private RelayCommand? _openBigPictureCommand;
+    public RelayCommand OpenBigPictureCommand => _openBigPictureCommand ??= new RelayCommand(_ => BigPictureRequested?.Invoke(this, EventArgs.Empty));
+
+    /// الإعدادات › عام: "الشاشة الكبيرة عند توصيل يد تحكم" (نفس إعداد الشاشة الكبيرة)
+    public bool BigPictureOnController
+    {
+        get => _config.BigPicture?.OpenOnController ?? true;
+        set
+        {
+            _config.BigPicture ??= new BpSettings();
+            if (_config.BigPicture.OpenOnController == value) return;
+            _config.BigPicture.OpenOnController = value;
+            SaveBigPictureSettings();
+        }
+    }
 
     /// <summary>
     /// نفس فحص ما قبل التشغيل؛ ما يمنع التشغيل يعود للشاشة الكبيرة بسببه الحقيقي بدل

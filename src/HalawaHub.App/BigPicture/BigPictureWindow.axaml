@@ -438,7 +438,7 @@
   </Window.Styles>
 
   <Viewbox Stretch="Uniform">
-    <Panel x:Name="Root" Width="1920" Height="1080" ClipToBounds="True"
+    <Panel x:Name="Root" Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}" ClipToBounds="True"
            FlowDirection="{Binding FlowDirection, Source={x:Static l:Loc.Instance}}"
            TextElement.FontFamily="{Binding FontFamily, Source={x:Static l:Loc.Instance}}">
       <Panel.Background>
@@ -452,7 +452,7 @@
         <StackPanel x:Name="Track" Orientation="Horizontal" HorizontalAlignment="Left">
 
           <!-- الرئيسي -->
-          <Panel x:Name="HomePage" Width="1920" Height="1080" ClipToBounds="True">
+          <Panel x:Name="HomePage" Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}" ClipToBounds="True">
             <Panel x:Name="HeroArt" IsHitTestVisible="False">
               <Border x:Name="HeroArtFill" Height="720" VerticalAlignment="Top" ClipToBounds="True"
                       Background="{Binding Hero.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
@@ -579,7 +579,7 @@
 
           <!-- المكتبة والبحث: المرحلة 2 -->
           <!-- المكتبة (.lh / .lg) -->
-          <Panel x:Name="LibraryPage" Width="1920" Height="1080" ClipToBounds="True">
+          <Panel x:Name="LibraryPage" Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}" ClipToBounds="True">
             <bpc:BpGridLight Classes="gl"/>
             <DockPanel Margin="72,144,72,0" Height="70" VerticalAlignment="Top" LastChildFill="False">
               <TextBlock DockPanel.Dock="Left" Text="{l:Loc bpLibrary}" FontSize="40" FontWeight="ExtraBold" VerticalAlignment="Center"/>
@@ -625,7 +625,7 @@
           </Panel>
 
           <!-- البحث (.sbx / .kb / .sres) -->
-          <Panel x:Name="SearchPage" Width="1920" Height="1080" ClipToBounds="True">
+          <Panel x:Name="SearchPage" Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}" ClipToBounds="True">
             <bpc:BpGridLight Classes="gl"/>
             <Border Margin="72,150,0,0" Width="1090" Height="84" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="26"
                     BorderThickness="2.5" Background="{StaticResource BpSurface}" BoxShadow="0 0 16 0 #66EF4444" Padding="24,0">
@@ -673,7 +673,7 @@
               </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <StackPanel Margin="0,150,72,0" Width="600" HorizontalAlignment="Right" VerticalAlignment="Top" Spacing="10">
+            <StackPanel Margin="0,150,72,0" Width="{Binding ResultsWidth}" HorizontalAlignment="Right" VerticalAlignment="Top" Spacing="10">
               <TextBlock Text="{l:Loc bpResults}" FontSize="22" FontWeight="Bold" Margin="0,0,0,8"/>
               <ItemsControl x:Name="ResultsList" ItemsSource="{Binding Results}">
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="10"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>

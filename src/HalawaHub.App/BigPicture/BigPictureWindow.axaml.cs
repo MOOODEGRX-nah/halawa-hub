@@ -114,7 +114,7 @@ public partial class BigPictureWindow : Window
     private void SyncView(bool animate)
     {
         // الصفحات: الإزاحة سالبة دائمًا، والعربية تعكسها المرآة تلقائيًا
-        _track.X = -_vm.TabIndex * 1920;
+        _track.X = -_vm.TabIndex * _vm.CanvasWidth;
         _row.X = -_vm.RowOffsetCards * Pitch;
         // المكتبة: الصف المركَّز يبقى أول صفين ظاهرين
         var libY = Math.Max(0, _vm.LibraryRow - 1) * 340.0;

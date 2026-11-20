@@ -36,8 +36,15 @@ public partial class App : Application
 
             // الشاشة الكبيرة: --big-picture يفتحها مباشرة بعد ظهور النافذة العادية
             BigPicture = new HalawaHub.App.BigPicture.BigPictureController(window, mainVm);
-            if (desktop.Args?.Contains("--big-picture") == true)
-                window.Opened += (_, _) => Dispatcher.UIThread.Post(() => BigPicture.Open(), DispatcherPriority.Background);
+            var force = desktop.Args?.Contains("--big-picture") == true;
+            // Opened يتكرر مع كل إظهار للنافذة: البدء مرة واحدة فقط
+            var started = false;
+            window.Opened += (_, _) =>
+            {
+                if (started) return;
+                started = true;
+                Dispatcher.UIThread.Post(() => BigPicture.Start(force), DispatcherPriority.Background);
+            };
             desktop.Exit += (_, _) => BigPicture.Dispose();
 
             Program.InstanceGuard?.StartListening(() => Dispatcher.UIThread.Post(window.ShowAndFocus));

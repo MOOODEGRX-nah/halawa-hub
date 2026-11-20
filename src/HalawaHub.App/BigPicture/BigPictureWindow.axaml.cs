@@ -65,7 +65,7 @@ public partial class BigPictureWindow : Window
 
         vm.PropertyChanged += OnVmChanged;
         vm.Bumped += OnBumped;
-        vm.Activated += () => _flash = true;
+        vm.Activated += OnActivated;
         vm.Toast += ShowToast;
         Loc.Instance.LanguageChanged += OnLanguageChanged;
 
@@ -120,6 +120,7 @@ public partial class BigPictureWindow : Window
         var libY = Math.Max(0, _vm.LibraryRow - 1) * 340.0;
         if (Math.Abs(LibraryScroll.Offset.Y - libY) > 0.5) LibraryScroll.Offset = new Vector(0, libY);
         ScheduleRing();
+        if (animate) Animate();
     }
 
     private void ApplyMotion()
@@ -186,6 +187,7 @@ public partial class BigPictureWindow : Window
         Ring.Height = r.Height + pad * 2;
         Ring.CornerRadius = new CornerRadius(radius);
         Ring.Opacity = 1;
+        MoveLight(r);
         if (!_ringShown) { Ring.Transitions = transitions; _ringShown = true; }
 
         if (flash && MotionSettings.Enabled) _ = FlashRing();

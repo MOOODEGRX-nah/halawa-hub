@@ -334,7 +334,8 @@ public sealed partial class BigPictureViewModel
     public string FailText => _failure?.Detail ?? "";
     public bool IsLaunchFailed => LaunchState == BpLaunchState.Failed;
     public bool IsLaunchDone => LaunchState == BpLaunchState.Done;
-    public HalawaHub.App.Controls.BadgeState LaunchBadge => LaunchState switch
+    /// الدوّار يعمل فقط واللوحة ظاهرة: شارة مخفية في حالة الانتظار تبقى تدور وتستهلك المعالج
+    public HalawaHub.App.Controls.BadgeState LaunchBadge => _overlay != BpOverlay.Launch ? HalawaHub.App.Controls.BadgeState.None : LaunchState switch
     {
         BpLaunchState.Done => HalawaHub.App.Controls.BadgeState.Done,
         BpLaunchState.Failed => HalawaHub.App.Controls.BadgeState.Error,

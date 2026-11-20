@@ -297,6 +297,22 @@ public class BigPictureNavigationTests : IDisposable
     }
 
     [Fact]
+    public void Launch_spinner_is_idle_unless_the_launch_panel_is_open()
+    {
+        // regression: the hidden panel kept its pending spinner looping and used CPU while idle
+        var host = FakeBpHost.WithGames(3);
+        host.PendingLaunch = new TaskCompletionSource<BpLaunchResult>();
+        var vm = Vm(host);
+        vm.LaunchBadge.Should().Be(App.Controls.BadgeState.None);
+
+        vm.Play(vm.RowCards[0].Game);
+        vm.LaunchBadge.Should().Be(App.Controls.BadgeState.Pending);
+        vm.Press(BpButton.B);
+        vm.LaunchBadge.Should().Be(App.Controls.BadgeState.None);
+        host.PendingLaunch.SetResult(BpLaunchResult.Success);
+    }
+
+    [Fact]
     public void Settings_toggles_save_and_segments_cycle()
     {
         var host = FakeBpHost.WithGames(3);

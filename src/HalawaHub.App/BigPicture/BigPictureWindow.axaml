@@ -444,6 +444,7 @@
                 </Border.Background>
               </Border>
             </Panel>
+            <bpc:BpGridLight Classes="gl"/>
 
             <StackPanel x:Name="HeroPanel" Margin="72,150,0,0" Width="1600" HorizontalAlignment="Left" VerticalAlignment="Top" Spacing="14">
               <Border Classes="bd" Height="34" Padding="14,0" HorizontalAlignment="Left">
@@ -534,6 +535,7 @@
           <!-- المكتبة والبحث: المرحلة 2 -->
           <!-- المكتبة (.lh / .lg) -->
           <Panel x:Name="LibraryPage" Width="1920" Height="1080" ClipToBounds="True">
+            <bpc:BpGridLight Classes="gl"/>
             <DockPanel Margin="72,144,72,0" Height="70" VerticalAlignment="Top" LastChildFill="False">
               <TextBlock DockPanel.Dock="Left" Text="{l:Loc bpLibrary}" FontSize="40" FontWeight="ExtraBold" VerticalAlignment="Center"/>
               <TextBlock DockPanel.Dock="Left" Text="{Binding LibraryCountText}" FontSize="20" Foreground="#9C8A8A" Margin="20,0,0,0" VerticalAlignment="Center"/>
@@ -579,6 +581,7 @@
 
           <!-- البحث (.sbx / .kb / .sres) -->
           <Panel x:Name="SearchPage" Width="1920" Height="1080" ClipToBounds="True">
+            <bpc:BpGridLight Classes="gl"/>
             <Border Margin="72,150,0,0" Width="1090" Height="84" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="26"
                     BorderThickness="2.5" Background="{StaticResource BpSurface}" BoxShadow="0 0 16 0 #66EF4444" Padding="24,0">
               <Border.BorderBrush>
@@ -627,7 +630,7 @@
 
             <StackPanel Margin="0,150,72,0" Width="600" HorizontalAlignment="Right" VerticalAlignment="Top" Spacing="10">
               <TextBlock Text="{l:Loc bpResults}" FontSize="22" FontWeight="Bold" Margin="0,0,0,8"/>
-              <ItemsControl ItemsSource="{Binding Results}">
+              <ItemsControl x:Name="ResultsList" ItemsSource="{Binding Results}">
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="10"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="bp:BpCardItem">
@@ -687,6 +690,8 @@
             <LinearGradientBrush StartPoint="0%,100%" EndPoint="0%,0%"><GradientStop Color="#FF0A0404" Offset="0.42"/><GradientStop Color="#000A0404" Offset="0.72"/></LinearGradientBrush>
           </Border.Background>
         </Border>
+
+        <bpc:BpGridLight Classes="gl"/>
 
         <StackPanel Margin="72,150,0,0" Width="880" HorizontalAlignment="Left" VerticalAlignment="Top" Spacing="14">
           <Border Classes="bd" Height="34" Padding="14,0" HorizontalAlignment="Left">
@@ -940,7 +945,7 @@
 
       <!-- ===== التحديث قبل التشغيل، ولوحة التشغيل (.panel) ===== -->
       <Panel IsVisible="{Binding IsUpdateOpen}" Background="#C7060202">
-        <Border Classes="panel" Width="900">
+        <Border x:Name="UpdatePanel" Classes="panel" Width="900">
           <StackPanel Spacing="18">
             <StackPanel Orientation="Horizontal" Spacing="16">
               <Border Width="52" Height="52" CornerRadius="14" Background="#2A1313" BorderBrush="#4A2A12" BorderThickness="1">
@@ -964,7 +969,7 @@
       </Panel>
 
       <Panel IsVisible="{Binding IsLaunchOpen}" Background="#C7060202">
-        <Border Classes="panel" Width="780">
+        <Border x:Name="LaunchPanel" Classes="panel" Width="780">
           <StackPanel Spacing="18" HorizontalAlignment="Stretch">
             <Border Width="220" Height="330" CornerRadius="16" ClipToBounds="True" BorderBrush="{StaticResource BpLine}" BorderThickness="1" HorizontalAlignment="Center"
                     Background="{Binding Hero.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
@@ -1057,8 +1062,10 @@
       <Canvas x:Name="RingLayer" IsHitTestVisible="False">
         <Border x:Name="Ring" Opacity="0" Width="0" Height="0" CornerRadius="20" BorderThickness="3" BorderBrush="#EF4444"
                 BoxShadow="0 0 28 0 #99EF4444, inset 0 0 16 0 #40EF4444">
-          <Border x:Name="RingFlash" Margin="-3" CornerRadius="{Binding #Ring.CornerRadius}" BorderThickness="3" BorderBrush="#8CFFFFFF" Opacity="0"/>
+                    <Border x:Name="RingFlash" Margin="-3" CornerRadius="{Binding #Ring.CornerRadius}" BorderThickness="3" BorderBrush="#8CFFFFFF" Opacity="0"/>
         </Border>
+        <Ellipse x:Name="TapR" Width="64" Height="64" Stroke="White" StrokeThickness="3" Opacity="0"/>
+        <Ellipse x:Name="TapM" Width="64" Height="64" Fill="#61FFFFFF" Stroke="White" StrokeThickness="3.5" Opacity="0"/>
       </Canvas>
 
       <!-- ===== شريط التلميحات (.hb) ===== -->

@@ -159,6 +159,7 @@ public partial class MainViewModel
     private void HandleNeverStarted(IPlaySessionTracker tracker)
     {
         var name = _session?.Name ?? "";
+        var failedCard = _session is { } s ? Games.FirstOrDefault(c => c.Game.Platform == s.Platform && c.Game.Id == s.Id) : null;
         CancelPlaySession();
 
         var key = tracker.Failure == SessionFailure.AlreadyRunning ? "launchAlreadyRunning" : "launchTimeout";
@@ -166,7 +167,7 @@ public partial class MainViewModel
         var message = Loc.Instance.Format(key, name);
         if (key == "launchTimeout" && _lastLaunchHint is { } hint) message += " " + hint;
         ShowStatus(message);
-        Notify("launch", message);
+        Notify("launch", message, failedCard);
     }
 
     private string? _lastLaunchHint;
@@ -332,7 +333,7 @@ public partial class MainViewModel
         {
             Log.Info($"launch blocked for {game.Name}: {problem} ({detail})");
             ShowStatus(problemMessage!);
-            Notify("launch", problemMessage!);
+            Notify("launch", problemMessage!, card);
             return;
         }
 
@@ -394,7 +395,7 @@ public partial class MainViewModel
             Log.Error($"launch failed for {game.Name}", ex);
             var failed = Loc.Instance.Format("launchFailed", card.Name, ex.Message);
             ShowStatus(failed);
-            Notify("launch", failed);
+            Notify("launch", failed, card);
         }
     }
 

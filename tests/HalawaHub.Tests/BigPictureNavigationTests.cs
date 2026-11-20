@@ -1,3 +1,4 @@
+using Avalonia.Headless.XUnit;
 using FluentAssertions;
 using HalawaHub.App.BigPicture;
 using HalawaHub.App.BigPicture.Input;
@@ -57,6 +58,8 @@ internal sealed class FakeBpHost : IBpHost
     public void CloseApp() => Calls.Add("close");
 }
 
+/// Loc تُغيَّر هنا، ونوافذ اختبارات سابقة تستمع لتغيير اللغة: على خيط الواجهة فقط، وإلا بدأت حركات
+/// خارج خيطها وتعطّل رسم الاختبارات التالية في CI
 public class BigPictureNavigationTests : IDisposable
 {
     private static readonly Func<TimeSpan, Task> NoDelay = _ => Task.CompletedTask;
@@ -66,7 +69,7 @@ public class BigPictureNavigationTests : IDisposable
 
     private static BigPictureViewModel Vm(FakeBpHost host) => new(host, NoDelay);
 
-    [Fact]
+    [AvaloniaFact]
     public void Home_starts_on_the_first_card_and_moves_up_to_the_strip_and_hero_buttons()
     {
         var vm = Vm(FakeBpHost.WithGames(10));
@@ -78,7 +81,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.FocusKey.Should().Be("hero.0");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Pushing_against_an_edge_bumps_instead_of_moving()
     {
         var vm = Vm(FakeBpHost.WithGames(3));
@@ -92,7 +95,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.FocusKey.Should().Be("card.0");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Cards_end_with_see_all_which_opens_the_library()
     {
         var vm = Vm(FakeBpHost.WithGames(3));
@@ -103,7 +106,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Screen.Should().Be(BpScreen.Library);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Focused_card_becomes_the_hero()
     {
         var host = FakeBpHost.WithGames(5);
@@ -115,7 +118,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.RowCards[0].IsFocused.Should().BeFalse();
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Arabic_swaps_left_and_right()
     {
         Loc.Instance.Language = Loc.Arabic;
@@ -127,7 +130,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.FocusKey.Should().Be("card.0");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Strip_tabs_change_the_card_list()
     {
         var host = FakeBpHost.WithGames(6);
@@ -141,7 +144,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.RowCards.Select(c => c.Game.Key).Should().Equal("g2");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Shoulder_buttons_cycle_the_tabs_and_b_returns_home_from_the_library()
     {
         var vm = Vm(FakeBpHost.WithGames(3));
@@ -162,7 +165,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Screen.Should().Be(BpScreen.Home, "B on the home screen does nothing");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Library_grid_has_seven_columns_and_does_not_wrap_rows()
     {
         var vm = Vm(FakeBpHost.WithGames(20));
@@ -180,7 +183,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Screen.Should().Be(BpScreen.Library);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void X_cycles_the_platform_filter()
     {
         var host = FakeBpHost.WithGames(6, i => FakeBpHost.Game(i, platform: i % 2 == 0 ? "Steam" : "Epic"));
@@ -196,7 +199,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.LibraryCards.Should().HaveCount(6);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Search_keyboard_types_deletes_and_moves_to_results()
     {
         var vm = Vm(FakeBpHost.WithGames(12));
@@ -220,7 +223,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Screen.Should().Be(BpScreen.Game);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Search_with_no_match_says_so()
     {
         var vm = Vm(FakeBpHost.WithGames(3));
@@ -231,7 +234,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.NoMatchText.Should().Contain("zzq");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Switch_key_changes_the_keyboard_language()
     {
         var vm = Vm(FakeBpHost.WithGames(3));
@@ -245,7 +248,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.FocusKey.Should().Be("kb.3.2");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Playing_a_game_with_an_update_asks_first()
     {
         var host = FakeBpHost.WithGames(3, i => FakeBpHost.Game(i, update: i == 0));
@@ -261,7 +264,7 @@ public class BigPictureNavigationTests : IDisposable
         host.Calls.Should().Contain("launch:" + g.Key);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void A_failed_launch_shows_the_real_reason_and_can_retry()
     {
         var host = FakeBpHost.WithGames(3);
@@ -281,7 +284,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Overlay.Should().Be(BpOverlay.None, "a successful launch closes the panel");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void B_cancels_a_pending_launch()
     {
         var host = FakeBpHost.WithGames(3);
@@ -298,7 +301,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Overlay.Should().Be(BpOverlay.None);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Launch_spinner_is_idle_unless_the_launch_panel_is_open()
     {
         // regression: the hidden panel kept its pending spinner looping and used CPU while idle
@@ -314,7 +317,7 @@ public class BigPictureNavigationTests : IDisposable
         host.PendingLaunch.SetResult(BpLaunchResult.Success);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Settings_toggles_save_and_segments_cycle()
     {
         var host = FakeBpHost.WithGames(3);
@@ -342,7 +345,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Screen.Should().Be(BpScreen.Home);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Swap_confirm_and_back_swaps_a_and_b_and_their_hints()
     {
         var host = FakeBpHost.WithGames(3);
@@ -355,7 +358,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Hints[0].Button.Should().Be("b");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Menu_opens_the_guide_and_its_items_run()
     {
         var host = FakeBpHost.WithGames(3);
@@ -369,7 +372,7 @@ public class BigPictureNavigationTests : IDisposable
         host.Calls.Should().Contain("exit");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Notifications_dismiss_and_clear()
     {
         var host = FakeBpHost.WithGames(3);
@@ -387,7 +390,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Hints.Select(h => h.Button).Should().Equal("b");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void A_new_notification_pops_up_shakes_the_bell_and_opens_the_panel()
     {
         var host = FakeBpHost.WithGames(3);
@@ -406,7 +409,7 @@ public class BigPictureNavigationTests : IDisposable
         gate.SetResult();
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Notification_actions_update_retry_and_show()
     {
         var host = FakeBpHost.WithGames(3);
@@ -433,7 +436,7 @@ public class BigPictureNavigationTests : IDisposable
         vm.Screen.Should().Be(BpScreen.Library);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Notification_times_read_like_the_design()
     {
         var now = new DateTime(2026, 11, 20, 15, 0, 0);
@@ -445,7 +448,7 @@ public class BigPictureNavigationTests : IDisposable
         BigPictureHost.RelativeTime(now.AddMinutes(-2), now).Should().Be("قبل دقيقتين");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Relative_days_match_the_design_wording()
     {
         var now = new DateTime(2026, 11, 20, 15, 0, 0);
@@ -460,7 +463,7 @@ public class BigPictureNavigationTests : IDisposable
 
 public class BigPictureInputTests
 {
-    [Fact]
+    [AvaloniaFact]
     public void Direction_repeats_after_a_delay_then_at_a_steady_rate()
     {
         var r = new DirectionRepeater { DelayMs = 400, RateMs = 100 };
@@ -474,7 +477,7 @@ public class BigPictureInputTests
         r.Tick(2000).Should().BeEmpty();
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Stick_has_a_deadzone_and_keeps_its_direction_until_released()
     {
         var r = new DirectionRepeater();
@@ -488,7 +491,7 @@ public class BigPictureInputTests
         r.Stick(0, -30000, 40).Should().Equal(BpButton.Up);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Keyboard_keys_follow_the_design()
     {
         KeyboardMap.Map(Avalonia.Input.Key.Enter).Should().Be(BpButton.A);
@@ -502,7 +505,7 @@ public class BigPictureInputTests
         KeyboardMap.Map(Avalonia.Input.Key.Z).Should().BeNull();
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Controller_buttons_and_types_map_by_position()
     {
         SdlGamepadSource.MapButton(SDL_GamepadButton.SDL_GAMEPAD_BUTTON_SOUTH).Should().Be(BpButton.A);

@@ -46,9 +46,32 @@ public sealed class BigPictureHost : IBpHost
         CoverUrl = c.CoverImageUrl,
         CoverFallbackUrl = c.CoverImageUrlFallback,
         SteamAppId = c.HasNews ? c.Game.Id : null,
+        HeroUrl = c.HasNews ? SteamHero(c.Game.Id) : null,
+        HeaderUrl = c.HasNews ? $"https://cdn.cloudflare.steamstatic.com/steam/apps/{c.Game.Id}/header.jpg" : c.CoverImageUrlFallback,
         SizeLookup = () => { c.EnsureSizeRequested(); return c.SizeOnDiskText; },
         Source = c,
     };
+
+    private static readonly Lazy<string?> SteamRoot = new(() =>
+    {
+        try { return HalawaHub.Core.Library.SteamLibraryProvider.GetSteamPath(); }
+        catch { return null; }
+    });
+
+    /// <summary>
+    /// صورة البطل لألعاب Steam: من ذاكرة Steam المحلية (librarycache) إن وُجدت، وإلا من خادم
+    /// Steam نفسه (تُحفظ بعدها في ذاكرة الأغلفة). اللعبة بلا صورة بطل تعرض غلافها مموّهًا.
+    /// </summary>
+    internal static string SteamHero(string appId)
+    {
+        if (SteamRoot.Value is { } root)
+        {
+            var cache = System.IO.Path.Combine(root, "appcache", "librarycache");
+            foreach (var path in new[] { System.IO.Path.Combine(cache, appId + "_library_hero.jpg"), System.IO.Path.Combine(cache, appId, "library_hero.jpg") })
+                if (System.IO.File.Exists(path)) return new Uri(path).AbsoluteUri;
+        }
+        return $"https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/library_hero.jpg";
+    }
 
     private static GameCardViewModel Card(BpGame g) => (GameCardViewModel)g.Source!;
 
@@ -85,7 +108,27 @@ public sealed class BigPictureHost : IBpHost
         _main.OpenDetailsCommand.Execute(Card(game));
     }
 
-    public void OpenNews(BpGame game, int index) { /* المرحلة 2 */ }
+    /// الخبر يُفتح داخل Steam (steam://openurl) كما في التصميم، وإن تعذّر ففي المتصفح
+    public void OpenNews(BpGame game, string url)
+    {
+        if (string.IsNullOrEmpty(url)) return;
+        try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("steam://openurl/" + url) { UseShellExecute = true })?.Dispose(); }
+        catch
+        {
+            try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true })?.Dispose(); }
+            catch (Exception ex) { HalawaHub.Core.Log.Error("could not open news", ex); }
+        }
+    }
+
+    public async Task<IReadOnlyList<(string Title, string Date, string Url)>> LoadNewsAsync(BpGame game)
+    {
+        var card = Card(game);
+        if (!card.HasNews) return Array.Empty<(string, string, string)>();
+        await _main.LoadGameNewsAsync(card);
+        return _main.GameNews.Take(2)
+            .Select(n => (n.Title, n.Date.ToLocalTime().ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture), n.Url))
+            .ToList();
+    }
 
     // ===== الإشعارات (المرحلة 4 تكمل الربط) =====
 

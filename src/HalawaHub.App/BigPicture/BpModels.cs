@@ -25,6 +25,10 @@ public sealed class BpGame
     public string? CoverUrl { get; init; }
     public string? CoverFallbackUrl { get; init; }
     public string? HeroUrl { get; init; }
+    /// صورة عريضة صغيرة لنتائج البحث (header.jpg في Steam)
+    public string? HeaderUrl { get; init; }
+    /// الصورة العريضة في صفحة اللعبة
+    public string? ShowcaseUrl => HeroUrl ?? HeaderUrl;
     public string? SteamAppId { get; init; }
     /// الحجم على القرص يُحسب عند الحاجة (للعبة المعروضة فقط)
     public Func<string>? SizeLookup { get; init; }
@@ -39,7 +43,9 @@ public sealed class BpGame
     public string LastShortText => RelativeDay(LastPlayed, DateTime.Now);
     public string LastLongText => LastPlayed == null
         ? Services.Loc.Instance["bpNever"]
-        : Services.Loc.Instance.Format("bpLastLong", LastShortText);
+        : Services.Loc.Instance.Format("bpLastLong", Services.Loc.Instance.IsRtl ? LastShortText : LowerFirst(LastShortText));
+
+    private static string LowerFirst(string s) => s.Length > 0 && char.IsUpper(s[0]) ? char.ToLowerInvariant(s[0]) + s[1..] : s;
     public string SizeShown => SizeLookup?.Invoke() is { Length: > 0 } s ? s : string.IsNullOrEmpty(SizeText) ? "—" : SizeText;
 
     internal static string FormatHours(double hours) =>
@@ -119,5 +125,6 @@ public sealed class BpButtonItem : BpItem
     public bool IsOn { get => _on; set { if (_on != value) { _on = value; Raise(); } } }
     public bool IsPrimary { get; init; }
     public bool IsDanger { get; init; }
+    public string Note { get; set; } = "";
     public string Badge { get; set; } = "";
 }

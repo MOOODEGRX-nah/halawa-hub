@@ -37,7 +37,9 @@ public interface IBpHost
     void OpenUpdateInLauncher(BpGame game);
     void OpenLauncher(BpGame game);
     void OpenGameSettings(BpGame game);
-    void OpenNews(BpGame game, int index);
+    void OpenNews(BpGame game, string url);
+    /// أخبار Steam للعبة (العنوان، التاريخ، الرابط)؛ فارغة لغير Steam
+    Task<IReadOnlyList<(string Title, string Date, string Url)>> LoadNewsAsync(BpGame game);
 
     IReadOnlyList<BpNotification> Notifications { get; }
     void DismissNotification(BpNotification item);

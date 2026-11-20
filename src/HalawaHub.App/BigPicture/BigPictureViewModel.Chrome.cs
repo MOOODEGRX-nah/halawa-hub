@@ -25,6 +25,8 @@ public sealed partial class BigPictureViewModel
         Changed();
     }
 
+    public string ContextPadText => T(_pad != null ? "bpController" : "bpNoController");
+
     public bool IsHomeTab => TabScreen == BpScreen.Home;
     public bool IsLibraryTab => TabScreen == BpScreen.Library;
     public bool IsSearchTab => TabScreen == BpScreen.Search;

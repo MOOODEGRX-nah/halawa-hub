@@ -116,6 +116,9 @@ public partial class BigPictureWindow : Window
         // الصفحات: الإزاحة سالبة دائمًا، والعربية تعكسها المرآة تلقائيًا
         _track.X = -_vm.TabIndex * 1920;
         _row.X = -_vm.RowOffsetCards * Pitch;
+        // المكتبة: الصف المركَّز يبقى أول صفين ظاهرين
+        var libY = Math.Max(0, _vm.LibraryRow - 1) * 340.0;
+        if (Math.Abs(LibraryScroll.Offset.Y - libY) > 0.5) LibraryScroll.Offset = new Vector(0, libY);
         ScheduleRing();
     }
 
@@ -226,7 +229,12 @@ public partial class BigPictureWindow : Window
 
     // ===== الساعة والرسالة =====
 
-    private void UpdateClock() => Clock.Text = DateTime.Now.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+    private void UpdateClock()
+    {
+        var now = DateTime.Now.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        Clock.Text = now;
+        GuideClock.Text = now;
+    }
 
     private void ShowToast(string text)
     {
@@ -267,6 +275,64 @@ public partial class BigPictureWindow : Window
     {
         if ((sender as Control)?.Tag is string tag && int.TryParse(tag, out var i)) _vm.GoTab(BigPictureViewModel.Tabs[i]);
     }
+
+    private void OnFilterClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpFilterItem>(sender) is { } item) _vm.SetPlatform(item.Id);
+    }
+
+    private void OnKeyClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpButtonItem>(sender) is not { } item) return;
+        for (var r = 0; r < _vm.KeyRows.Count; r++)
+        {
+            var c = _vm.KeyRows[r].IndexOf(item);
+            if (c >= 0) { _vm.ClickKey(r, c); return; }
+        }
+    }
+
+    private void OnGameButtonClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpButtonItem>(sender) is { } item) _vm.ClickGameButton(_vm.GameButtons.IndexOf(item));
+    }
+
+    private void OnNewsClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpButtonItem>(sender) is { } item) _vm.ClickNews(_vm.NewsItems.IndexOf(item));
+    }
+
+    private void OnSectionClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpButtonItem>(sender) is { } item) _vm.ClickSection(_vm.SettingSections.IndexOf(item));
+    }
+
+    private void OnRowClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpSettingRow>(sender) is { } item) _vm.ClickRow(_vm.SettingRows.IndexOf(item));
+    }
+
+    private void OnUpdateButtonClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpButtonItem>(sender) is { } item) _vm.ClickUpdateButton(_vm.UpdateButtons.IndexOf(item));
+    }
+
+    private void OnFailButtonClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpButtonItem>(sender) is { } item) _vm.ClickFailButton(_vm.FailButtons.IndexOf(item));
+    }
+
+    private void OnGuideItemClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpButtonItem>(sender) is { } item) _vm.ClickGuide(_vm.GuideItems.IndexOf(item));
+    }
+
+    /// الضغط خارج النافذة يغلقها (فقط على الخلفية نفسها)
+    private void OnSettingsScrimPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (ReferenceEquals(e.Source, SettingsLayer)) _vm.CloseSettings();
+    }
+
+    private void OnGuideScrimPressed(object? sender, PointerPressedEventArgs e) => _vm.CloseOverlay();
 
     private void OnGuideClick(object? sender, RoutedEventArgs e) => _vm.ToggleGuide();
     private void OnBellClick(object? sender, RoutedEventArgs e) => _vm.OpenNotifications();

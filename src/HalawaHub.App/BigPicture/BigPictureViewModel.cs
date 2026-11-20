@@ -198,7 +198,19 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
         _gameCol = 0;
         _gameIndex = 0;
         BuildGameButtons();
+        NewsItems.Clear();
+        _ = LoadNewsAsync(game);
         Changed();
+    }
+
+    private async Task LoadNewsAsync(BpGame game)
+    {
+        try
+        {
+            var news = await _host.LoadNewsAsync(game);
+            if (ReferenceEquals(_hero, game) && _screen == BpScreen.Game) SetNews(news);
+        }
+        catch (Exception ex) { HalawaHub.Core.Log.Error("big picture news failed", ex); }
     }
 
     public void OpenSettings()

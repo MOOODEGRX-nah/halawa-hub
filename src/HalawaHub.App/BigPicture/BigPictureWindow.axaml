@@ -245,6 +245,138 @@
     </Style>
     <Style Selector="StackPanel.hst > TextBlock.v"><Setter Property="FontSize" Value="21"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
 
+    <!-- منصات المكتبة (.chip) -->
+    <Style Selector="Button.chip">
+      <Setter Property="Foreground" Value="{StaticResource BpMuted}"/>
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Button.chip.on"><Setter Property="Foreground" Value="White"/></Style>
+    <Style Selector="Border.cnt"><Setter Property="Background" Value="#2A1313"/></Style>
+    <Style Selector="Button.chip.on Border.cnt"><Setter Property="Background" Value="#4D000000"/></Style>
+
+    <!-- مفاتيح لوحة المفاتيح (.key) -->
+    <Style Selector="Button.key">
+      <Setter Property="Height" Value="78"/>
+      <Setter Property="CornerRadius" Value="14"/>
+      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
+      <Setter Property="BorderBrush" Value="#2E1616"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Foreground" Value="#D9C7C7"/>
+      <Setter Property="ZIndex" Value="0"/>
+      <Setter Property="RenderTransform" Value="scale(1)"/>
+      <Setter Property="Transitions">
+        <Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.25" Easing="{x:Static bp:BpSprings.Key}"/></Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.key /template/ ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+      <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}"/>
+      <Setter Property="CornerRadius" Value="14"/>
+    </Style>
+    <Style Selector="Button.key.pri"><Setter Property="BorderBrush" Value="#7F1D1D"/><Setter Property="Foreground" Value="White"/></Style>
+    <Style Selector="Button.key.f">
+      <Setter Property="Background" Value="{StaticResource BpRedGrad}"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="ZIndex" Value="1"/>
+      <Setter Property="RenderTransform" Value="scale(1.08)"/>
+    </Style>
+    <Style Selector="Button.key.f /template/ ContentPresenter"><Setter Property="BoxShadow" Value="0 0 24 0 #8CEF4444"/></Style>
+    <Style Selector="Button.key:pressed"><Setter Property="RenderTransform" Value="scale(0.92)"/></Style>
+
+    <!-- نتائج البحث (.qsr) -->
+    <Style Selector="Button.qsr">
+      <Setter Property="Height" Value="92"/>
+      <Setter Property="Padding" Value="14,0"/>
+      <Setter Property="CornerRadius" Value="14"/>
+      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
+      <Setter Property="RenderTransform" Value="scale(1)"/>
+      <Setter Property="Transitions">
+        <Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" Easing="{x:Static bp:BpSprings.Lift}"/></Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.qsr /template/ ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+      <Setter Property="CornerRadius" Value="14"/>
+    </Style>
+    <Style Selector="Button.qsr.f"><Setter Property="Background" Value="#4A1C1F"/><Setter Property="RenderTransform" Value="scale(1.02)"/></Style>
+
+    <!-- البطاقات والأسطر (.cd / .tile / .row / .nti) -->
+    <Style Selector="Border.cd">
+      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource BpLine}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="18"/>
+    </Style>
+    <Style Selector="Button.wide">
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    </Style>
+    <Style Selector="Button.nti">
+      <Setter Property="Padding" Value="16,14"/>
+      <Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="Background" Duration="0:0:0.2"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Button.nti /template/ ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+      <Setter Property="CornerRadius" Value="12"/>
+    </Style>
+    <Style Selector="Button.nti.f"><Setter Property="Background" Value="#241010"/></Style>
+    <Style Selector="Button.row">
+      <Setter Property="Padding" Value="20,16"/>
+      <Setter Property="CornerRadius" Value="14"/>
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="Background" Duration="0:0:0.2"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Button.row /template/ ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+      <Setter Property="CornerRadius" Value="14"/>
+    </Style>
+    <Style Selector="Button.row.f"><Setter Property="Background" Value="#241010"/></Style>
+
+    <!-- عناصر القائمة الجانبية والإعدادات (.si) -->
+    <Style Selector="Button.si">
+      <Setter Property="Height" Value="64"/>
+      <Setter Property="Padding" Value="18,0"/>
+      <Setter Property="FontSize" Value="20"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="{StaticResource BpMuted}"/>
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Button.si.on"><Setter Property="Foreground" Value="White"/></Style>
+    <Style Selector="Button.si.dg"><Setter Property="Foreground" Value="#FCA5A5"/></Style>
+    <Style Selector="Button.si.dg.on"><Setter Property="Foreground" Value="White"/></Style>
+
+    <!-- اللوحات (.panel) وصندوق الحالة (.stat) -->
+    <Style Selector="Border.panel">
+      <Setter Property="Background" Value="#0E0606"/>
+      <Setter Property="BorderBrush" Value="{StaticResource BpLine}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="20"/>
+      <Setter Property="Padding" Value="38,32"/>
+      <Setter Property="BoxShadow" Value="0 40 110 0 #B3000000"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Border.stat">
+      <Setter Property="Padding" Value="20,16"/>
+      <Setter Property="CornerRadius" Value="16"/>
+      <Setter Property="Background" Value="#0A0404"/>
+      <Setter Property="BorderBrush" Value="{StaticResource BpLine}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Transitions"><Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.35"/></Transitions></Setter>
+    </Style>
+    <Style Selector="Border.stat.ok">
+      <Setter Property="BorderBrush" Value="#59EF4444"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%"><GradientStop Color="#14EF4444" Offset="0"/><GradientStop Color="#0A0404" Offset="0.6"/></LinearGradientBrush>
+      </Setter>
+    </Style>
+    <Style Selector="Border.stat.bad">
+      <Setter Property="BorderBrush" Value="#8CDC2626"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%"><GradientStop Color="#477F1D1D" Offset="0"/><GradientStop Color="#0A0404" Offset="0.6"/></LinearGradientBrush>
+      </Setter>
+    </Style>
+
     <!-- حلقة التركيز (.fring) -->
     <Style Selector="Border#Ring">
       <Setter Property="Transitions">
@@ -275,7 +407,7 @@
         <StackPanel x:Name="Track" Orientation="Horizontal" HorizontalAlignment="Left">
 
           <!-- الرئيسي -->
-          <Panel x:Name="HomePage" Width="1920" Height="1080">
+          <Panel x:Name="HomePage" Width="1920" Height="1080" ClipToBounds="True">
             <Panel x:Name="HeroArt" IsHitTestVisible="False">
               <Border x:Name="HeroArtFill" Height="720" VerticalAlignment="Top" ClipToBounds="True"
                       Background="{Binding Hero.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
@@ -287,6 +419,14 @@
                 <Panel>
                   <TextBlock Text="{Binding Hero.Letter}" FontFamily="fonts:Inter#Inter" FontWeight="Black" FontSize="860"
                              Foreground="#17FFFFFF" HorizontalAlignment="Right" Margin="0,-150,140,0" LineHeight="860"/>
+                  <!-- بلا صورة بطل: الغلاف مموّهًا -->
+                  <Image Stretch="UniformToFill" Opacity="0.55" IsVisible="{Binding HeroHasNoArt}" FlowDirection="LeftToRight"
+                         behaviors:AsyncImage.DecodeWidth="360"
+                         behaviors:AsyncImage.SourceUrl="{Binding Hero.CoverUrl}" behaviors:AsyncImage.FallbackUrl="{Binding Hero.CoverFallbackUrl}">
+                    <Image.Effect><BlurEffect Radius="60"/></Image.Effect>
+                  </Image>
+                  <Image Stretch="UniformToFill" FlowDirection="LeftToRight" behaviors:AsyncImage.DecodeWidth="1920"
+                         behaviors:AsyncImage.SourceUrl="{Binding Hero.HeroUrl}"/>
                 </Panel>
               </Border>
               <Border>
@@ -392,8 +532,253 @@
           </Panel>
 
           <!-- المكتبة والبحث: المرحلة 2 -->
-          <Panel x:Name="LibraryPage" Width="1920" Height="1080"/>
-          <Panel x:Name="SearchPage" Width="1920" Height="1080"/>
+          <!-- المكتبة (.lh / .lg) -->
+          <Panel x:Name="LibraryPage" Width="1920" Height="1080" ClipToBounds="True">
+            <DockPanel Margin="72,144,72,0" Height="70" VerticalAlignment="Top" LastChildFill="False">
+              <TextBlock DockPanel.Dock="Left" Text="{l:Loc bpLibrary}" FontSize="40" FontWeight="ExtraBold" VerticalAlignment="Center"/>
+              <TextBlock DockPanel.Dock="Left" Text="{Binding LibraryCountText}" FontSize="20" Foreground="#9C8A8A" Margin="20,0,0,0" VerticalAlignment="Center"/>
+              <Border DockPanel.Dock="Right" Padding="6" CornerRadius="30" Background="{StaticResource BpSurface}" BorderBrush="{StaticResource BpLine}" BorderThickness="1"
+                      MinWidth="900" VerticalAlignment="Center">
+                <Panel>
+                  <c:SlidingPill ItemCount="{Binding Filters.Count}" SelectedIndex="{Binding FilterIndex}">
+                    <Border CornerRadius="24" Background="{StaticResource BpRedGrad}" BoxShadow="0 0 18 0 #80EF4444"/>
+                  </c:SlidingPill>
+                  <ItemsControl ItemsSource="{Binding Filters}">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="bp:BpFilterItem">
+                        <Button Classes="chip" Classes.on="{Binding IsOn}" Focusable="False" Click="OnFilterClick" Height="54">
+                          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Label}" FontSize="19" FontWeight="SemiBold" Foreground="{Binding $parent[Button].Foreground}" VerticalAlignment="Center"/>
+                            <Border Classes="cnt" CornerRadius="12" Padding="10,2" VerticalAlignment="Center">
+                              <TextBlock Text="{Binding Count}" FontSize="15" FontWeight="SemiBold" Foreground="{Binding $parent[Button].Foreground}"/>
+                            </Border>
+                          </StackPanel>
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </Panel>
+              </Border>
+              <bpc:BpGlyph DockPanel.Dock="Right" Button="x" Ps="{Binding UsePsGlyphs}" Size="34" Margin="0,0,14,0" VerticalAlignment="Center"/>
+            </DockPanel>
+            <ScrollViewer x:Name="LibraryScroll" Margin="52,224,0,100" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden"
+                          IsHitTestVisible="True">
+              <ItemsControl x:Name="LibraryGrid" ItemsSource="{Binding LibraryRows}" Margin="20,17,20,40">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel Orientation="Vertical"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <ItemsControl ItemsSource="{Binding}" ItemTemplate="{StaticResource BpCardTemplate}" Height="340">
+                      <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="26"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Panel>
+
+          <!-- البحث (.sbx / .kb / .sres) -->
+          <Panel x:Name="SearchPage" Width="1920" Height="1080" ClipToBounds="True">
+            <Border Margin="72,150,0,0" Width="1090" Height="84" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="26"
+                    BorderThickness="2.5" Background="{StaticResource BpSurface}" BoxShadow="0 0 16 0 #66EF4444" Padding="24,0">
+              <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
+                  <GradientStop Color="#B91C1C" Offset="0"/><GradientStop Color="#F5A623" Offset="1"/>
+                </LinearGradientBrush>
+              </Border.BorderBrush>
+              <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                <Panel Width="30" Height="30">
+                  <c:VectorIcon x:Name="SearchIcon" Data="M4 11a7 7 0 1 0 14 0a7 7 0 1 0 -14 0 M21 21l-4.3-4.3" Size="30" StrokeWidth="2.4" Foreground="{StaticResource BpMuted}"/>
+                  <Border x:Name="QBadge" IsVisible="{Binding NoMatch}" Width="34" Height="34" CornerRadius="17" Margin="0,-76,0,0"
+                          HorizontalAlignment="Left" BoxShadow="0 0 14 0 #80EF4444">
+                    <Border.Background>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%"><GradientStop Color="#EF4444" Offset="0"/><GradientStop Color="#F5A623" Offset="1"/></LinearGradientBrush>
+                    </Border.Background>
+                    <TextBlock Text="?" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                  </Border>
+                </Panel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                  <bpc:BpAutoText Text="{Binding QueryShown}" FontSize="30" Foreground="{Binding HasQuery, Converter={x:Static bp:BpIs.QueryBrush}}" VerticalAlignment="Center"/>
+                  <Border Width="3" Height="40" CornerRadius="2" Background="#F5A623" Margin="2,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <ItemsControl x:Name="Keyboard" ItemsSource="{Binding KeyRows}" Margin="72,272,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"
+                          FlowDirection="{Binding KeyboardDirection}">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="12"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <ItemsControl ItemsSource="{Binding}">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="10"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="bp:BpButtonItem">
+                        <Button Classes="key" Classes.f="{Binding IsFocused}" Classes.pri="{Binding IsPrimary}" Focusable="False" Click="OnKeyClick"
+                                Width="{Binding Id, Converter={x:Static bp:BpIs.KeyWidth}}" bpc:BpFocus.Key="{Binding FocusKey}">
+                          <TextBlock Text="{Binding Label}" FontSize="{Binding Id, Converter={x:Static bp:BpIs.KeyFont}}" FontWeight="SemiBold"
+                                     Foreground="{Binding $parent[Button].Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Margin="0,150,72,0" Width="600" HorizontalAlignment="Right" VerticalAlignment="Top" Spacing="10">
+              <TextBlock Text="{l:Loc bpResults}" FontSize="22" FontWeight="Bold" Margin="0,0,0,8"/>
+              <ItemsControl ItemsSource="{Binding Results}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="10"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="bp:BpCardItem">
+                    <Button Classes="qsr" Classes.f="{Binding IsFocused}" Focusable="False" Click="OnCardClick" bpc:BpFocus.Key="{Binding FocusKey}">
+                      <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="120" Height="68" CornerRadius="10" ClipToBounds="True"
+                                Background="{Binding Game.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
+                          <Panel>
+                            <TextBlock Text="{Binding Game.Letter}" FontFamily="fonts:Inter#Inter" FontWeight="ExtraBold" FontSize="38" Foreground="#29FFFFFF"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Image Stretch="UniformToFill" behaviors:AsyncImage.DecodeWidth="240"
+                                   behaviors:AsyncImage.SourceUrl="{Binding Game.HeaderUrl}" behaviors:AsyncImage.FallbackUrl="{Binding Game.CoverUrl}"/>
+                          </Panel>
+                        </Border>
+                        <Border DockPanel.Dock="Right" CornerRadius="8" Background="#2A1313" Padding="10,3" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Game.ShownPlatform}" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                        </Border>
+                        <bpc:BpAutoText Text="{Binding Game.Name}" FontSize="21" FontWeight="SemiBold" Margin="18,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                      </DockPanel>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <StackPanel IsVisible="{Binding NoMatch}" Margin="0,20" Spacing="4">
+                <TextBlock Text="{Binding NoMatchText}" FontSize="22" FontWeight="SemiBold" Foreground="#D9C7C7"/>
+                <TextBlock Text="{l:Loc bpTryOther}" FontSize="17" Foreground="#9C8A8A"/>
+              </StackPanel>
+            </StackPanel>
+          </Panel>
+        </StackPanel>
+      </Panel>
+
+      <!-- ===== صفحة اللعبة (.gpg) ===== -->
+      <Panel x:Name="GamePage" IsVisible="{Binding IsGameOpen}" Background="#0A0404">
+        <Border Height="720" VerticalAlignment="Top" ClipToBounds="True" IsHitTestVisible="False"
+                Background="{Binding Hero.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
+          <Border.OpacityMask>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="Black" Offset="0.45"/><GradientStop Color="Transparent" Offset="1"/></LinearGradientBrush>
+          </Border.OpacityMask>
+          <Panel>
+            <Image Stretch="UniformToFill" Opacity="0.55" IsVisible="{Binding HeroHasNoArt}" FlowDirection="LeftToRight" behaviors:AsyncImage.DecodeWidth="360"
+                   behaviors:AsyncImage.SourceUrl="{Binding Hero.CoverUrl}" behaviors:AsyncImage.FallbackUrl="{Binding Hero.CoverFallbackUrl}">
+              <Image.Effect><BlurEffect Radius="60"/></Image.Effect>
+            </Image>
+            <Image Stretch="UniformToFill" FlowDirection="LeftToRight" behaviors:AsyncImage.DecodeWidth="1920" behaviors:AsyncImage.SourceUrl="{Binding Hero.HeroUrl}"/>
+          </Panel>
+        </Border>
+        <Border IsHitTestVisible="False">
+          <Border.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+              <GradientStop Color="#E00A0404" Offset="0"/><GradientStop Color="#8C0A0404" Offset="0.38"/><GradientStop Color="#000A0404" Offset="0.72"/>
+            </LinearGradientBrush>
+          </Border.Background>
+        </Border>
+        <Border IsHitTestVisible="False">
+          <Border.Background>
+            <LinearGradientBrush StartPoint="0%,100%" EndPoint="0%,0%"><GradientStop Color="#FF0A0404" Offset="0.42"/><GradientStop Color="#000A0404" Offset="0.72"/></LinearGradientBrush>
+          </Border.Background>
+        </Border>
+
+        <StackPanel Margin="72,150,0,0" Width="880" HorizontalAlignment="Left" VerticalAlignment="Top" Spacing="14">
+          <Border Classes="bd" Height="34" Padding="14,0" HorizontalAlignment="Left">
+            <TextBlock Text="{Binding Hero.ShownPlatform}" FontSize="17" VerticalAlignment="Center"/>
+          </Border>
+          <TextBlock Text="{Binding Hero.Name}" FontSize="84" FontWeight="ExtraBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"/>
+          <StackPanel Orientation="Horizontal" Spacing="14">
+            <TextBlock Text="{Binding Hero.HoursText}" FontSize="21" Foreground="#D9C7C7"/>
+            <Ellipse Width="6" Height="6" Fill="#6B4B4B" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding Hero.LastLongText}" FontSize="21" Foreground="#D9C7C7"/>
+          </StackPanel>
+          <Border IsVisible="{Binding Hero.HasUpdate}" Height="40" Padding="16,0" CornerRadius="12" Background="#2A1313"
+                  BorderBrush="#4A2A12" BorderThickness="1" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+              <c:VectorIcon Data="M12 4v12M6 11l6 6 6-6M5 20h14" Size="18" StrokeWidth="2.6" Foreground="#F5A623"/>
+              <TextBlock Text="{l:Loc bpUpdAvail}" FontSize="18" FontWeight="SemiBold" Foreground="#F5A623"/>
+            </StackPanel>
+          </Border>
+          <ItemsControl ItemsSource="{Binding GameButtons}" Width="460" HorizontalAlignment="Left" Margin="0,20,0,0">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="14"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="bp:BpButtonItem">
+                <Button Classes="btn wide" Classes.pl="{Binding IsPrimary}" Classes.f="{Binding IsFocused}" Focusable="False"
+                        HorizontalAlignment="Stretch" bpc:BpFocus.Key="{Binding FocusKey}" Click="OnGameButtonClick">
+                  <StackPanel Orientation="Horizontal" Spacing="12">
+                    <c:VectorIcon IsVisible="{Binding IsPrimary}" Data="M6 4l14 8-14 8z" Size="22" IsFilled="True" Foreground="White"/>
+                    <TextBlock Text="{Binding Label}" VerticalAlignment="Center" FontSize="{Binding $parent[Button].FontSize}"
+                               FontWeight="{Binding $parent[Button].FontWeight}" Foreground="{Binding $parent[Button].Foreground}"/>
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <StackPanel x:Name="GameSide" Margin="0,150,72,0" Width="660" HorizontalAlignment="Right" VerticalAlignment="Top" Spacing="18">
+          <Border Height="372" CornerRadius="22" ClipToBounds="True" BorderBrush="#14FFFFFF" BorderThickness="1" BoxShadow="0 30 70 0 #80000000"
+                  Background="{Binding Hero.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
+            <Panel>
+              <TextBlock Text="{Binding Hero.Letter}" FontFamily="fonts:Inter#Inter" FontWeight="Black" FontSize="220" Foreground="#21FFFFFF"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <Image Stretch="UniformToFill" FlowDirection="LeftToRight" behaviors:AsyncImage.DecodeWidth="720"
+                     behaviors:AsyncImage.SourceUrl="{Binding Hero.ShowcaseUrl}" behaviors:AsyncImage.FallbackUrl="{Binding Hero.CoverUrl}"/>
+              <Border>
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%"><GradientStop Color="#21FFFFFF" Offset="0"/><GradientStop Color="#00FFFFFF" Offset="0.38"/></LinearGradientBrush>
+                </Border.Background>
+              </Border>
+            </Panel>
+          </Border>
+          <UniformGrid Rows="1" Columns="4">
+            <Border Classes="cd" CornerRadius="16" Padding="16,14" Margin="0,0,12,0">
+              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpPlayTime}" FontSize="15" Foreground="{StaticResource BpMuted}" TextTrimming="CharacterEllipsis"/>
+                <TextBlock Text="{Binding Hero.HoursShortText}" FontSize="21" FontWeight="Bold" TextTrimming="CharacterEllipsis"/></StackPanel>
+            </Border>
+            <Border Classes="cd" CornerRadius="16" Padding="16,14" Margin="0,0,12,0">
+              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpLastPlayed}" FontSize="15" Foreground="{StaticResource BpMuted}" TextTrimming="CharacterEllipsis"/>
+                <TextBlock Text="{Binding Hero.LastShortText}" FontSize="21" FontWeight="Bold" TextTrimming="CharacterEllipsis"/></StackPanel>
+            </Border>
+            <Border Classes="cd" CornerRadius="16" Padding="16,14" Margin="0,0,12,0">
+              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpSize}" FontSize="15" Foreground="{StaticResource BpMuted}" TextTrimming="CharacterEllipsis"/>
+                <TextBlock Text="{Binding Hero.SizeShown}" FontSize="21" FontWeight="Bold" FlowDirection="LeftToRight" HorizontalAlignment="Left" TextTrimming="CharacterEllipsis"/></StackPanel>
+            </Border>
+            <Border Classes="cd" CornerRadius="16" Padding="16,14">
+              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpPlatform}" FontSize="15" Foreground="{StaticResource BpMuted}" TextTrimming="CharacterEllipsis"/>
+                <TextBlock Text="{Binding Hero.ShownPlatform}" FontSize="21" FontWeight="Bold" TextTrimming="CharacterEllipsis"/></StackPanel>
+            </Border>
+          </UniformGrid>
+          <Border Classes="cd" Padding="24,18" IsVisible="{Binding Hero.SteamAppId, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <StackPanel Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,8">
+                <TextBlock Text="{l:Loc bpNews}" FontSize="22" FontWeight="Bold"/>
+                <Border CornerRadius="10" Background="#2A1313" Padding="10,2" VerticalAlignment="Center"><TextBlock Text="Steam" FontSize="14" FontWeight="SemiBold"/></Border>
+              </StackPanel>
+              <ItemsControl ItemsSource="{Binding NewsItems}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="bp:BpButtonItem">
+                    <Border BorderBrush="#231010" BorderThickness="0,1,0,0">
+                      <Button Classes="nti" Classes.f="{Binding IsFocused}" Focusable="False" bpc:BpFocus.Key="{Binding FocusKey}" bpc:BpFocus.Radius="12"
+                              Click="OnNewsClick">
+                        <StackPanel Spacing="4">
+                          <bpc:BpAutoText Text="{Binding Label}" FontSize="19" TextTrimming="CharacterEllipsis"/>
+                          <TextBlock Text="{Binding Note}" FontSize="15" Foreground="#9C8A8A" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                      </Button>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock IsVisible="{Binding !NewsItems.Count}" Text="{l:Loc bpNoNews}" FontSize="17" Foreground="#9C8A8A" Margin="16,8"/>
+            </StackPanel>
+          </Border>
         </StackPanel>
       </Panel>
 
@@ -462,6 +847,211 @@
                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Border>
       </Grid>
+
+      <!-- ===== نافذة الإعدادات (.setdlg) ===== -->
+      <Panel x:Name="SettingsLayer" IsVisible="{Binding IsSettingsOpen}" Background="#C7060202" PointerPressed="OnSettingsScrimPressed">
+        <Border x:Name="SettingsDialog" Width="1340" CornerRadius="20" ClipToBounds="True" BorderBrush="{StaticResource BpLine}" BorderThickness="1"
+                HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 40 110 0 #B3000000" Background="#0E0606">
+          <Grid ColumnDefinitions="340,*" MinHeight="740">
+            <Border Grid.Column="0" Background="#0F0607" BorderBrush="{StaticResource BpLine}" BorderThickness="0,0,1,0" Padding="16,28">
+              <StackPanel Spacing="6">
+                <Border BorderBrush="#231010" BorderThickness="0,0,0,1" Padding="12,0,12,18" Margin="0,0,0,12">
+                  <StackPanel Orientation="Horizontal" Spacing="14">
+                    <Border Width="50" Height="50" CornerRadius="12" ClipToBounds="True" Background="Black" BoxShadow="0 0 16 0 #4DEF4444">
+                      <Image Source="/Assets/logo.png" Stretch="UniformToFill"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                      <TextBlock Text="Halawa Hub" FontSize="20" FontWeight="Bold"/>
+                      <TextBlock Text="{l:Loc bp}" FontSize="15" Foreground="#F5A623"/>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+                <TextBlock Text="{l:Loc bpSettings}" FontSize="20" FontWeight="Bold" Foreground="#EF4444" Margin="12,0,12,14"/>
+                <Panel>
+                  <c:SlidingPill Orientation="Vertical" ItemCount="5" Pitch="70" SelectedIndex="{Binding SectionIndex}" Motion="Dialog"
+                                 Opacity="{Binding SectionPillDim, Converter={x:Static bp:BpIs.Dim}}">
+                    <Border CornerRadius="14" Background="{StaticResource BpRedGrad}" BoxShadow="0 0 20 0 #73EF4444"/>
+                  </c:SlidingPill>
+                  <ItemsControl ItemsSource="{Binding SettingSections}">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="6"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="bp:BpButtonItem">
+                        <Button Classes="si" Classes.on="{Binding IsOn}" Focusable="False" Click="OnSectionClick">
+                          <TextBlock Text="{Binding Label}" Foreground="{Binding $parent[Button].Foreground}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </Panel>
+              </StackPanel>
+            </Border>
+            <DockPanel Grid.Column="1" Margin="36,30">
+              <DockPanel DockPanel.Dock="Top" Margin="0,0,0,20">
+                <Button DockPanel.Dock="Right" Width="60" Height="60" Focusable="False" Click="OnSettingsClick">
+                  <c:VectorIcon Data="M6 6l12 12M18 6L6 18" Size="26" Foreground="{StaticResource BpMuted}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Button>
+                <TextBlock Text="{Binding SectionTitle}" FontSize="30" FontWeight="Bold" VerticalAlignment="Center"/>
+              </DockPanel>
+              <Border DockPanel.Dock="Bottom" BorderBrush="#231010" BorderThickness="0,1,0,0" Padding="0,14,0,0">
+                <TextBlock Text="{l:Loc bpSaved}" FontSize="16" Foreground="{StaticResource BpMuted}"/>
+              </Border>
+              <ItemsControl x:Name="SettingRowsList" ItemsSource="{Binding SettingRows}" VerticalAlignment="Top">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="10"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="bp:BpSettingRow">
+                    <Panel>
+                      <TextBlock IsVisible="{Binding IsInfo}" Text="{Binding Label}" FontSize="17" Foreground="{StaticResource BpMuted}" Margin="20,6"/>
+                      <Button IsVisible="{Binding IsControl}" Classes="row" Classes.f="{Binding IsFocused}" Focusable="False"
+                              bpc:BpFocus.Key="{Binding FocusKey}" Click="OnRowClick">
+                        <DockPanel>
+                          <bpc:BpSwitch DockPanel.Dock="Right" IsVisible="{Binding IsToggle}" IsOn="{Binding IsOn}" Margin="22,0,0,0" VerticalAlignment="Center"/>
+                          <bpc:BpGlyph DockPanel.Dock="Right" IsVisible="{Binding IsButton}" Button="a" Ps="{Binding $parent[Window].((bp:BigPictureViewModel)DataContext).UsePsGlyphs}"
+                                       Margin="22,0,0,0" VerticalAlignment="Center"/>
+                          <Border DockPanel.Dock="Right" IsVisible="{Binding IsSegmented}" Margin="22,0,0,0" Padding="5" CornerRadius="14" Background="#0A0404"
+                                  BorderBrush="{StaticResource BpLine}" BorderThickness="1" VerticalAlignment="Center">
+                            <Panel>
+                              <c:SlidingPill ItemCount="{Binding Options.Count}" SelectedIndex="{Binding Selected}" Motion="Even">
+                                <Border CornerRadius="10" Background="#B91C1C" BoxShadow="0 0 14 0 #73EF4444"/>
+                              </c:SlidingPill>
+                              <ItemsControl ItemsSource="{Binding Options}">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                  <DataTemplate>
+                                    <TextBlock Text="{Binding}" FontSize="18" Padding="22,0" Height="48" LineHeight="48" TextAlignment="Center" Foreground="#B8A4A4"/>
+                                  </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                              </ItemsControl>
+                            </Panel>
+                          </Border>
+                          <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Label}" FontSize="21"/>
+                            <TextBlock Text="{Binding Note}" FontSize="16" Foreground="{StaticResource BpMuted}" TextWrapping="Wrap" Margin="0,4,0,0" LineHeight="24"/>
+                          </StackPanel>
+                        </DockPanel>
+                      </Button>
+                    </Panel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </DockPanel>
+          </Grid>
+        </Border>
+      </Panel>
+
+      <!-- ===== التحديث قبل التشغيل، ولوحة التشغيل (.panel) ===== -->
+      <Panel IsVisible="{Binding IsUpdateOpen}" Background="#C7060202">
+        <Border Classes="panel" Width="900">
+          <StackPanel Spacing="18">
+            <StackPanel Orientation="Horizontal" Spacing="16">
+              <Border Width="52" Height="52" CornerRadius="14" Background="#2A1313" BorderBrush="#4A2A12" BorderThickness="1">
+                <c:VectorIcon Data="M12 4v12M6 11l6 6 6-6M5 20h14" Size="26" StrokeWidth="2.4" Foreground="#F5A623" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Border>
+              <TextBlock Text="{Binding UpdateTitle}" FontSize="30" FontWeight="Bold" Foreground="#EF4444" VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock Text="{l:Loc bpUpdText}" FontSize="21" LineHeight="34" Foreground="#D9C7C7" TextWrapping="Wrap"/>
+            <ItemsControl ItemsSource="{Binding UpdateButtons}">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="14"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="bp:BpButtonItem">
+                  <Button Classes="btn" Classes.pri="{Binding IsPrimary}" Classes.f="{Binding IsFocused}" Focusable="False" bpc:BpFocus.Key="{Binding FocusKey}" Click="OnUpdateButtonClick">
+                    <TextBlock Text="{Binding Label}" FontSize="21" FontWeight="{Binding $parent[Button].FontWeight}" Foreground="{Binding $parent[Button].Foreground}"/>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </Panel>
+
+      <Panel IsVisible="{Binding IsLaunchOpen}" Background="#C7060202">
+        <Border Classes="panel" Width="780">
+          <StackPanel Spacing="18" HorizontalAlignment="Stretch">
+            <Border Width="220" Height="330" CornerRadius="16" ClipToBounds="True" BorderBrush="{StaticResource BpLine}" BorderThickness="1" HorizontalAlignment="Center"
+                    Background="{Binding Hero.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
+              <Panel>
+                <TextBlock Text="{Binding Hero.Letter}" FontFamily="fonts:Inter#Inter" FontWeight="ExtraBold" FontSize="100" Foreground="#24FFFFFF"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Image Stretch="UniformToFill" behaviors:AsyncImage.DecodeWidth="320"
+                       behaviors:AsyncImage.SourceUrl="{Binding Hero.CoverUrl}" behaviors:AsyncImage.FallbackUrl="{Binding Hero.CoverFallbackUrl}"/>
+              </Panel>
+            </Border>
+            <Border Classes="stat" Classes.ok="{Binding IsLaunchDone}" Classes.bad="{Binding IsLaunchFailed}">
+              <StackPanel Orientation="Horizontal" Spacing="18">
+                <Viewbox Width="56" Height="56"><c:StatusBadge State="{Binding LaunchBadge}"/></Viewbox>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Text="{Binding LaunchTitle}" FontSize="22" FontWeight="Bold" Foreground="{Binding IsLaunchFailed, Converter={x:Static bp:BpIs.FailTitle}}"/>
+                  <TextBlock Text="{Binding LaunchSub}" FontSize="17" Foreground="{StaticResource BpMuted}"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <StackPanel IsVisible="{Binding IsLaunchFailed}" Spacing="18">
+              <TextBlock Text="{Binding FailText}" FontSize="21" LineHeight="34" Foreground="#D9C7C7" TextWrapping="Wrap" TextAlignment="Center"/>
+              <ItemsControl ItemsSource="{Binding FailButtons}" HorizontalAlignment="Center">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="14"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="bp:BpButtonItem">
+                    <Button Classes="btn" Classes.pri="{Binding IsPrimary}" Classes.f="{Binding IsFocused}" Focusable="False" bpc:BpFocus.Key="{Binding FocusKey}" Click="OnFailButtonClick">
+                      <TextBlock Text="{Binding Label}" FontSize="21" FontWeight="{Binding $parent[Button].FontWeight}" Foreground="{Binding $parent[Button].Foreground}"/>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </Panel>
+
+      <!-- ===== القائمة الجانبية (.gsh) ===== -->
+      <Panel IsVisible="{Binding IsGuideOpen}">
+        <Border Background="#99060202" PointerPressed="OnGuideScrimPressed"/>
+        <Border x:Name="GuideSheet" Width="520" HorizontalAlignment="Left" Background="#0F0607" BorderBrush="{StaticResource BpLine}" BorderThickness="0,0,1,0"
+                Padding="22,40,22,120" BoxShadow="30 0 90 0 #99000000">
+          <StackPanel Spacing="12">
+            <Border BorderBrush="#231010" BorderThickness="0,0,0,1" Padding="12,0,12,18" Margin="0,0,0,12">
+              <StackPanel Orientation="Horizontal" Spacing="14">
+                <Border Width="50" Height="50" CornerRadius="12" ClipToBounds="True" Background="Black" BoxShadow="0 0 16 0 #4DEF4444">
+                  <Image Source="/Assets/logo.png" Stretch="UniformToFill"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Text="Halawa Hub" FontSize="20" FontWeight="Bold"/>
+                  <TextBlock Text="{l:Loc bp}" FontSize="15" Foreground="#F5A623"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <TextBlock x:Name="GuideClock" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="54" Padding="12,0" FlowDirection="LeftToRight"
+                       HorizontalAlignment="Left" IsVisible="{Binding Settings.ShowClock}"/>
+            <Border BorderBrush="#231010" BorderThickness="0,0,0,1" Padding="12,0,12,14" Margin="0,0,0,8">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <c:VectorIcon Size="18" StrokeWidth="2.4" Foreground="{StaticResource BpMuted}" Width="26" Height="20"
+                              Data="M9 3h16c4.4 0 7 4 7.6 9.5.6 5.6-.6 10.5-4 10.5-2.6 0-3.7-3.4-6.6-3.4h-10c-2.9 0-4 3.4-6.6 3.4-3.4 0-4.6-4.9-4-10.5C2 7 4.6 3 9 3z"/>
+                <TextBlock Text="{Binding ContextPadText}" FontSize="17" Foreground="{StaticResource BpMuted}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Border>
+            <Panel>
+              <c:SlidingPill Orientation="Vertical" ItemCount="7" Pitch="70" SelectedIndex="{Binding GuideIndex}" Motion="Dialog">
+                <Border CornerRadius="14" Background="{StaticResource BpRedGrad}" BoxShadow="0 0 20 0 #73EF4444"/>
+              </c:SlidingPill>
+              <ItemsControl ItemsSource="{Binding GuideItems}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="6"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="bp:BpButtonItem">
+                    <Button Classes="si" Classes.on="{Binding IsOn}" Classes.dg="{Binding IsDanger}" Focusable="False" Click="OnGuideItemClick">
+                      <DockPanel>
+                        <Border DockPanel.Dock="Right" IsVisible="{Binding Badge, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" MinWidth="30" Height="30"
+                                CornerRadius="15" Background="#EF4444" Padding="9,0">
+                          <TextBlock Text="{Binding Badge}" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="15" Foreground="White"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="{Binding Label}" Foreground="{Binding $parent[Button].Foreground}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                      </DockPanel>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Panel>
+          </StackPanel>
+        </Border>
+      </Panel>
 
       <!-- ===== حلقة التركيز ===== -->
       <Canvas x:Name="RingLayer" IsHitTestVisible="False">

@@ -22,6 +22,24 @@ public static class BpIs
     public static IValueConverter HeartFill { get; } = new FuncValueConverter<bool, IBrush?>(on =>
         on ? new SolidColorBrush(Color.Parse("#EF4444")) : null);
 
+    public static IValueConverter QueryBrush { get; } = new FuncValueConverter<bool, IBrush>(has =>
+        new SolidColorBrush(Color.Parse(has ? "#F5EDED" : "#9C8A8A")));
+
+    /// عرض مفتاح لوحة المفاتيح: المسافة 490، الحذف والتبديل وتم 190، والحروف 90
+    public static IValueConverter KeyWidth { get; } = new FuncValueConverter<string?, double>(id => id switch
+    {
+        "space" => 490, "del" or "abc" or "done" => 190, _ => 90,
+    });
+
+    public static IValueConverter KeyFont { get; } = new FuncValueConverter<string?, double>(id =>
+        id is "space" or "abc" or "done" ? 21 : 28);
+
+    /// المؤشر الجانبي يخفت حين يكون التركيز على الأسطر
+    public static IValueConverter Dim { get; } = new FuncValueConverter<bool, double>(dim => dim ? 0.4 : 1);
+
+    public static IValueConverter FailTitle { get; } = new FuncValueConverter<bool, IBrush>(bad =>
+        new SolidColorBrush(Color.Parse(bad ? "#FCA5A5" : "#F5EDED")));
+
     public static IValueConverter Positive { get; } = new FuncValueConverter<int, bool>(n => n > 0);
 
     /// شريط البطارية رقم N يضيء إن كان عدد الأشرطة ≥ N

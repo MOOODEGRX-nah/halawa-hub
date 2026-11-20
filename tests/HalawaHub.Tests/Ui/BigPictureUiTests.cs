@@ -49,7 +49,7 @@ public class BigPictureUiTests : IDisposable
             {
                 Key = "k" + i, Name = g.name, Platform = g.plat, PlatformShort = g.plat, Hours = g.h,
                 LastPlayed = now.AddDays(-g.days), DateAdded = now.AddDays(-30 + i), SizeText = g.size, HasUpdate = g.upd,
-                IsFavorite = i is 2 or 3 or 7 or 8 or 9 or 10,
+                IsFavorite = i is 2 or 3 or 7 or 8 or 9 or 10, SteamAppId = g.plat == "Steam" ? (1000 + i).ToString() : null,
             });
         }
         return host;
@@ -108,6 +108,90 @@ public class BigPictureUiTests : IDisposable
         Settle();
         vm.FocusKey.Should().Be("hero.0");
         Shot(window, language, "01-home");
+        window.Close();
+    }
+
+    [AvaloniaTheory]
+    [InlineData(Loc.Arabic)]
+    [InlineData(Loc.English)]
+    public void Every_screen_renders_and_the_ring_finds_its_target(string language)
+    {
+        var host = DesignHost();
+        host.News.Add(("[News headline 1]", "2026/11/18", "https://example.invalid/1"));
+        host.News.Add(("[News headline 2]", "2026/11/12", "https://example.invalid/2"));
+        var (window, vm) = Open(language, host);
+        void Check(string name, bool ring = true)
+        {
+            Settle();
+            if (ring) window.FocusRect().Should().NotBeNull($"the ring needs a target on {name} ({vm.FocusKey})");
+            Shot(window, language, name);
+        }
+
+        vm.GoTab(BpScreen.Library);
+        Check("03-library");
+
+        var elden = host.GameList[0];
+        vm.OpenGame(elden);
+        Check("04-game");
+
+        vm.Play(elden);
+        Check("05-update-prompt");
+        vm.CloseOverlay();
+
+        host.PendingLaunch = new TaskCompletionSource<BpLaunchResult>();
+        vm.Play(host.GameList[1]);
+        Check("06-launching", ring: false);
+        vm.CloseOverlay();
+        // xUnit ينتظر كل async void: التشغيل المعلّق يجب أن ينتهي
+        host.PendingLaunch.SetResult(BpLaunchResult.Success);
+
+        host.PendingLaunch = null;
+        host.NextLaunch = new BpLaunchResult(false, Loc.Instance["bpWhySteam"], "Steam is not signed in. Sign in to Steam, then try again.", true);
+        vm.OpenGame(elden);
+        vm.Press(App.BigPicture.Input.BpButton.Right);
+        vm.Press(App.BigPicture.Input.BpButton.Left);
+        vm.ClickUpdateButton(1);
+        vm.ClickUpdateButton(1);
+        Check("07-launch-failed");
+        vm.CloseOverlay();
+
+        vm.GoTab(BpScreen.Search);
+        vm.SetQuery("el");
+        vm.Press(App.BigPicture.Input.BpButton.Up);
+        Check("08-search");
+        vm.SetQuery("zzq");
+        Check("09-search-no-match");
+
+        vm.GoTab(BpScreen.Home);
+        vm.ToggleGuide();
+        Check("10-menu", ring: false);
+        vm.CloseOverlay();
+
+        vm.OpenSettings();
+        Check("11-settings-general", ring: false);
+        host.Settings.Glyphs = "ps";
+        vm.ClickSection(1);
+        Check("12-settings-controller-ps", ring: false);
+        vm.Press(vm.IsRtl ? App.BigPicture.Input.BpButton.Left : App.BigPicture.Input.BpButton.Right);
+        Check("12b-settings-row");
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Library_of_1000_games_builds_only_the_visible_rows()
+    {
+        var host = FakeBpHost.WithGames(1000);
+        var (window, vm) = Open(Loc.English, host);
+        vm.GoTab(BpScreen.Library);
+        Settle();
+
+        var cards = window.GetVisualDescendants().OfType<Button>().Count(b => b.Classes.Contains("bpcard") && (BpFocus.GetKey(b)?.StartsWith("lib.") ?? false));
+        cards.Should().BeLessThan(100);
+
+        for (var i = 0; i < 30; i++) vm.Press(App.BigPicture.Input.BpButton.Down);
+        Settle();
+        vm.LibraryIndex.Should().Be(210);
+        window.FocusRect().Should().NotBeNull("the focused row is scrolled into view");
         window.Close();
     }
 

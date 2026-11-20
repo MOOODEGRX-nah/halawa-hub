@@ -43,7 +43,10 @@ internal sealed class FakeBpHost : IBpHost
     public void OpenUpdateInLauncher(BpGame game) => Calls.Add("update:" + game.Key);
     public void OpenLauncher(BpGame game) => Calls.Add("launcher:" + game.Key);
     public void OpenGameSettings(BpGame game) => Calls.Add("settings:" + game.Key);
-    public void OpenNews(BpGame game, int index) => Calls.Add("news:" + index);
+    public void OpenNews(BpGame game, string url) => Calls.Add("news:" + url);
+    public List<(string Title, string Date, string Url)> News { get; } = new();
+    public Task<IReadOnlyList<(string Title, string Date, string Url)>> LoadNewsAsync(BpGame game) =>
+        Task.FromResult<IReadOnlyList<(string Title, string Date, string Url)>>(News);
     public IReadOnlyList<BpNotification> Notifications => NotificationList;
     public void DismissNotification(BpNotification item) => NotificationList.Remove(item);
     public void ClearNotifications() => NotificationList.Clear();

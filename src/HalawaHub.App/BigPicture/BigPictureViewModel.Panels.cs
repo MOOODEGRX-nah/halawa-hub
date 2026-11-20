@@ -333,6 +333,13 @@ public sealed partial class BigPictureViewModel
 
     public string FailText => _failure?.Detail ?? "";
     public bool IsLaunchFailed => LaunchState == BpLaunchState.Failed;
+    public bool IsLaunchDone => LaunchState == BpLaunchState.Done;
+    public HalawaHub.App.Controls.BadgeState LaunchBadge => LaunchState switch
+    {
+        BpLaunchState.Done => HalawaHub.App.Controls.BadgeState.Done,
+        BpLaunchState.Failed => HalawaHub.App.Controls.BadgeState.Error,
+        _ => HalawaHub.App.Controls.BadgeState.Pending,
+    };
 
     private void RefreshOverlayLabels()
     {

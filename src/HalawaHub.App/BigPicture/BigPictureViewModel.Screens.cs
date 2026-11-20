@@ -49,6 +49,7 @@ public sealed partial class BigPictureViewModel
     }
 
     public bool HasHero => _hero != null;
+    public bool HeroHasNoArt => _hero is { HeroUrl: null } && _hero.CoverUrl != null;
     public bool HeroIsFavorite => _hero?.IsFavorite == true;
 
     /// إزاحة صف البطاقات: تبقى البطاقة المركَّزة رابعة من البداية ما أمكن
@@ -214,6 +215,9 @@ public sealed partial class BigPictureViewModel
 
     public ObservableCollection<BpFilterItem> Filters { get; } = new();
     public ObservableCollection<BpCardItem> LibraryCards { get; } = new();
+    /// صفوف من 7 بطاقات: قائمة الصفوف افتراضية، فالمكتبة الكبيرة لا تُبنى كلها
+    public ObservableCollection<IReadOnlyList<BpCardItem>> LibraryRows { get; } = new();
+    public int LibraryRow => _libIndex / LibraryColumns;
     public int LibraryIndex => _libIndex;
     public int FilterIndex => Math.Max(0, Filters.ToList().FindIndex(f => f.Id == _platform));
     public bool FilterForward => _platformForward;
@@ -246,6 +250,9 @@ public sealed partial class BigPictureViewModel
             .ToList();
         for (var i = 0; i < list.Count; i++)
             LibraryCards.Add(new BpCardItem { FocusKey = "lib." + i, Game = list[i], Index = i, Delay = TimeSpan.FromMilliseconds(Math.Min(i, 20) * 30) });
+        LibraryRows.Clear();
+        for (var r = 0; r < LibraryCards.Count; r += LibraryColumns)
+            LibraryRows.Add(LibraryCards.Skip(r).Take(LibraryColumns).ToList());
         _libIndex = Math.Clamp(_libIndex, 0, Math.Max(0, LibraryCards.Count - 1));
         LibraryVersion++;
     }
@@ -306,12 +313,12 @@ public sealed partial class BigPictureViewModel
     }
 
     /// أخبار Steam للعبة المفتوحة (تملؤها الواجهة بعد تحميلها)
-    public void SetNews(IEnumerable<(string Title, string Date)> news)
+    public void SetNews(IEnumerable<(string Title, string Date, string Url)> news)
     {
         NewsItems.Clear();
         var i = 0;
-        foreach (var (title, date) in news)
-            NewsItems.Add(new BpButtonItem { FocusKey = "news." + i++, Id = date, Label = title });
+        foreach (var (title, date, url) in news)
+            NewsItems.Add(new BpButtonItem { FocusKey = "news." + i++, Id = url, Label = title, Note = date });
         if (_gameCol == 1 && NewsItems.Count == 0) _gameCol = 0;
         SyncFocus();
     }
@@ -332,7 +339,7 @@ public sealed partial class BigPictureViewModel
     private void ActGame()
     {
         if (_hero is not { } g) return;
-        if (_gameCol == 1) { _host.OpenNews(g, _gameIndex); ShowToast(T("bpNewsOpened")); return; }
+        if (_gameCol == 1) { if (_gameIndex < NewsItems.Count) _host.OpenNews(g, NewsItems[_gameIndex].Id); ShowToast(T("bpNewsOpened")); return; }
         RunGameButton(_gameIndex);
     }
 
@@ -389,6 +396,8 @@ public sealed partial class BigPictureViewModel
     public ObservableCollection<BpCardItem> Results { get; } = new();
     public string Query => _query;
     public bool HasQuery => _query.Length > 0;
+    public string QueryShown => _query.Length > 0 ? _query : T("bpSearchPh");
+    public Avalonia.Media.FlowDirection KeyboardDirection => _kbLang == "ar" ? Avalonia.Media.FlowDirection.RightToLeft : Avalonia.Media.FlowDirection.LeftToRight;
     public string KeyboardLanguage => _kbLang;
     public bool NoMatch => _query.Trim().Length > 0 && Results.Count == 0;
     public string NoMatchText => F("bpNoResFor", _query.Trim());
@@ -434,6 +443,7 @@ public sealed partial class BigPictureViewModel
     {
         _query = q;
         RefreshResults();
+        Changed();
     }
 
     private void RefreshResults()

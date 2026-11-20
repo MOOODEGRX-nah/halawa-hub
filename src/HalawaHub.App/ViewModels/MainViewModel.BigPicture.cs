@@ -23,7 +23,7 @@ public partial class MainViewModel
         {
             var message = LaunchProblemMessage(problem, card.Name, detail) ?? "";
             Log.Info($"big picture launch blocked for {card.Game.Name}: {problem} ({detail})");
-            if (LaunchPreflight.BlocksLaunch(problem)) Notify("launch", message);
+            if (LaunchPreflight.BlocksLaunch(problem)) Notify("launch", message, card);
             var reason = Loc.Instance[problem switch
             {
                 LaunchProblem.DriveNotConnected => "bpWhyDrive",

@@ -47,6 +47,8 @@ internal sealed class FakeBpHost : IBpHost
     public List<(string Title, string Date, string Url)> News { get; } = new();
     public Task<IReadOnlyList<(string Title, string Date, string Url)>> LoadNewsAsync(BpGame game) =>
         Task.FromResult<IReadOnlyList<(string Title, string Date, string Url)>>(News);
+    public event Action<BpNotification>? NotificationArrived;
+    public void Arrive(BpNotification n) { NotificationList.Insert(0, n); NotificationArrived?.Invoke(n); }
     public IReadOnlyList<BpNotification> Notifications => NotificationList;
     public void DismissNotification(BpNotification item) => NotificationList.Remove(item);
     public void ClearNotifications() => NotificationList.Clear();
@@ -383,6 +385,64 @@ public class BigPictureNavigationTests : IDisposable
         vm.Press(BpButton.Y);
         host.NotificationList.Should().BeEmpty();
         vm.Hints.Select(h => h.Button).Should().Equal("b");
+    }
+
+    [Fact]
+    public void A_new_notification_pops_up_shakes_the_bell_and_opens_the_panel()
+    {
+        var host = FakeBpHost.WithGames(3);
+        var gate = new TaskCompletionSource();
+        var vm = new BigPictureViewModel(host, _ => gate.Task);
+
+        host.Arrive(new BpNotification { Id = "n1", Kind = "free", Title = "Free this week on Epic", Unread = true });
+
+        vm.Incoming!.Id.Should().Be("n1");
+        vm.BellVersion.Should().Be(1);
+        vm.UnreadCount.Should().Be(1);
+        vm.OpenIncoming();
+        vm.Overlay.Should().Be(BpOverlay.Notifications);
+        vm.Incoming.Should().BeNull();
+        vm.NotifItems[0].IsNew.Should().BeTrue();
+        gate.SetResult();
+    }
+
+    [Fact]
+    public void Notification_actions_update_retry_and_show()
+    {
+        var host = FakeBpHost.WithGames(3);
+        var g = host.GameList[1];
+        host.NotificationList.Add(new BpNotification { Id = "u", Kind = "upd", Title = "u", ActionId = "update", ActionLabel = "Update in Steam", Game = g });
+        host.NotificationList.Add(new BpNotification { Id = "f", Kind = "fail", Title = "f", ActionId = "retry", ActionLabel = "Try again", Game = g });
+        host.NotificationList.Add(new BpNotification { Id = "s", Kind = "scan", Title = "s", ActionId = "show", ActionLabel = "Show" });
+        var vm = Vm(host);
+
+        vm.OpenNotifications();
+        vm.Press(BpButton.A);
+        host.Calls.Should().Contain("update:" + g.Key);
+        vm.Overlay.Should().Be(BpOverlay.None);
+
+        vm.OpenNotifications();
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.A);
+        host.Calls.Should().Contain("launch:" + g.Key);
+
+        vm.OpenNotifications();
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.A);
+        vm.Screen.Should().Be(BpScreen.Library);
+    }
+
+    [Fact]
+    public void Notification_times_read_like_the_design()
+    {
+        var now = new DateTime(2026, 11, 20, 15, 0, 0);
+        BigPictureHost.RelativeTime(now.AddSeconds(-20), now).Should().Be("Now");
+        BigPictureHost.RelativeTime(now.AddMinutes(-2), now).Should().Be("2 min ago");
+        BigPictureHost.RelativeTime(now.AddMinutes(-70), now).Should().Be("1 hour ago");
+        BigPictureHost.RelativeTime(now.AddDays(-1), now).Should().Be("Yesterday");
+        Loc.Instance.Language = Loc.Arabic;
+        BigPictureHost.RelativeTime(now.AddMinutes(-2), now).Should().Be("قبل دقيقتين");
     }
 
     [Fact]

@@ -336,6 +336,27 @@ public partial class BigPictureWindow : Window
 
     private void OnGuideScrimPressed(object? sender, PointerPressedEventArgs e) => _vm.CloseOverlay();
 
+    private void OnClearNotificationsClick(object? sender, RoutedEventArgs e) => _vm.ClickClearNotifications();
+
+    private void OnNotificationPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (Item<BpNotifItem>(sender) is { } item) _vm.ClickNotification(item.Index);
+    }
+
+    private void OnNotificationActionClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpNotifItem>(sender) is { } item) _vm.ClickNotificationAction(item.Index);
+        e.Handled = true;
+    }
+
+    private void OnNotificationDismissClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpNotifItem>(sender) is { } item) _vm.ClickNotificationDismiss(item.Index);
+        e.Handled = true;
+    }
+
+    private void OnIncomingPressed(object? sender, PointerPressedEventArgs e) => _vm.OpenIncoming();
+
     private void OnGuideClick(object? sender, RoutedEventArgs e) => _vm.ToggleGuide();
     private void OnBellClick(object? sender, RoutedEventArgs e) => _vm.OpenNotifications();
     private void OnSettingsClick(object? sender, RoutedEventArgs e)

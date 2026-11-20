@@ -48,6 +48,9 @@ public sealed partial class Loc
         ["bpMotionInfo"] = "الحركات تتبع «تقليل الحركة» في الإعدادات › المظهر.",
         ["bpLangNote"] = "يتغير اتجاه الواجهة مع اللغة.",
         ["bpExitRow"] = "الخروج من الشاشة الكبيرة", ["bpExitRowN"] = "تُغلق الشاشة الكبيرة وتفتح نافذة Halawa العادية. يد التحكم تبقى تعمل في المكتبة.",
+        ["bpNtUpdT"] = "تحديث متوفر لـ {0}", ["bpNtUpdB"] = "ينزّله Steam قبل أن تبدأ اللعبة.", ["bpNtScanT"] = "انتهى الفحص",
+        ["bpNtAppT"] = "إصدار جديد من Halawa-Hub", ["bpNtAppB"] = "افتح النافذة العادية ثم الإعدادات › التحديثات لتثبيته.", ["bpNtFreeT"] = "مجانية هذا الأسبوع على Epic",
+        ["bpNow"] = "الآن", ["bpMinAgo"] = "قبل {0} دقيقة", ["bpHourAgo"] = "قبل ساعة", ["bpHoursAgo"] = "قبل {0} ساعات",
         ["bpWhyDrive"] = "القرص غير موصول", ["bpWhyFiles"] = "ملفات اللعبة غير موجودة", ["bpWhyLauncher"] = "المشغّل غير مثبت", ["bpWhySteam"] = "Steam غير مسجّل الدخول",
         ["bpController"] = "يد التحكم موصولة", ["bpNoController"] = "لوحة المفاتيح", ["bpSaved"] = "تُحفظ التغييرات تلقائيًا",
     };
@@ -89,6 +92,9 @@ public sealed partial class Loc
         ["bpMotionInfo"] = "Animations follow Reduce motion in Settings › Appearance.",
         ["bpLangNote"] = "The interface direction follows the language.",
         ["bpExitRow"] = "Exit Big Picture", ["bpExitRowN"] = "Big Picture closes and the normal Halawa window opens. The controller still works in the library.",
+        ["bpNtUpdT"] = "{0}: update available", ["bpNtUpdB"] = "Steam downloads it before the game starts.", ["bpNtScanT"] = "Scan finished",
+        ["bpNtAppT"] = "A new version of Halawa-Hub", ["bpNtAppB"] = "Open the normal window, then Settings › Updates, to install it.", ["bpNtFreeT"] = "Free this week on Epic",
+        ["bpNow"] = "Now", ["bpMinAgo"] = "{0} min ago", ["bpHourAgo"] = "1 hour ago", ["bpHoursAgo"] = "{0} hours ago",
         ["bpWhyDrive"] = "The drive isn't connected", ["bpWhyFiles"] = "The game files are missing", ["bpWhyLauncher"] = "The launcher isn't installed", ["bpWhySteam"] = "Steam is not signed in",
         ["bpController"] = "Controller connected", ["bpNoController"] = "Keyboard", ["bpSaved"] = "Changes are saved automatically",
     };

@@ -25,6 +25,7 @@ public partial class BigPictureWindow
     private BpScreen _lastScreen = BpScreen.Home;
     private BpOverlay _lastOverlay = BpOverlay.None;
     private string _lastQuery = "";
+    private int _bellV, _incomingV;
 
     /// دخول ما تغيّر فقط، مرة واحدة لكل تغيير
     private void Animate()
@@ -59,9 +60,13 @@ public partial class BigPictureWindow
                 case BpOverlay.Update: _ = MotionSettings.AnimateAsync(UpdatePanel, TimeSpan.FromSeconds(0.42), MotionSettings.DialogEasing, 0, 0.94, 18); break;
                 case BpOverlay.Launch: _ = MotionSettings.AnimateAsync(LaunchPanel, TimeSpan.FromSeconds(0.42), MotionSettings.DialogEasing, 0, 0.94, 18); break;
                 case BpOverlay.Guide: SlideIn(GuideSheet, -520, 0.5, 0, BpSprings.Track); break;
+                case BpOverlay.Notifications: SlideIn(NotifSheet, 660, 0.5, 0, BpSprings.Track); StaggerNotifications(); break;
             }
             _lastOverlay = vm.Overlay;
         }
+
+        if (vm.BellVersion != _bellV) { _bellV = vm.BellVersion; BellShake(); }
+        if (vm.IncomingVersion != _incomingV) { _incomingV = vm.IncomingVersion; if (vm.Incoming != null) ShowIncoming(); }
 
         // لا نتائج: الأيقونة تهتز مع كل حرف لا يطابق شيئًا، و"?" يقفز مرة
         if (vm.Query != _lastQuery)
@@ -147,6 +152,38 @@ public partial class BigPictureWindow
             Children = { Frame(0, (ScaleTransform.ScaleXProperty, 0.0), (ScaleTransform.ScaleYProperty, 0.0)), Frame(1, (ScaleTransform.ScaleXProperty, 1.0), (ScaleTransform.ScaleYProperty, 1.0)) },
         };
         try { await anim.RunAsync(s); } catch (Exception ex) { Log.Error("pop failed", ex); }
+    }
+
+    /// bellA: الجرس يهتز عند وصول إشعار
+    private async void BellShake()
+    {
+        if (!MotionSettings.Enabled) return;
+        var r = new RotateTransform();
+        BellIcon.RenderTransformOrigin = new RelativePoint(0.5, 0.08, RelativeUnit.Relative);
+        BellIcon.RenderTransform = r;
+        var anim = new Animation { Duration = TimeSpan.FromSeconds(0.9), Easing = new CubicEaseOut() };
+        foreach (var (cue, a) in new[] { (0.0, 0.0), (0.12, -18.0), (0.26, 15.0), (0.40, -11.0), (0.54, 7.0), (0.68, -3.0), (1.0, 0.0) })
+            anim.Children.Add(Frame(cue, (RotateTransform.AngleProperty, a)));
+        try { await anim.RunAsync(r); } catch (Exception ex) { Log.Error("bell failed", ex); }
+    }
+
+    /// ntoIn ثم شريط التقدم 5 ثوانٍ (يتوقف مع الإشعار، لا حلقة)
+    private async void ShowIncoming()
+    {
+        SlideIn(IncomingToast, 660, 0.6, 0, BpSprings.Open);
+        if (!MotionSettings.Enabled) return;
+        var s = new ScaleTransform();
+        IncomingBar.RenderTransform = s;
+        var bar = new Animation { Duration = TimeSpan.FromSeconds(5), FillMode = FillMode.Forward, Children = { Frame(0, (ScaleTransform.ScaleXProperty, 1.0)), Frame(1, (ScaleTransform.ScaleXProperty, 0.0)) } };
+        try { await bar.RunAsync(s); } catch (Exception ex) { Log.Error("incoming bar failed", ex); }
+    }
+
+    private void StaggerNotifications()
+    {
+        if (!MotionSettings.Enabled) return;
+        var i = 0;
+        foreach (var row in NotifSheet.GetVisualDescendants().OfType<Border>().Where(b => b.Classes.Contains("ntr")))
+            _ = MotionSettings.AnimateAsync(row, TimeSpan.FromSeconds(0.45), MotionSettings.EnterEasing, 0, 1, 0, delay: TimeSpan.FromMilliseconds(60 + i++ * 60));
     }
 
     /// A: وميض الحلقة، علامة الضغط، وموجة عبر نقاط الشبكة

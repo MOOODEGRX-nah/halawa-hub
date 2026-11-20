@@ -24,6 +24,7 @@ public class BigPictureUiTests : IDisposable
     public BigPictureUiTests() => MotionSettings.Enabled = false;
     public void Dispose()
     {
+        _longDelay.TrySetResult();
         MotionSettings.Enabled = true;
         Loc.Instance.Language = Loc.Arabic;
     }
@@ -55,10 +56,13 @@ public class BigPictureUiTests : IDisposable
         return host;
     }
 
-    private static (BigPictureWindow Window, BigPictureViewModel Vm) Open(string language, FakeBpHost? host = null)
+    /// تأخير 5 ثوانٍ (الإشعار القادم) ينتظر حتى يُطلق، والباقي فوري
+    private readonly TaskCompletionSource _longDelay = new();
+
+    private (BigPictureWindow Window, BigPictureViewModel Vm) Open(string language, FakeBpHost? host = null)
     {
         Loc.Instance.Language = language;
-        var vm = new BigPictureViewModel(host ?? DesignHost(), _ => Task.CompletedTask);
+        var vm = new BigPictureViewModel(host ?? DesignHost(), d => d >= TimeSpan.FromSeconds(5) ? _longDelay.Task : Task.CompletedTask);
         var window = new BigPictureWindow(vm, null) { Width = 1920, Height = 1080 };
         window.Show();
         Settle();
@@ -174,6 +178,21 @@ public class BigPictureUiTests : IDisposable
         Check("12-settings-controller-ps", ring: false);
         vm.Press(vm.IsRtl ? App.BigPicture.Input.BpButton.Left : App.BigPicture.Input.BpButton.Right);
         Check("12b-settings-row");
+        vm.CloseSettings();
+
+        host.NotificationList.Add(new BpNotification { Id = "a", Kind = "upd", Title = Loc.Instance.Format("bpNtUpdT", "Elden Ring"), Body = Loc.Instance["bpNtUpdB"], Time = Loc.Instance.Format("bpMinAgo", 2), Unread = true, ActionId = "update", ActionLabel = Loc.Instance["bpUpdNow"], Game = elden });
+        host.NotificationList.Add(new BpNotification { Id = "b", Kind = "scan", Title = Loc.Instance["bpNtScanT"], Body = "6 games found, 1 new: Celeste.", Time = Loc.Instance["bpHourAgo"], Unread = true, ActionId = "show", ActionLabel = Loc.Instance["bpNtShow"] });
+        host.NotificationList.Add(new BpNotification { Id = "c", Kind = "fail", Title = Loc.Instance.Format("bpFailTitle", "Valorant"), Body = "Riot Client is not running.", Time = Loc.Instance["bpYesterday"], ActionId = "retry", ActionLabel = Loc.Instance["bpRetry"], Game = host.GameList[5] });
+        host.NotificationList.Add(new BpNotification { Id = "d", Kind = "app", Title = Loc.Instance["bpNtAppT"], Body = Loc.Instance["bpNtAppB"], Time = Loc.Instance["bpYesterday"] });
+        vm.Press(App.BigPicture.Input.BpButton.Notifications);
+        vm.Press(App.BigPicture.Input.BpButton.Down);
+        Check("13-notifications");
+        vm.Press(App.BigPicture.Input.BpButton.Y);
+        Check("14-notifications-empty", ring: false);
+        vm.CloseOverlay();
+        host.Arrive(new BpNotification { Id = "e", Kind = "free", Title = Loc.Instance["bpNtFreeT"], Body = "[Game title], free until [DATE].", Unread = true });
+        Check("15-notification-arrives");
+        _longDelay.TrySetResult();
         window.Close();
     }
 

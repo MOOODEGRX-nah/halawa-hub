@@ -421,6 +421,7 @@ public sealed partial class BigPictureViewModel
 
     public void OpenNotifications()
     {
+        Incoming = null;
         CloseOverlayQuiet();
         _overlay = BpOverlay.Notifications;
         _ntIndex = 0;
@@ -443,7 +444,7 @@ public sealed partial class BigPictureViewModel
         NotifItems.Clear();
         var i = 0;
         foreach (var n in _host.Notifications)
-            NotifItems.Add(new BpNotifItem { FocusKey = "nt." + i, Model = n, Index = i++, Unread = n.Unread });
+            NotifItems.Add(new BpNotifItem { FocusKey = "nt." + i, Model = n, Index = i++, Unread = n.Unread, IsNew = n.Id == _newId });
         _ntIndex = Math.Clamp(_ntIndex, 0, Math.Max(0, NotifItems.Count - 1));
     }
 
@@ -453,7 +454,62 @@ public sealed partial class BigPictureViewModel
     private void RunNotificationAction()
     {
         if (_ntIndex >= NotifItems.Count) return;
-        NotifItems[_ntIndex].Model.Action?.Invoke();
+        var n = NotifItems[_ntIndex].Model;
+        switch (n.ActionId)
+        {
+            case "update" when n.Game != null:
+                CloseOverlay();
+                _host.OpenUpdateInLauncher(n.Game);
+                ShowToast(F("bpOpenedSteam", n.Game.Name));
+                break;
+            case "retry" when n.Game != null:
+                CloseOverlay();
+                StartLaunch(n.Game);
+                break;
+            case "show":
+                GoTab(BpScreen.Library);
+                break;
+            default:
+                n.Action?.Invoke();
+                break;
+        }
+    }
+
+    // ===== إشعار يصل والشاشة مفتوحة =====
+
+    private string? _newId;
+
+    /// الإشعار القادم (نافذة صغيرة 5 ثوانٍ)، أو null
+    public BpNotification? Incoming { get; private set; }
+    public int IncomingVersion { get; private set; }
+    /// يزيد مع كل وصول: الجرس يهتز
+    public int BellVersion { get; private set; }
+
+    private async void OnNotificationArrived(BpNotification n)
+    {
+        BellVersion++;
+        _newId = n.Id;
+        if (_overlay == BpOverlay.Notifications)
+        {
+            RebuildNotifications();
+            Changed();
+            return;
+        }
+        Incoming = n;
+        var v = ++IncomingVersion;
+        Changed();
+        await _delay(TimeSpan.FromSeconds(5));
+        if (v != IncomingVersion) return;
+        Incoming = null;
+        Changed();
+    }
+
+    /// الضغط على الإشعار القادم يفتح اللوحة
+    public void OpenIncoming()
+    {
+        Incoming = null;
+        IncomingVersion++;
+        OpenNotifications();
     }
 
     private async void DismissFocusedNotification()

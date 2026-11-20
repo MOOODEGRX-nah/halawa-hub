@@ -85,6 +85,9 @@ public sealed class BpNotification
     public bool Unread { get; set; }
     /// نص زر الإجراء، أو null بلا زر
     public string? ActionLabel { get; init; }
+    /// update (حدّث من Steam)، retry (حاول مجددًا)، show (المكتبة)، open (يفتح في النافذة العادية)
+    public string? ActionId { get; init; }
+    public BpGame? Game { get; init; }
     public Action? Action { get; init; }
     public object? Source { get; init; }
 }

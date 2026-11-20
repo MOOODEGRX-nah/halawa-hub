@@ -34,6 +34,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
         BuildSearch();
         BuildSettings();
         BuildGuide();
+        _host.NotificationArrived += OnNotificationArrived;
         RefreshOverlayLabels();
         SyncFocus();
     }

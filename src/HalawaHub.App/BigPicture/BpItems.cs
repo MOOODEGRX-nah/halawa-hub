@@ -36,6 +36,7 @@ public sealed class BpNotifItem : BpItem
     public required BpNotification Model { get; init; }
     public int Index { get; init; }
     public bool HasAction => Model.ActionLabel != null;
+    public bool IsNew { get; init; }
     public bool Unread { get => _unread; set { if (_unread != value) { _unread = value; Raise(); } } }
     public bool Leaving { get => _leaving; set { if (_leaving != value) { _leaving = value; Raise(); } } }
 }

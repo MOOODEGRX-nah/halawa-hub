@@ -59,3 +59,24 @@ public sealed class BpUpper
     public static BpUpper Instance { get; } = new();
     public string this[string key] => Loc.Instance.IsRtl ? Loc.Instance[key] : Loc.Instance[key].ToUpperInvariant();
 }
+
+/// <summary>شكل الإشعار حسب نوعه (.nic.upd / .free / .scan / .fail / .app).</summary>
+public static class BpKind
+{
+    private static readonly System.Collections.Generic.Dictionary<string, (string Path, string Bg, string Border, string Fg)> Kinds = new()
+    {
+        ["upd"] = ("M12 4v12M6 11l6 6 6-6M5 20h14", "#2A1313", "#4A2A12", "#F5A623"),
+        ["free"] = ("M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H8a2.5 2.5 0 0 1 0-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 0 0 0-5c-3 0-4 5-4 5z", "#33157F3D", "#664ADE80", "#4ADE80"),
+        ["scan"] = ("M5 12.5l4.5 4.5L19 7.5", "#1C0E0F", "#2E1616", "#D9C7C7"),
+        ["fail"] = ("M12 8v5M12 16.5v.5M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z", "#597F1D1D", "#8CEF4444", "#FCA5A5"),
+        ["app"] = ("M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5", "#DC2626", "#00000000", "#FFFFFF"),
+    };
+
+    private static (string Path, string Bg, string Border, string Fg) Of(string? kind) =>
+        kind != null && Kinds.TryGetValue(kind, out var k) ? k : Kinds["scan"];
+
+    public static IValueConverter PathOf { get; } = new FuncValueConverter<string?, Geometry>(k => Geometry.Parse(Of(k).Path));
+    public static IValueConverter Background { get; } = new FuncValueConverter<string?, IBrush>(k => new SolidColorBrush(Color.Parse(Of(k).Bg)));
+    public static IValueConverter Border { get; } = new FuncValueConverter<string?, IBrush>(k => new SolidColorBrush(Color.Parse(Of(k).Border)));
+    public static IValueConverter Foreground { get; } = new FuncValueConverter<string?, IBrush>(k => new SolidColorBrush(Color.Parse(Of(k).Fg)));
+}

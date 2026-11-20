@@ -22,6 +22,7 @@ public sealed class BigPictureHost : IBpHost
         _exit = exit;
         _closeApp = closeApp;
         main.Config.BigPicture ??= new BpSettings();
+        Watch();
     }
 
     public BpSettings Settings => _main.Config.BigPicture;
@@ -130,25 +131,73 @@ public sealed class BigPictureHost : IBpHost
             .ToList();
     }
 
-    // ===== الإشعارات (المرحلة 4 تكمل الربط) =====
+    // ===== الإشعارات: نفس إشعارات النافذة العادية بعنوان ونص وإجراء كما في التصميم =====
+
+    public event Action<BpNotification>? NotificationArrived;
+    private bool _watching;
+
+    private void Watch()
+    {
+        if (_watching) return;
+        _watching = true;
+        _main.Notifications.CollectionChanged += (_, e) =>
+        {
+            if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add || e.NewStartingIndex != 0) return;
+            if (e.NewItems?[0] is NotificationItem n) NotificationArrived?.Invoke(Map(n, 0, true));
+        };
+    }
 
     public IReadOnlyList<BpNotification> Notifications
     {
         get
         {
+            Watch();
             var unread = _main.UnreadNotifications;
-            return _main.Notifications.Select((n, i) => new BpNotification
-            {
-                Id = n.At.Ticks + ":" + i,
-                Kind = n.Category switch { "update" => "upd", "launch" => "fail", "scan" => "scan", "appupdate" => "app", _ => "free" },
-                Title = n.Text,
-                Time = n.TimeText,
-                Unread = i < unread,
-                ActionLabel = n.CanOpen ? Loc.Instance["bpNtShow"] : null,
-                Action = n.Open,
-                Source = n,
-            }).ToList();
+            return _main.Notifications.Select((n, i) => Map(n, i, i < unread)).ToList();
         }
+    }
+
+    private BpNotification Map(NotificationItem n, int index, bool unread)
+    {
+        var L = Loc.Instance;
+        var game = n.Game is { } card ? Games.FirstOrDefault(g => ReferenceEquals(g.Source, card)) ?? ToBp(card) : null;
+        var (kind, title, body, actionId, label) = n.Category switch
+        {
+            "update" when game != null => ("upd", L.Format("bpNtUpdT", game.Name), L["bpNtUpdB"], "update", L["bpUpdNow"]),
+            "launch" when game != null => ("fail", L.Format("bpFailTitle", game.Name), n.Text, "retry", L["bpRetry"]),
+            "launch" => ("fail", n.Text, "", (string?)null, (string?)null),
+            "scan" => ("scan", L["bpNtScanT"], n.Text, "show", L["bpNtShow"]),
+            "appupdate" => ("app", L["bpNtAppT"], L["bpNtAppB"], null, null),
+            "free" => ("free", L["bpNtFreeT"], n.Text, n.CanOpen ? "open" : null, n.CanOpen ? L["bpOpen"] : null),
+            _ => ("scan", n.Text, "", null, null),
+        };
+        return new BpNotification
+        {
+            Id = n.At.Ticks + ":" + index,
+            Kind = kind, Title = title, Body = body,
+            Time = RelativeTime(n.At, DateTime.Now),
+            Unread = unread,
+            ActionId = actionId, ActionLabel = label, Game = game,
+            Action = actionId == "open" ? () => { _exit(); n.Open?.Invoke(); } : null,
+            Source = n,
+        };
+    }
+
+    /// "الآن"، "قبل دقيقتين"، "قبل ساعة"، "أمس" كما في التصميم
+    internal static string RelativeTime(DateTime at, DateTime now)
+    {
+        var L = Loc.Instance;
+        var span = now - at;
+        if (span.TotalMinutes < 1) return L["bpNow"];
+        if (span.TotalMinutes < 60)
+        {
+            var m = (int)span.TotalMinutes;
+            // العربية: دقيقة، دقيقتين، 3 دقائق، 11 دقيقة
+            if (L.IsRtl) return m == 1 ? "قبل دقيقة" : m == 2 ? "قبل دقيقتين" : m <= 10 ? $"قبل {m} دقائق" : $"قبل {m} دقيقة";
+            return L.Format("bpMinAgo", m);
+        }
+        if (now.Date == at.Date) return (int)span.TotalHours <= 1 ? L["bpHourAgo"] : L.Format("bpHoursAgo", (int)span.TotalHours);
+        return now.Date.AddDays(-1) == at.Date ? L["bpYesterday"] : at.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     public void DismissNotification(BpNotification item) => _main.DismissNotificationCommand.Execute(item.Source);

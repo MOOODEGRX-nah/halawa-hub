@@ -22,6 +22,8 @@ public sealed class NotificationItem
     public string TimeText => At.ToString("HH:mm", CultureInfo.InvariantCulture);
     /// ما يفتحه الضغط على الإشعار (صفحة العروض مثلًا)، أو لا شيء
     public Action? Open { get; init; }
+    /// اللعبة المعنية (تحديث، فشل تشغيل) إن وُجدت: الشاشة الكبيرة تعرض لها زر إجراء
+    public GameCardViewModel? Game { get; init; }
     public bool CanOpen => Open != null;
 }
 
@@ -115,25 +117,25 @@ public partial class MainViewModel
     };
 
     /// الفئات: update (تحديث لعبة)، launch (فشل تشغيل)، scan (انتهى الفحص)، appupdate (تحديث Halawa)
-    internal void Notify(string category, string text) => Notify(category, () => text);
+    internal void Notify(string category, string text, GameCardViewModel? game = null) => Notify(category, () => text, game: game);
 
     /// نص بمفتاح ترجمة: يُعاد حسابه إن تغيّرت اللغة
     internal void NotifyKey(string category, string key, params object[] args) =>
         Notify(category, () => Loc.Instance.Format(key, args));
 
-    internal void Notify(string category, Func<string> render, Action? open = null)
+    internal void Notify(string category, Func<string> render, Action? open = null, GameCardViewModel? game = null)
     {
         if (!CategoryEnabled(category) || string.IsNullOrWhiteSpace(render())) return;
-        Notifications.Insert(0, new NotificationItem { Category = category, Render = render, Open = open });
+        Notifications.Insert(0, new NotificationItem { Category = category, Render = render, Open = open, Game = game });
         while (Notifications.Count > MaxNotifications) Notifications.RemoveAt(Notifications.Count - 1);
         if (!IsNotificationsOpen) UnreadNotifications++;
         OnPropertyChanged(nameof(HasNoNotifications));
     }
 
     /// مرة واحدة في الجلسة لكل مفتاح (لعبة لها تحديث تُفحص حالتها مرارًا)
-    private void NotifyOnce(string category, string key, string locKey, params object[] args)
+    private void NotifyOnce(string category, string key, string locKey, GameCardViewModel? game, params object[] args)
     {
-        if (_notifiedOnce.Add(category + ":" + key)) NotifyKey(category, locKey, args);
+        if (_notifiedOnce.Add(category + ":" + key)) Notify(category, () => Loc.Instance.Format(locKey, args), game: game);
     }
 
     /// بعد تغيير اللغة: نعيد عرض الإشعارات بنصوص اللغة الجديدة

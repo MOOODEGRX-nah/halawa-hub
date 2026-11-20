@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,6 +42,8 @@ public interface IBpHost
     /// أخبار Steam للعبة (العنوان، التاريخ، الرابط)؛ فارغة لغير Steam
     Task<IReadOnlyList<(string Title, string Date, string Url)>> LoadNewsAsync(BpGame game);
 
+    /// إشعار جديد وصل (يُستدعى على خيط الواجهة)
+    event Action<BpNotification>? NotificationArrived;
     IReadOnlyList<BpNotification> Notifications { get; }
     void DismissNotification(BpNotification item);
     void ClearNotifications();

@@ -11,6 +11,8 @@ namespace HalawaHub.App;
 
 public partial class App : Application
 {
+    internal HalawaHub.App.BigPicture.BigPictureController? BigPicture { get; private set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -28,11 +30,15 @@ public partial class App : Application
             var libraryService = new LibraryService();
             var filterService = new FilterService();
             var updateService = new UpdateService(new UpdateChecker());
-            var window = new MainWindow
-            {
-                DataContext = new MainViewModel(libraryService, filterService, updateService)
-            };
+            var mainVm = new MainViewModel(libraryService, filterService, updateService);
+            var window = new MainWindow { DataContext = mainVm };
             desktop.MainWindow = window;
+
+            // الشاشة الكبيرة: --big-picture يفتحها مباشرة بعد ظهور النافذة العادية
+            BigPicture = new HalawaHub.App.BigPicture.BigPictureController(window, mainVm);
+            if (desktop.Args?.Contains("--big-picture") == true)
+                window.Opened += (_, _) => Dispatcher.UIThread.Post(() => BigPicture.Open(), DispatcherPriority.Background);
+            desktop.Exit += (_, _) => BigPicture.Dispose();
 
             Program.InstanceGuard?.StartListening(() => Dispatcher.UIThread.Post(window.ShowAndFocus));
         }

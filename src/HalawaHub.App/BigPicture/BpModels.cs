@@ -38,8 +38,8 @@ public sealed class BpGame
     public string ShownPlatform => string.IsNullOrEmpty(PlatformShort) ? Platform : PlatformShort;
 
     // النصوص تُقرأ باللغة الحالية؛ تغيير اللغة يعيد بناء العناصر
-    public string HoursText => Services.Loc.Instance.Format("bpHours", FormatHours(Hours));
-    public string HoursShortText => Services.Loc.Instance.Format("bpHoursShort", FormatHours(Hours));
+    public string HoursText => BpPlural.HoursPlayed(Math.Round(Hours, Hours >= 10 || Hours == 0 ? 0 : 1));
+    public string HoursShortText => BpPlural.HoursShort(Math.Round(Hours, Hours >= 10 || Hours == 0 ? 0 : 1));
     public string LastShortText => RelativeDay(LastPlayed, DateTime.Now);
     public string LastLongText => LastPlayed == null
         ? Services.Loc.Instance["bpNever"]
@@ -60,14 +60,9 @@ public sealed class BpGame
         return days switch
         {
             <= 0 => L["bpToday"],
-            1 => L["bpYesterday"],
-            < 7 => L.Format("bpDaysAgo", days),
-            < 14 => L["bpLastWeek"],
-            < 21 => L["bp2Weeks"],
-            < 30 => L.Format("bpWeeksAgo", days / 7),
-            < 60 => L["bpLastMonth"],
-            < 90 => L["bp2Months"],
-            < 365 => L.Format("bpMonthsAgo", days / 30),
+            < 7 => BpPlural.DaysAgo(days),
+            < 30 => BpPlural.WeeksAgo(days / 7),
+            < 365 => BpPlural.MonthsAgo(Math.Max(1, days / 30)),
             _ => L["bpLongAgo"],
         };
     }

@@ -86,6 +86,7 @@ public partial class BigPictureWindow : Window
             _clock.Start();
             _pads?.SetActive(true);
             SyncView(animate: false);
+            PlayIntro();
         };
         Activated += (_, _) => _pads?.SetActive(true);
         // لعبة أمام النافذة: قراءة بطيئة، والأزرار لا تحرّك الشاشة الكبيرة خلفها
@@ -99,13 +100,15 @@ public partial class BigPictureWindow : Window
     {
         if (KeyboardMap.Map(e.Key) is not { } button) return;
         e.Handled = true;
+        if (IntroRunning) { SkipIntro(); return; }
         _vm.Press(button);
     }
 
     private void OnPadButton(BpButton button) => Dispatcher.UIThread.Post(() =>
     {
         // اليد تبقى ترسل وهي في الخلفية (لا نافذة SDL): لا نتحرك خلف لعبة تعمل
-        if (IsActive) _vm.Press(button);
+        if (IsActive && IntroRunning) SkipIntro();
+        else if (IsActive) _vm.Press(button);
         else if (Environment.GetEnvironmentVariable("HALAWAHUB_BP_INPUTLOG") == "1") HalawaHub.Core.Log.Info("gamepad button ignored: Big Picture is not the active window");
     });
 

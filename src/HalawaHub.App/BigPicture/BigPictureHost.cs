@@ -195,7 +195,7 @@ public sealed class BigPictureHost : IBpHost
             "launch" => ("fail", n.Text, "", (string?)null, (string?)null),
             "scan" => ("scan", L["bpNtScanT"], n.Text, "show", L["bpNtShow"]),
             "appupdate" => ("app", L["bpNtAppT"], L["bpNtAppB"], null, null),
-            "free" => ("free", L["bpNtFreeT"], n.Text, n.CanOpen ? "open" : null, n.CanOpen ? L["bpOpen"] : null),
+            "free" => ("free", L["bpNtFreeT"], FreeBody(n.Text), n.CanOpen ? "open" : null, n.CanOpen ? L["bpOpen"] : null),
             _ => ("scan", n.Text, "", null, null),
         };
         return new BpNotification
@@ -210,20 +210,25 @@ public sealed class BigPictureHost : IBpHost
         };
     }
 
+    /// نص المجانيات في النافذة العادية يقول "اضغط لفتح العروض"؛ هنا أسماء الألعاب وموعد انتهائها كما في التصميم
+    private string FreeBody(string fallback)
+    {
+        var games = _main.FreeGames;
+        if (games.Count == 0) return fallback;
+        var sep = Loc.Instance.IsRtl ? "، " : ", ";
+        var ends = games[0].EndsText;
+        if (!Loc.Instance.IsRtl && ends.Length > 0) ends = char.ToLowerInvariant(ends[0]) + ends[1..];
+        return string.Join(sep, games.Select(g => g.Title)) + sep + ends + ".";
+    }
+
     /// "الآن"، "قبل دقيقتين"، "قبل ساعة"، "أمس" كما في التصميم
     internal static string RelativeTime(DateTime at, DateTime now)
     {
         var L = Loc.Instance;
         var span = now - at;
         if (span.TotalMinutes < 1) return L["bpNow"];
-        if (span.TotalMinutes < 60)
-        {
-            var m = (int)span.TotalMinutes;
-            // العربية: دقيقة، دقيقتين، 3 دقائق، 11 دقيقة
-            if (L.IsRtl) return m == 1 ? "قبل دقيقة" : m == 2 ? "قبل دقيقتين" : m <= 10 ? $"قبل {m} دقائق" : $"قبل {m} دقيقة";
-            return L.Format("bpMinAgo", m);
-        }
-        if (now.Date == at.Date) return (int)span.TotalHours <= 1 ? L["bpHourAgo"] : L.Format("bpHoursAgo", (int)span.TotalHours);
+        if (span.TotalMinutes < 60) return BpPlural.MinutesAgo((int)span.TotalMinutes);
+        if (now.Date == at.Date) return BpPlural.HoursAgo(Math.Max(1, (int)span.TotalHours));
         return now.Date.AddDays(-1) == at.Date ? L["bpYesterday"] : at.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture);
     }
 

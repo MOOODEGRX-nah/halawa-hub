@@ -245,7 +245,7 @@ public sealed partial class BigPictureViewModel
     public int FilterIndex => Math.Max(0, Filters.ToList().FindIndex(f => f.Id == _platform));
     public bool FilterForward => _platformForward;
     public int LibraryVersion { get; private set; }
-    public string LibraryCountText => F("bpGames", LibraryCards.Count);
+    public string LibraryCountText => BpPlural.Games(LibraryCards.Count);
     public BpGame? FocusedLibraryGame => _libIndex < LibraryCards.Count ? LibraryCards[_libIndex].Game : null;
 
     private void BuildLibrary()

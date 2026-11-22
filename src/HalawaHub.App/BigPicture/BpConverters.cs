@@ -93,3 +93,13 @@ public static class BpKind
     public static IValueConverter Border { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "o", s => new SolidColorBrush(Color.Parse(s))));
     public static IValueConverter Foreground { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "f", s => new SolidColorBrush(Color.Parse(s))));
 }
+
+/// <summary>عنوان النافذة (في Alt+Tab وشريط المهام) باللغة الحالية.</summary>
+public sealed class BpWindowTitle : System.ComponentModel.INotifyPropertyChanged
+{
+    public static BpWindowTitle Instance { get; } = new();
+    private BpWindowTitle() => Loc.Instance.LanguageChanged += (_, _) =>
+        PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(Title)));
+    public string Title => "Halawa Hub — " + Loc.Instance["bp"];
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+}

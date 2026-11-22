@@ -199,7 +199,7 @@ public partial class BigPictureWindow
     /// الضوء يتبع مركز العنصر المركَّز
     private BpGridLight[]? _lights;
     /// أضواء الصفحات الأربع (تُجمع مرة واحدة: البحث في كل النافذة مع كل ضغطة مكلف)
-    private BpGridLight[] Lights => _lights ??= Root.GetVisualDescendants().OfType<BpGridLight>().ToArray();
+    private BpGridLight[] Lights => _lights ??= Root.GetVisualDescendants().OfType<BpGridLight>().Where(g => !ReferenceEquals(g, IntroGrid)).ToArray();
 
     private void MoveLight(Rect r)
     {

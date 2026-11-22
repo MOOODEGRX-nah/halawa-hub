@@ -7,7 +7,7 @@
         xmlns:behaviors="using:HalawaHub.App.Behaviors"
         x:Class="HalawaHub.App.BigPicture.BigPictureWindow"
         x:DataType="bp:BigPictureViewModel"
-        Title="Halawa Hub — Big Picture"
+        Title="{Binding Title, Source={x:Static bp:BpWindowTitle.Instance}}"
         SystemDecorations="None" CanResize="False" ShowInTaskbar="True"
         Background="#0A0404" Icon="/Assets/icon.ico">
 
@@ -1250,6 +1250,32 @@
           <TextBlock x:Name="ToastText" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
         </StackPanel>
       </Border>
+
+      <!-- ===== بداية الشاشة الكبيرة: الشعار يتوهج ثم تظهر الواجهة (أي زر يتخطاها) ===== -->
+      <Panel x:Name="Intro" Background="#0A0404" IsVisible="False">
+        <Border x:Name="IntroGlow" Width="1300" Height="1300" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0" IsHitTestVisible="False">
+          <Border.Background>
+            <RadialGradientBrush>
+              <GradientStop Color="#66B91C1C" Offset="0"/><GradientStop Color="#1FB91C1C" Offset="0.4"/><GradientStop Color="#000A0404" Offset="0.72"/>
+            </RadialGradientBrush>
+          </Border.Background>
+        </Border>
+        <bpc:BpGridLight x:Name="IntroGrid" LightX="960" LightY="470" Opacity="0"/>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="26" Margin="0,-40,0,0">
+          <Border x:Name="IntroLogo" Width="168" Height="168" CornerRadius="38" ClipToBounds="True" Background="Black" HorizontalAlignment="Center"
+                  BorderBrush="#4DEF4444" BorderThickness="1" BoxShadow="0 0 70 0 #A6EF4444" Opacity="0" RenderTransformOrigin="50%,50%">
+            <Image Source="/Assets/logo.png" Stretch="UniformToFill"/>
+          </Border>
+          <StackPanel x:Name="IntroText" Spacing="6" HorizontalAlignment="Center" Opacity="0">
+            <TextBlock Text="Halawa Hub" FontFamily="fonts:Inter#Inter" FontWeight="ExtraBold" FontSize="58" HorizontalAlignment="Center" FlowDirection="LeftToRight"/>
+            <TextBlock Text="{l:Loc bp}" FontSize="26" FontWeight="SemiBold" Foreground="#F5A623" HorizontalAlignment="Center"/>
+          </StackPanel>
+          <Border Width="260" Height="4" CornerRadius="2" Background="#2A1313" HorizontalAlignment="Center" ClipToBounds="True">
+            <Border x:Name="IntroBar" CornerRadius="2" Background="{StaticResource BpRedGrad}" HorizontalAlignment="Left" Width="260"
+                    RenderTransformOrigin="0%,50%" BoxShadow="0 0 12 0 #B3EF4444"/>
+          </Border>
+        </StackPanel>
+      </Panel>
     </Panel>
   </Viewbox>
 </Window>

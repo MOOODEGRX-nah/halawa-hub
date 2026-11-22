@@ -180,8 +180,8 @@ public class BigPictureUiTests : IDisposable
         Check("12b-settings-row");
         vm.CloseSettings();
 
-        host.NotificationList.Add(new BpNotification { Id = "a", Kind = "upd", Title = Loc.Instance.Format("bpNtUpdT", "Elden Ring"), Body = Loc.Instance["bpNtUpdB"], Time = Loc.Instance.Format("bpMinAgo", 2), Unread = true, ActionId = "update", ActionLabel = Loc.Instance["bpUpdNow"], Game = elden });
-        host.NotificationList.Add(new BpNotification { Id = "b", Kind = "scan", Title = Loc.Instance["bpNtScanT"], Body = "6 games found, 1 new: Celeste.", Time = Loc.Instance["bpHourAgo"], Unread = true, ActionId = "show", ActionLabel = Loc.Instance["bpNtShow"] });
+        host.NotificationList.Add(new BpNotification { Id = "a", Kind = "upd", Title = Loc.Instance.Format("bpNtUpdT", "Elden Ring"), Body = Loc.Instance["bpNtUpdB"], Time = BpPlural.MinutesAgo(2), Unread = true, ActionId = "update", ActionLabel = Loc.Instance["bpUpdNow"], Game = elden });
+        host.NotificationList.Add(new BpNotification { Id = "b", Kind = "scan", Title = Loc.Instance["bpNtScanT"], Body = "6 games found, 1 new: Celeste.", Time = BpPlural.HoursAgo(1), Unread = true, ActionId = "show", ActionLabel = Loc.Instance["bpNtShow"] });
         host.NotificationList.Add(new BpNotification { Id = "c", Kind = "fail", Title = Loc.Instance.Format("bpFailTitle", "Valorant"), Body = "Riot Client is not running.", Time = Loc.Instance["bpYesterday"], ActionId = "retry", ActionLabel = Loc.Instance["bpRetry"], Game = host.GameList[5] });
         host.NotificationList.Add(new BpNotification { Id = "d", Kind = "app", Title = Loc.Instance["bpNtAppT"], Body = Loc.Instance["bpNtAppB"], Time = Loc.Instance["bpYesterday"] });
         vm.Press(App.BigPicture.Input.BpButton.Notifications);
@@ -265,6 +265,45 @@ public class BigPictureUiTests : IDisposable
         Settle();
         var added = LogText()[Math.Min(before, LogText().Length)..];
         added.Should().NotContain("failed ::");
+        window.Close();
+    }
+
+    [AvaloniaTheory]
+    [InlineData(Loc.Arabic)]
+    [InlineData(Loc.English)]
+    public void Startup_intro_shows_the_logo_and_a_press_skips_it(string language)
+    {
+        MotionSettings.Enabled = true;
+        BigPictureWindow.IntroHold = TimeSpan.FromSeconds(60);
+        try
+        {
+        var (window, vm) = Open(language);
+        window.IntroRunning.Should().BeTrue();
+        Thread.Sleep(900);
+        Shot(window, language, "00-intro");
+        window.IntroRunning.Should().BeTrue();
+
+        window.KeyPress(Key.Right, RawInputModifiers.None, PhysicalKey.ArrowRight, null);
+        vm.FocusKey.Should().Be("card.0", "the press that skips the intro does nothing else");
+        var until = DateTime.UtcNow.AddSeconds(10);
+        while (window.IntroRunning && DateTime.UtcNow < until) { Dispatcher.UIThread.RunJobs(); AvaloniaHeadlessPlatform.ForceRenderTimerTick(); Thread.Sleep(10); }
+        Settle();
+        window.IntroRunning.Should().BeFalse();
+        window.GetVisualDescendants().OfType<Panel>().First(p => p.Name == "Intro").IsVisible.Should().BeFalse();
+        var next = vm.IsRtl ? Key.Left : Key.Right;
+        window.KeyPress(next, RawInputModifiers.None, vm.IsRtl ? PhysicalKey.ArrowLeft : PhysicalKey.ArrowRight, null);
+        vm.FocusKey.Should().Be("card.1");
+        window.Close();
+        }
+        finally { BigPictureWindow.IntroHold = TimeSpan.FromMilliseconds(1250); }
+    }
+
+    [AvaloniaFact]
+    public void Reduce_motion_skips_the_intro()
+    {
+        MotionSettings.Enabled = false;
+        var (window, _) = Open(Loc.English);
+        window.IntroRunning.Should().BeFalse();
         window.Close();
     }
 

@@ -23,6 +23,7 @@ public sealed class BigPictureHost : IBpHost
         _closeApp = closeApp;
         main.Config.BigPicture ??= new BpSettings();
         Watch();
+        WatchLibrary();
     }
 
     public BpSettings Settings => _main.Config.BigPicture;
@@ -32,7 +33,33 @@ public sealed class BigPictureHost : IBpHost
     /// تُعاد قراءة المكتبة بعد فحص جديد
     public void Invalidate() => _games = null;
 
-    internal static BpGame ToBp(GameCardViewModel c) => new()
+    public event Action<bool>? DataChanged;
+    private readonly HashSet<GameCardViewModel> _sizeWatched = new();
+    private Avalonia.Threading.DispatcherTimer? _rescan;
+
+    /// الحجم يُحسب في الخلفية: نعيد الرسم حين يصل
+    private void WatchSize(GameCardViewModel c)
+    {
+        if (!_sizeWatched.Add(c)) return;
+        c.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(GameCardViewModel.SizeOnDiskText)) DataChanged?.Invoke(false);
+        };
+    }
+
+    /// فحص جديد يضيف الألعاب واحدة واحدة: نعيد البناء مرة بعد أن يهدأ
+    private void WatchLibrary()
+    {
+        _main.Games.CollectionChanged += (_, _) =>
+        {
+            _rescan?.Stop();
+            _rescan = new Avalonia.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
+            _rescan.Tick += (_, _) => { _rescan?.Stop(); _games = null; DataChanged?.Invoke(true); };
+            _rescan.Start();
+        };
+    }
+
+    internal BpGame ToBp(GameCardViewModel c) => new()
     {
         Key = c.Game.Platform + ":" + c.Game.Id,
         Name = c.Name,
@@ -49,7 +76,7 @@ public sealed class BigPictureHost : IBpHost
         SteamAppId = c.HasNews ? c.Game.Id : null,
         HeroUrl = c.HasNews ? SteamHero(c.Game.Id) : null,
         HeaderUrl = c.HasNews ? $"https://cdn.cloudflare.steamstatic.com/steam/apps/{c.Game.Id}/header.jpg" : c.CoverImageUrlFallback,
-        SizeLookup = () => { c.EnsureSizeRequested(); return c.SizeOnDiskText; },
+        SizeLookup = () => { WatchSize(c); c.EnsureSizeRequested(); return c.SizeOnDiskText; },
         Source = c,
     };
 

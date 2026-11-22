@@ -226,7 +226,7 @@ public partial class BigPictureWindow : Window
                 new KeyFrame { Cue = new Cue(1), Setters = { new Avalonia.Styling.Setter(TranslateTransform.XProperty, 0.0), new Avalonia.Styling.Setter(TranslateTransform.YProperty, 0.0) } },
             },
         };
-        await anim.RunAsync(shift);
+        try { await anim.RunAsync(Ring); } catch (Exception ex) { HalawaHub.Core.Log.Error("bump failed", ex); }
     }
 
     // ===== الساعة والرسالة =====

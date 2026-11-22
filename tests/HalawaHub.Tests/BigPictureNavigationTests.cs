@@ -49,6 +49,8 @@ internal sealed class FakeBpHost : IBpHost
     public Task<IReadOnlyList<(string Title, string Date, string Url)>> LoadNewsAsync(BpGame game) =>
         Task.FromResult<IReadOnlyList<(string Title, string Date, string Url)>>(News);
     public event Action<BpNotification>? NotificationArrived;
+    public event Action<bool>? DataChanged;
+    public void Rescan(params BpGame[] added) { GameList.AddRange(added); DataChanged?.Invoke(true); }
     public void Arrive(BpNotification n) { NotificationList.Insert(0, n); NotificationArrived?.Invoke(n); }
     public IReadOnlyList<BpNotification> Notifications => NotificationList;
     public void DismissNotification(BpNotification item) => NotificationList.Remove(item);
@@ -446,6 +448,50 @@ public class BigPictureNavigationTests : IDisposable
         BigPictureHost.RelativeTime(now.AddDays(-1), now).Should().Be("Yesterday");
         Loc.Instance.Language = Loc.Arabic;
         BigPictureHost.RelativeTime(now.AddMinutes(-2), now).Should().Be("قبل دقيقتين");
+    }
+
+    [AvaloniaFact]
+    public void A_library_rescan_while_open_shows_new_games_and_keeps_the_hero()
+    {
+        var host = FakeBpHost.WithGames(3);
+        var vm = Vm(host);
+        vm.Press(BpButton.Right);
+        var hero = vm.Hero;
+
+        host.Rescan(FakeBpHost.Game(9));
+
+        vm.LibraryCards.Should().HaveCount(4);
+        vm.Hero.Should().BeSameAs(hero);
+        vm.FocusKey.Should().Be("card.1");
+    }
+
+    [AvaloniaFact]
+    public void Auto_button_icons_follow_the_connected_controller()
+    {
+        var host = FakeBpHost.WithGames(2);
+        var vm = Vm(host);
+        vm.UsePsGlyphs.Should().BeFalse();
+        vm.SetPad(new PadInfo("DualSense", PadKind.PlayStation, 60));
+        vm.UsePsGlyphs.Should().BeTrue();
+        vm.BatteryBars.Should().Be(3);
+        vm.ContextText.Should().Be("Controller connected");
+        vm.SetPad(new PadInfo("Xbox", PadKind.Xbox, -1));
+        vm.UsePsGlyphs.Should().BeFalse();
+        vm.HasBattery.Should().BeFalse();
+        host.Settings.Glyphs = "ps";
+        vm.UsePsGlyphs.Should().BeTrue("a fixed choice wins over the connected controller");
+        vm.SetPad(null);
+        vm.ContextText.Should().Be("Keyboard");
+    }
+
+    [AvaloniaFact]
+    public void An_empty_library_does_not_crash_any_screen()
+    {
+        var vm = Vm(new FakeBpHost());
+        vm.FocusKey.Should().Be("more");
+        foreach (var b in new[] { BpButton.Up, BpButton.A, BpButton.Up, BpButton.A, BpButton.RB, BpButton.A, BpButton.X, BpButton.RB, BpButton.A, BpButton.Menu, BpButton.Down, BpButton.A })
+            vm.Press(b);
+        vm.Hero.Should().BeNull();
     }
 
     [AvaloniaFact]

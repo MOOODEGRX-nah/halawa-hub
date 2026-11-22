@@ -114,7 +114,7 @@ public partial class BigPictureWindow
             FillMode = FillMode.Both,
             Children = { Frame(0, (TranslateTransform.XProperty, fromX)), Frame(1, (TranslateTransform.XProperty, 0.0)) },
         };
-        try { await anim.RunAsync(t); } catch (Exception ex) { Log.Error("slide failed", ex); }
+        try { await anim.RunAsync(target); } catch (Exception ex) { Log.Error("slide failed", ex); }
     }
 
     /// sbShake: اهتزاز ودوران قصير يخفت (0.9 ثانية)
@@ -133,7 +133,7 @@ public partial class BigPictureWindow
             a.Children.Add(Frame(f.Cue, (TranslateTransform.XProperty, f.X)));
             r.Children.Add(Frame(f.Cue, (RotateTransform.AngleProperty, f.A)));
         }
-        try { await Task.WhenAll(a.RunAsync(move), r.RunAsync(rotate)); } catch (Exception ex) { Log.Error("shake failed", ex); }
+        try { await Task.WhenAll(a.RunAsync(target), r.RunAsync(target)); } catch (Exception ex) { Log.Error("shake failed", ex); }
     }
 
     /// qIn: الشارة تظهر بقفزة (بدل الطفو الدائم في التصميم، حتى لا تتحرك وهي ساكنة)
@@ -151,7 +151,7 @@ public partial class BigPictureWindow
             FillMode = FillMode.Both,
             Children = { Frame(0, (ScaleTransform.ScaleXProperty, 0.0), (ScaleTransform.ScaleYProperty, 0.0)), Frame(1, (ScaleTransform.ScaleXProperty, 1.0), (ScaleTransform.ScaleYProperty, 1.0)) },
         };
-        try { await anim.RunAsync(s); } catch (Exception ex) { Log.Error("pop failed", ex); }
+        try { await anim.RunAsync(target); } catch (Exception ex) { Log.Error("pop failed", ex); }
     }
 
     /// bellA: الجرس يهتز عند وصول إشعار
@@ -164,7 +164,7 @@ public partial class BigPictureWindow
         var anim = new Animation { Duration = TimeSpan.FromSeconds(0.9), Easing = new CubicEaseOut() };
         foreach (var (cue, a) in new[] { (0.0, 0.0), (0.12, -18.0), (0.26, 15.0), (0.40, -11.0), (0.54, 7.0), (0.68, -3.0), (1.0, 0.0) })
             anim.Children.Add(Frame(cue, (RotateTransform.AngleProperty, a)));
-        try { await anim.RunAsync(r); } catch (Exception ex) { Log.Error("bell failed", ex); }
+        try { await anim.RunAsync(BellIcon); } catch (Exception ex) { Log.Error("bell failed", ex); }
     }
 
     /// ntoIn ثم شريط التقدم 5 ثوانٍ (يتوقف مع الإشعار، لا حلقة)
@@ -175,7 +175,7 @@ public partial class BigPictureWindow
         var s = new ScaleTransform();
         IncomingBar.RenderTransform = s;
         var bar = new Animation { Duration = TimeSpan.FromSeconds(5), FillMode = FillMode.Forward, Children = { Frame(0, (ScaleTransform.ScaleXProperty, 1.0)), Frame(1, (ScaleTransform.ScaleXProperty, 0.0)) } };
-        try { await bar.RunAsync(s); } catch (Exception ex) { Log.Error("incoming bar failed", ex); }
+        try { await bar.RunAsync(IncomingBar); } catch (Exception ex) { Log.Error("incoming bar failed", ex); }
     }
 
     private void StaggerNotifications()

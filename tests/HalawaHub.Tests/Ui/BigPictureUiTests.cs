@@ -214,6 +214,70 @@ public class BigPictureUiTests : IDisposable
         window.Close();
     }
 
+    [AvaloniaTheory]
+    [InlineData(2560, 1440)]
+    [InlineData(3840, 2160)]
+    public void Bigger_screens_scale_the_same_layout(int width, int height)
+    {
+        var (window, vm) = Open(Loc.English);
+        var at1080 = window.FocusRect()!.Value;
+        window.Width = width;
+        window.Height = height;
+        Settle();
+
+        var root = window.GetVisualDescendants().OfType<Panel>().First(p => p.Name == "Root");
+        root.Bounds.Width.Should().Be(1920, "the design canvas never changes, the Viewbox scales it");
+        window.FocusRect()!.Value.Should().Be(at1080);
+        root.TranslatePoint(new Avalonia.Point(1920, 1080), window)!.Value.X.Should().BeApproximately(width, 1);
+        Shot(window, "en", $"20-home-{width}x{height}");
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Motion_runs_without_errors_when_a_notification_arrives()
+    {
+        // regression: the incoming popup slide threw InvalidCastException
+        MotionSettings.Enabled = true;
+        var host = DesignHost();
+        var (window, vm) = Open(Loc.English, host);
+        string LogText() => Directory.Exists(HalawaHub.Core.Log.LogDir)
+            ? string.Concat(Directory.GetFiles(HalawaHub.Core.Log.LogDir).Select(f => { using var s = new FileStream(f, FileMode.Open, FileAccess.Read, FileShare.ReadWrite); return new StreamReader(s).ReadToEnd(); }))
+            : "";
+        var before = LogText().Length;
+        {
+            host.Arrive(new BpNotification { Id = "x", Kind = "scan", Title = "Scan finished", Unread = true });
+            vm.OpenGame(host.GameList[0]);
+            vm.ToggleGuide();
+            vm.CloseOverlay();
+            vm.OpenNotifications();
+            vm.CloseOverlay();
+            vm.Press(App.BigPicture.Input.BpButton.Left);
+            vm.Press(App.BigPicture.Input.BpButton.A);
+            vm.OpenSettings();
+            vm.Press(App.BigPicture.Input.BpButton.A);
+            vm.Press(App.BigPicture.Input.BpButton.A);
+            vm.CloseSettings();
+            vm.GoTab(BpScreen.Search);
+            vm.SetQuery("zzq");
+            for (var i = 0; i < 40; i++) { Settle(); Thread.Sleep(10); }
+        }
+        _longDelay.TrySetResult();
+        Settle();
+        var added = LogText()[Math.Min(before, LogText().Length)..];
+        added.Should().NotContain("failed ::");
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Reduce_motion_turns_off_gliding_and_light_transitions()
+    {
+        MotionSettings.Enabled = false;
+        var (window, _) = Open(Loc.English);
+        Ring(window).Transitions.Should().BeNullOrEmpty();
+        window.GetVisualDescendants().OfType<BpGridLight>().Should().OnlyContain(g => g.Transitions == null);
+        window.Close();
+    }
+
     [AvaloniaFact]
     public void Arrow_keys_move_the_focus_and_escape_on_home_does_nothing()
     {

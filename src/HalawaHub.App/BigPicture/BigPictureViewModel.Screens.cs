@@ -207,6 +207,19 @@ public sealed partial class BigPictureViewModel
         if (StripIds[_strip] == "favs") { RefreshRow(); _cardIndex = Math.Min(_cardIndex, RowCards.Count); }
     }
 
+    /// فحص جديد للمكتبة والشاشة مفتوحة: نعيد القوائم ونبقي مكان التركيز ما أمكن
+    public void Reload()
+    {
+        var heroKey = _hero?.Key;
+        RefreshRow();
+        _cardIndex = Math.Min(_cardIndex, RowCards.Count);
+        BuildLibraryKeepingFilter();
+        RefreshResults();
+        var hero = _host.Games.FirstOrDefault(g => g.Key == heroKey) ?? RowCards.FirstOrDefault()?.Game ?? _host.Games.FirstOrDefault();
+        if (!ReferenceEquals(hero, _hero)) Hero = hero;
+        Changed();
+    }
+
     // ===== المكتبة =====
 
     private string _platform = "all";
@@ -512,14 +525,6 @@ public sealed partial class BigPictureViewModel
     public void ClickResult(int index)
     {
         if (index < Results.Count) OpenGame(Results[index].Game);
-        SyncFocus();
-    }
-
-    /// كتابة من لوحة المفاتيح الحقيقية في صفحة البحث
-    public void TypeText(string text)
-    {
-        if (_screen != BpScreen.Search || _overlay != BpOverlay.None) return;
-        SetQuery(_query + text.ToLowerInvariant());
         SyncFocus();
     }
 }

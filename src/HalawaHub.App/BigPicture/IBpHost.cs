@@ -44,6 +44,8 @@ public interface IBpHost
 
     /// إشعار جديد وصل (يُستدعى على خيط الواجهة)
     event Action<BpNotification>? NotificationArrived;
+    /// تغيّرت البيانات: true = المكتبة نفسها (فحص جديد)، false = تفصيل (حجم اللعبة وصل)
+    event Action<bool>? DataChanged;
     IReadOnlyList<BpNotification> Notifications { get; }
     void DismissNotification(BpNotification item);
     void ClearNotifications();

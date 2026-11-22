@@ -116,7 +116,7 @@ public sealed class BpSwitch : Panel
                 Frame(0, 1, 1), Frame(0.3, 1.32, 0.84), Frame(0.7, 0.94, 1.05), Frame(1, 1, 1),
             },
         };
-        await anim.RunAsync(scale);
+        try { await anim.RunAsync(knob); } catch (Exception ex) { HalawaHub.Core.Log.Error("switch stretch failed", ex); }
     }
 
     private static KeyFrame Frame(double cue, double sx, double sy) => new()

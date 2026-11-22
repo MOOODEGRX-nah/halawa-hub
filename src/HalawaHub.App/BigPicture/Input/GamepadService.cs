@@ -154,12 +154,14 @@ public sealed unsafe class SdlGamepadSource : IGamepadSource
         }
         _open[id] = (IntPtr)pad;
         MakeCurrent(id, force: true);
+        Log.Info($"gamepad connected: {Current?.Name} ({Current?.Kind}, battery {Current?.Battery})");
     }
 
     private void Close(SDL_JoystickID id)
     {
         if (!_open.Remove(id, out var pad)) return;
         SDL_CloseGamepad((SDL_Gamepad*)pad);
+        Log.Info("gamepad disconnected");
         if (_currentId != id) return;
 
         _repeat.Reset();
@@ -231,8 +233,12 @@ public sealed unsafe class SdlGamepadSource : IGamepadSource
         _ => null,
     };
 
+    /// HALAWAHUB_BP_INPUTLOG=1: كل زر يُكتب في السجل (لتجربة يد جديدة)
+    private static readonly bool LogInput = Environment.GetEnvironmentVariable("HALAWAHUB_BP_INPUTLOG") == "1";
+
     private void Raise(BpButton button)
     {
+        if (LogInput) Log.Info("gamepad button: " + button);
         try { ButtonPressed?.Invoke(button); }
         catch (Exception ex) { Log.Error("gamepad handler failed", ex); }
     }

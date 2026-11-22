@@ -103,6 +103,7 @@ public partial class BigPictureWindow : Window
     {
         // اليد تبقى ترسل وهي في الخلفية (لا نافذة SDL): لا نتحرك خلف لعبة تعمل
         if (IsActive) _vm.Press(button);
+        else if (Environment.GetEnvironmentVariable("HALAWAHUB_BP_INPUTLOG") == "1") HalawaHub.Core.Log.Info("gamepad button ignored: Big Picture is not the active window");
     });
 
     private void OnPadChanged(PadInfo? pad) => Dispatcher.UIThread.Post(() => _vm.SetPad(pad));

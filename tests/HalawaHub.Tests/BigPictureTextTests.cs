@@ -75,6 +75,17 @@ public class BigPictureTextTests : IDisposable
     }
 
     [AvaloniaFact]
+    public void Arabic_sentences_starting_with_a_game_name_stay_right_to_left()
+    {
+        Loc.Instance.Language = Loc.Arabic;
+        App.BigPicture.Controls.BpAutoText.IsRtlText("Elden Ring تعمل الآن").Should().BeTrue();
+        App.BigPicture.Controls.BpAutoText.IsRtlText("Elden Ring").Should().BeFalse();
+        App.BigPicture.Controls.BpAutoText.IsRtlText("2077").Should().BeTrue("no letters: follows the interface");
+        Loc.Instance.Language = Loc.English;
+        App.BigPicture.Controls.BpAutoText.IsRtlText("2077").Should().BeFalse();
+    }
+
+    [AvaloniaFact]
     public void English_counts_use_singular_and_plural()
     {
         Loc.Instance.Language = Loc.English;

@@ -42,15 +42,19 @@ public class BpAutoText : TextBlock
         TextAlignment = textRtl == Loc.Instance.IsRtl ? TextAlignment.Start : TextAlignment.End;
     }
 
-    /// أول حرف قوي يحدد الاتجاه
+    /// <summary>
+    /// أي حرف عربي يجعل النص جملة عربية (من اليمين): "Elden Ring تعمل الآن" جملة عربية تبدأ
+    /// باسم لعبة، وكانت تُعامل كإنجليزية لأن أول حرف لاتيني. نص بلا حروف أصلًا يتبع الواجهة.
+    /// </summary>
     internal static bool IsRtlText(string? text)
     {
         if (string.IsNullOrEmpty(text)) return Loc.Instance.IsRtl;
+        var hasLetter = false;
         foreach (var ch in text)
         {
             if (ch is >= '֐' and <= 'ࣿ' or >= 'יִ' and <= '﷿' or >= 'ﹰ' and <= '﻿') return true;
-            if (char.IsLetter(ch)) return false;
+            if (char.IsLetter(ch)) hasLetter = true;
         }
-        return Loc.Instance.IsRtl;
+        return !hasLetter && Loc.Instance.IsRtl;
     }
 }

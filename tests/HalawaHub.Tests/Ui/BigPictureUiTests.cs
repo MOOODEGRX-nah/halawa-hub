@@ -131,6 +131,9 @@ public class BigPictureUiTests : IDisposable
             Shot(window, language, name);
         }
 
+        vm.SetPad(new App.BigPicture.Input.PadInfo("Xbox Wireless Controller", App.BigPicture.Input.PadKind.Xbox, 70));
+        for (var i = 0; i < 20; i++) vm.Press(vm.IsRtl ? App.BigPicture.Input.BpButton.Left : App.BigPicture.Input.BpButton.Right);
+        Check("02c-see-all");
         vm.GoTab(BpScreen.Library);
         Check("03-library");
 
@@ -167,6 +170,7 @@ public class BigPictureUiTests : IDisposable
         Check("09-search-no-match");
 
         vm.GoTab(BpScreen.Home);
+        host.NotificationList.Add(new BpNotification { Id = "u0", Kind = "scan", Title = "x", Unread = true });
         vm.ToggleGuide();
         Check("10-menu", ring: false);
         vm.CloseOverlay();

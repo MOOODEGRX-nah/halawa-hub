@@ -42,6 +42,9 @@ public static class BpIs
 
     public static IValueConverter FailTitle { get; } = new FuncValueConverter<bool, IBrush>(bad => bad ? Pink : Text);
 
+    /// قلب الرسم أفقيًا في العربية (للأسهم)
+    public static IValueConverter FlipX { get; } = new FuncValueConverter<bool, ITransform?>(rtl => rtl ? new ScaleTransform(-1, 1) : null);
+
     public static IValueConverter Positive { get; } = new FuncValueConverter<int, bool>(n => n > 0);
 
     /// شريط البطارية رقم N يضيء إن كان عدد الأشرطة ≥ N

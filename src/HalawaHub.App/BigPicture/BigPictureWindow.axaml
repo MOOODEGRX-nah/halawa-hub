@@ -179,6 +179,23 @@
     <Style Selector="Button.bpcard.f Border.cpl"><Setter Property="Height" Value="44"/><Setter Property="Margin" Value="0,10,0,0"/><Setter Property="Opacity" Value="1"/></Style>
 
     <!-- "عرض الكل" (.c.more) -->
+    <Style Selector="Border.mi">
+      <Setter Property="Background" Value="#241010"/>
+      <Setter Property="RenderTransform" Value="translateX(0px)"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="{x:Static bp:BpSprings.Lift}"/>
+          <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.3"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.bpcard.f Border.mi">
+      <Setter Property="Background" Value="{StaticResource BpRedHot}"/>
+      <Setter Property="BoxShadow" Value="0 0 22 0 #8CEF4444"/>
+      <Setter Property="RenderTransform" Value="translateX(6px)"/>
+    </Style>
+    <Style Selector="Rectangle.dash"><Setter Property="Stroke" Value="#3A1518"/><Setter Property="StrokeDashArray" Value="3,2"/></Style>
+    <Style Selector="Button.bpcard.f Rectangle.dash"><Setter Property="StrokeDashArray" Value="{x:Null}"/><Setter Property="Stroke" Value="#7F1D1D"/></Style>
     <Style Selector="Border.more">
       <Setter Property="CornerRadius" Value="18"/>
       <Setter Property="Background" Value="{StaticResource BpSurface}"/>
@@ -334,6 +351,8 @@
 
     <!-- عناصر القائمة الجانبية والإعدادات (.si) -->
     <Style Selector="Button.si">
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
       <Setter Property="Height" Value="64"/>
       <Setter Property="Padding" Value="18,0"/>
       <Setter Property="FontSize" Value="20"/>
@@ -564,10 +583,12 @@
                 </ItemsControl>
                 <Button Classes="bpcard" Classes.f="{Binding MoreCard.IsFocused}" Focusable="False" Click="OnMoreClick"
                         bpc:BpFocus.Key="more" bpc:BpFocus.Radius="18" Width="204" Height="306">
-                  <Panel><Border Classes="more"/><Rectangle Stroke="#3A1518" StrokeThickness="2" StrokeDashArray="3,2" RadiusX="18" RadiusY="18"/>
+                  <Panel><Border Classes="more"/><Rectangle Classes="dash" StrokeThickness="2" RadiusX="18" RadiusY="18"/>
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="14">
-                      <Border x:Name="MoreIcon" Width="64" Height="64" CornerRadius="32" Background="#241010" HorizontalAlignment="Center">
-                        <c:VectorIcon Data="M5 12h14M13 6l6 6-6 6" Size="26" StrokeWidth="2.4" Foreground="White"/>
+                      <Border x:Name="MoreIcon" Classes="mi" Width="64" Height="64" CornerRadius="32" HorizontalAlignment="Center">
+                        <!-- السهم يشير لاتجاه القراءة: يسارًا في العربية -->
+                        <c:VectorIcon Data="M5 12h14M13 6l6 6-6 6" Size="26" StrokeWidth="2.4" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      RenderTransform="{Binding IsRtl, Converter={x:Static bp:BpIs.FlipX}}"/>
                       </Border>
                       <TextBlock Text="{Binding MoreCard.Label}" FontSize="19" FontWeight="SemiBold" Foreground="#D9C7C7" HorizontalAlignment="Center"/>
                     </StackPanel>
@@ -874,7 +895,7 @@
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="16" HorizontalAlignment="Right" VerticalAlignment="Center">
           <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,6,0" IsVisible="{Binding HasPad}" VerticalAlignment="Center">
             <c:VectorIcon Size="24" StrokeWidth="2" Foreground="#D9C7C7" Width="34" Height="26"
-                          Data="M9 3h16c4.4 0 7 4 7.6 9.5.6 5.6-.6 10.5-4 10.5-2.6 0-3.7-3.4-6.6-3.4h-10c-2.9 0-4 3.4-6.6 3.4-3.4 0-4.6-4.9-4-10.5C2 7 4.6 3 9 3z M9 9v6 M6 12h6"/>
+                          Data="M9 3h16c4.4 0 7 4 7.6 9.5.6 5.6-.6 10.5-4 10.5-2.6 0-3.7-3.4-6.6-3.4h-10c-2.9 0-4 3.4-6.6 3.4-3.4 0-4.6-4.9-4-10.5C2 7 4.6 3 9 3z M9 9v6 M6 12h6 M22.4 10.5a.6 .6 0 1 0 1.2 0a.6 .6 0 1 0 -1.2 0 M25.4 13.5a.6 .6 0 1 0 1.2 0a.6 .6 0 1 0 -1.2 0"/>
             <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasBattery}" FlowDirection="LeftToRight" VerticalAlignment="Center">
               <Border Width="6" Height="16" CornerRadius="2" Background="{Binding BatteryBars, Converter={x:Static bp:BpIs.Bar}, ConverterParameter=1}"/>
               <Border Width="6" Height="16" CornerRadius="2" Background="{Binding BatteryBars, Converter={x:Static bp:BpIs.Bar}, ConverterParameter=2}"/>
@@ -884,11 +905,18 @@
           </StackPanel>
           <TextBlock x:Name="Clock" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="26" FlowDirection="LeftToRight"
                      VerticalAlignment="Center" Margin="0,0,6,0" IsVisible="{Binding Settings.ShowClock}"/>
-          <Button x:Name="BellButton" Classes="ib" Focusable="False" Click="OnBellClick">
-            <Panel>
-              <c:VectorIcon x:Name="BellIcon" Data="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0" Size="24" Foreground="#E8D8D8"/>
-            </Panel>
-          </Button>
+          <Panel>
+            <Button x:Name="BellButton" Classes="ib" Focusable="False" Click="OnBellClick">
+              <c:VectorIcon x:Name="BellIcon" Data="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0" Size="24" Foreground="#E8D8D8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Button>
+            <!-- عدد غير المقروء على حافة الجرس (.ib .cnt) -->
+            <Border IsVisible="{Binding UnreadCount, Converter={x:Static bp:BpIs.Positive}}" IsHitTestVisible="False"
+                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,2,0" MinWidth="26" Height="26" CornerRadius="13"
+                    Padding="7,0" Background="#EF4444" BorderBrush="#0A0404" BorderThickness="3">
+              <TextBlock Text="{Binding UnreadCount}" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="14" Foreground="White"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+          </Panel>
           <Button Classes="ib" Classes.open="{Binding IsSettingsOpen}" Focusable="False" Click="OnSettingsClick">
             <c:SlidersIcon IsFlipped="{Binding IsSettingsOpen}" Foreground="White"/>
           </Button>
@@ -896,13 +924,6 @@
             <c:MenuCloseIcon IsOpen="{Binding IsGuideOpen}" Foreground="#E8D8D8" Width="26" Height="26"/>
           </Button>
         </StackPanel>
-        <!-- عداد الإشعارات فوق الجرس -->
-        <Border Grid.Column="2" IsVisible="{Binding UnreadCount, Converter={x:Static bp:BpIs.Positive}}" IsHitTestVisible="False"
-                HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,-36,160,0" MinWidth="26" Height="26" CornerRadius="13"
-                Padding="7,0" Background="#EF4444" BorderBrush="#0A0404" BorderThickness="3">
-          <TextBlock Text="{Binding UnreadCount}" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="14" Foreground="White"
-                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </Border>
       </Grid>
 
       <!-- ===== نافذة الإعدادات (.setdlg) ===== -->
@@ -1082,6 +1103,12 @@
                 <c:VectorIcon Size="18" StrokeWidth="2.4" Foreground="{StaticResource BpMuted}" Width="26" Height="20"
                               Data="M9 3h16c4.4 0 7 4 7.6 9.5.6 5.6-.6 10.5-4 10.5-2.6 0-3.7-3.4-6.6-3.4h-10c-2.9 0-4 3.4-6.6 3.4-3.4 0-4.6-4.9-4-10.5C2 7 4.6 3 9 3z"/>
                 <TextBlock Text="{Binding ContextPadText}" FontSize="17" Foreground="{StaticResource BpMuted}" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasBattery}" FlowDirection="LeftToRight" VerticalAlignment="Center">
+                  <Border Width="6" Height="16" CornerRadius="2" Background="{Binding BatteryBars, Converter={x:Static bp:BpIs.Bar}, ConverterParameter=1}"/>
+                  <Border Width="6" Height="16" CornerRadius="2" Background="{Binding BatteryBars, Converter={x:Static bp:BpIs.Bar}, ConverterParameter=2}"/>
+                  <Border Width="6" Height="16" CornerRadius="2" Background="{Binding BatteryBars, Converter={x:Static bp:BpIs.Bar}, ConverterParameter=3}"/>
+                  <Border Width="6" Height="16" CornerRadius="2" Background="{Binding BatteryBars, Converter={x:Static bp:BpIs.Bar}, ConverterParameter=4}"/>
+                </StackPanel>
               </StackPanel>
             </Border>
             <Panel>

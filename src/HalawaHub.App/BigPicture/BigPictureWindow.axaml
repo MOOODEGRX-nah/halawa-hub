@@ -594,7 +594,8 @@
                     <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                       <DataTemplate x:DataType="bp:BpFilterItem">
-                        <Button Classes="chip" Classes.on="{Binding IsOn}" Focusable="False" Click="OnFilterClick" Height="54">
+                        <Button Classes="chip" Classes.on="{Binding IsOn}" Focusable="False" Click="OnFilterClick" Height="54"
+                                bpc:BpFocus.Key="{Binding FocusKey}" bpc:BpFocus.Radius="24">
                           <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <TextBlock Text="{Binding Label}" FontSize="19" FontWeight="SemiBold" Foreground="{Binding $parent[Button].Foreground}" VerticalAlignment="Center"/>
                             <Border Classes="cnt" CornerRadius="12" Padding="10,2" VerticalAlignment="Center">
@@ -609,19 +610,25 @@
               </Border>
               <bpc:BpGlyph DockPanel.Dock="Right" Button="x" Ps="{Binding UsePsGlyphs}" Size="34" Margin="0,0,14,0" VerticalAlignment="Center"/>
             </DockPanel>
-            <ScrollViewer x:Name="LibraryScroll" Margin="52,224,0,100" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden"
-                          IsHitTestVisible="True">
-              <ItemsControl x:Name="LibraryGrid" ItemsSource="{Binding LibraryRows}" Margin="20,17,20,40">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><VirtualizingStackPanel Orientation="Vertical"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <!-- نافذة ثابتة من 4 صفوف تتبدل ألعابها عند التمرير: لا بطاقات جديدة ولا تمرير افتراضي مكلف -->
+            <Panel x:Name="LibraryViewport" Margin="52,224,0,100" ClipToBounds="True">
+              <ItemsControl x:Name="LibraryGrid" ItemsSource="{Binding LibraryWindow}" Margin="20,17,20,0" VerticalAlignment="Top">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Vertical"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <ItemsControl ItemsSource="{Binding}" ItemTemplate="{StaticResource BpCardTemplate}" Height="340">
-                      <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="26"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                    </ItemsControl>
+                  <DataTemplate x:DataType="bp:BpRowSlot">
+                    <StackPanel Orientation="Horizontal" Spacing="26" Height="340">
+                      <ContentControl Content="{Binding C0}" ContentTemplate="{StaticResource BpCardTemplate}" IsVisible="{Binding C0, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                      <ContentControl Content="{Binding C1}" ContentTemplate="{StaticResource BpCardTemplate}" IsVisible="{Binding C1, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                      <ContentControl Content="{Binding C2}" ContentTemplate="{StaticResource BpCardTemplate}" IsVisible="{Binding C2, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                      <ContentControl Content="{Binding C3}" ContentTemplate="{StaticResource BpCardTemplate}" IsVisible="{Binding C3, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                      <ContentControl Content="{Binding C4}" ContentTemplate="{StaticResource BpCardTemplate}" IsVisible="{Binding C4, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                      <ContentControl Content="{Binding C5}" ContentTemplate="{StaticResource BpCardTemplate}" IsVisible="{Binding C5, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                      <ContentControl Content="{Binding C6}" ContentTemplate="{StaticResource BpCardTemplate}" IsVisible="{Binding C6, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                    </StackPanel>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-            </ScrollViewer>
+            </Panel>
           </Panel>
 
           <!-- البحث (.sbx / .kb / .sres) -->

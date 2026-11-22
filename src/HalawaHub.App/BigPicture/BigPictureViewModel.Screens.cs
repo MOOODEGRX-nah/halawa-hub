@@ -229,8 +229,18 @@ public sealed partial class BigPictureViewModel
     public ObservableCollection<BpFilterItem> Filters { get; } = new();
     public ObservableCollection<BpCardItem> LibraryCards { get; } = new();
     /// صفوف من 7 بطاقات: قائمة الصفوف افتراضية، فالمكتبة الكبيرة لا تُبنى كلها
-    public ObservableCollection<IReadOnlyList<BpCardItem>> LibraryRows { get; } = new();
+    public ObservableCollection<BpCardRow> LibraryRows { get; } = new();
     public int LibraryRow => _libIndex / LibraryColumns;
+    /// الصفوف الأربعة الظاهرة، والصف الأول منها: الصف المركَّز يبقى ثاني الصفوف ما أمكن
+    public BpRowSlot[] LibraryWindow { get; } = { new(), new(), new(), new() };
+    public int LibraryFirstRow => Math.Max(0, Math.Min(LibraryRow - 1, Math.Max(0, LibraryRows.Count - 2)));
+
+    private void UpdateLibraryWindow()
+    {
+        var first = LibraryFirstRow;
+        for (var i = 0; i < LibraryWindow.Length; i++)
+            LibraryWindow[i].Row = first + i < LibraryRows.Count ? LibraryRows[first + i] : null;
+    }
     public int LibraryIndex => _libIndex;
     public int FilterIndex => Math.Max(0, Filters.ToList().FindIndex(f => f.Id == _platform));
     public bool FilterForward => _platformForward;
@@ -265,7 +275,7 @@ public sealed partial class BigPictureViewModel
             LibraryCards.Add(new BpCardItem { FocusKey = "lib." + i, Game = list[i], Index = i, Delay = TimeSpan.FromMilliseconds(Math.Min(i, 20) * 30) });
         LibraryRows.Clear();
         for (var r = 0; r < LibraryCards.Count; r += LibraryColumns)
-            LibraryRows.Add(LibraryCards.Skip(r).Take(LibraryColumns).ToList());
+            LibraryRows.Add(new BpCardRow(LibraryCards.Skip(r).Take(LibraryColumns).ToList()));
         _libIndex = Math.Clamp(_libIndex, 0, Math.Max(0, LibraryCards.Count - 1));
         LibraryVersion++;
     }
@@ -288,12 +298,30 @@ public sealed partial class BigPictureViewModel
         SetPlatform(Filters[(FilterIndex + 1) % Filters.Count].Id);
     }
 
+    /// التركيز على شريط المنصات فوق الشبكة (فوق من الصف الأول، كما في Steam)
+    private bool _onFilters;
+    public bool LibraryOnFilters => _onFilters;
+
     private void NavLibrary(int dx, int dy)
     {
+        if (_onFilters)
+        {
+            if (dy > 0 && LibraryCards.Count > 0) { _onFilters = false; return; }
+            if (dx != 0)
+            {
+                var f = Math.Clamp(FilterIndex + dx, 0, Filters.Count - 1);
+                if (f != FilterIndex) SetPlatform(Filters[f].Id);
+            }
+            return;
+        }
+
         var i = _libIndex + dx;
         if (dx != 0 && i / LibraryColumns != _libIndex / LibraryColumns) i = _libIndex;
         if (dx != 0 && i < 0) i = _libIndex;
+        if (dy < 0 && _libIndex < LibraryColumns && Filters.Count > 1) { _onFilters = true; return; }
         if (dy != 0) i = _libIndex + dy * LibraryColumns;
+        // نزولًا إلى صف أخير أقصر: آخر لعبة فيه
+        if (dy > 0 && i >= LibraryCards.Count && _libIndex / LibraryColumns < (LibraryCards.Count - 1) / LibraryColumns) i = LibraryCards.Count - 1;
         if (i >= 0 && i < LibraryCards.Count) _libIndex = i;
     }
 

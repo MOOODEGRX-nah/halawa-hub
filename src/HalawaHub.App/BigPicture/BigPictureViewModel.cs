@@ -151,7 +151,10 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
         switch (_screen)
         {
             case BpScreen.Home: ActHome(); break;
-            case BpScreen.Library: if (FocusedLibraryGame is { } g) OpenGame(g); break;
+            case BpScreen.Library:
+                if (_onFilters) { if (LibraryCards.Count > 0) _onFilters = false; }
+                else if (FocusedLibraryGame is { } g) OpenGame(g);
+                break;
             case BpScreen.Game: ActGame(); break;
             case BpScreen.Search: ActSearch(); break;
             case BpScreen.Settings: ActSettings(); break;
@@ -276,7 +279,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
                 1 => "strip." + _strip,
                 _ => _cardIndex >= RowCards.Count ? "more" : "card." + _cardIndex,
             },
-            BpScreen.Library => LibraryCards.Count > 0 ? "lib." + _libIndex : null,
+            BpScreen.Library => _onFilters ? "flt." + _platform : LibraryCards.Count > 0 ? "lib." + _libIndex : null,
             BpScreen.Game => _gameCol == 0 ? "game." + _gameIndex : "news." + _gameIndex,
             BpScreen.Search => _kbZone == 0 ? "kb." + _kbRow + "." + _kbCol : "res." + _resIndex,
             BpScreen.Settings => _setCol == 0 ? "sec." + _section : "row." + _setRow,
@@ -287,6 +290,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
     /// كل تغيير يعيد رسم كل الروابط (المصفوفة صغيرة، والعناصر نفسها لا تُعاد)
     private void Changed()
     {
+        UpdateLibraryWindow();
         FocusKey = ComputeFocusKey();
         foreach (var item in AllItems()) item.IsFocused = item.FocusKey == FocusKey;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));

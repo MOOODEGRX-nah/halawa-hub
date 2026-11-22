@@ -192,15 +192,19 @@ public partial class BigPictureWindow
         _flash = true;
         if (!MotionSettings.Enabled || FocusRect() is not { } r) return;
         var c = r.Center;
-        foreach (var gl in Root.GetVisualDescendants().OfType<BpGridLight>().Where(g => g.IsEffectivelyVisible)) gl.Wave(c.X, c.Y);
+        foreach (var gl in Lights.Where(g => g.IsEffectivelyVisible)) gl.Wave(c.X, c.Y);
         TapMark(c);
     }
 
     /// الضوء يتبع مركز العنصر المركَّز
+    private BpGridLight[]? _lights;
+    /// أضواء الصفحات الأربع (تُجمع مرة واحدة: البحث في كل النافذة مع كل ضغطة مكلف)
+    private BpGridLight[] Lights => _lights ??= Root.GetVisualDescendants().OfType<BpGridLight>().ToArray();
+
     private void MoveLight(Rect r)
     {
         var c = r.Center;
-        foreach (var gl in Root.GetVisualDescendants().OfType<BpGridLight>())
+        foreach (var gl in Lights)
         {
             gl.LightX = c.X;
             gl.LightY = c.Y;

@@ -16,14 +16,17 @@ public static class BpIs
     public static IValueConverter Fav { get; } = new FuncValueConverter<string?, bool>(id => id == "fav");
 
     /// لون إطار القلب: أحمر في المفضلة
-    public static IValueConverter HeartStroke { get; } = new FuncValueConverter<bool, IBrush>(on =>
-        on ? new SolidColorBrush(Color.Parse("#EF4444")) : Brushes.White);
+    private static readonly IBrush Red = new SolidColorBrush(Color.Parse("#EF4444"));
+    private static readonly IBrush Text = new SolidColorBrush(Color.Parse("#F5EDED"));
+    private static readonly IBrush Faded = new SolidColorBrush(Color.Parse("#9C8A8A"));
+    private static readonly IBrush Pink = new SolidColorBrush(Color.Parse("#FCA5A5"));
 
-    public static IValueConverter HeartFill { get; } = new FuncValueConverter<bool, IBrush?>(on =>
-        on ? new SolidColorBrush(Color.Parse("#EF4444")) : null);
+    // الفرش ثابتة: فرشاة جديدة مع كل تحديث تُعيد رسم العنصر بلا داعٍ
+    public static IValueConverter HeartStroke { get; } = new FuncValueConverter<bool, IBrush>(on => on ? Red : Brushes.White);
 
-    public static IValueConverter QueryBrush { get; } = new FuncValueConverter<bool, IBrush>(has =>
-        new SolidColorBrush(Color.Parse(has ? "#F5EDED" : "#9C8A8A")));
+    public static IValueConverter HeartFill { get; } = new FuncValueConverter<bool, IBrush?>(on => on ? Red : null);
+
+    public static IValueConverter QueryBrush { get; } = new FuncValueConverter<bool, IBrush>(has => has ? Text : Faded);
 
     /// عرض مفتاح لوحة المفاتيح: المسافة 490، الحذف والتبديل وتم 190، والحروف 90
     public static IValueConverter KeyWidth { get; } = new FuncValueConverter<string?, double>(id => id switch
@@ -37,8 +40,7 @@ public static class BpIs
     /// المؤشر الجانبي يخفت حين يكون التركيز على الأسطر
     public static IValueConverter Dim { get; } = new FuncValueConverter<bool, double>(dim => dim ? 0.4 : 1);
 
-    public static IValueConverter FailTitle { get; } = new FuncValueConverter<bool, IBrush>(bad =>
-        new SolidColorBrush(Color.Parse(bad ? "#FCA5A5" : "#F5EDED")));
+    public static IValueConverter FailTitle { get; } = new FuncValueConverter<bool, IBrush>(bad => bad ? Pink : Text);
 
     public static IValueConverter Positive { get; } = new FuncValueConverter<int, bool>(n => n > 0);
 
@@ -75,8 +77,19 @@ public static class BpKind
     private static (string Path, string Bg, string Border, string Fg) Of(string? kind) =>
         kind != null && Kinds.TryGetValue(kind, out var k) ? k : Kinds["scan"];
 
-    public static IValueConverter PathOf { get; } = new FuncValueConverter<string?, Geometry>(k => Geometry.Parse(Of(k).Path));
-    public static IValueConverter Background { get; } = new FuncValueConverter<string?, IBrush>(k => new SolidColorBrush(Color.Parse(Of(k).Bg)));
-    public static IValueConverter Border { get; } = new FuncValueConverter<string?, IBrush>(k => new SolidColorBrush(Color.Parse(Of(k).Border)));
-    public static IValueConverter Foreground { get; } = new FuncValueConverter<string?, IBrush>(k => new SolidColorBrush(Color.Parse(Of(k).Fg)));
+    private static readonly System.Collections.Generic.Dictionary<string, object> Built = new();
+
+    private static T Cached<T>(string? kind, string part, Func<string, T> make) where T : class
+    {
+        var key = (kind ?? "scan") + "|" + part;
+        if (Built.TryGetValue(key, out var v)) return (T)v;
+        var made = make(part switch { "p" => Of(kind).Path, "b" => Of(kind).Bg, "o" => Of(kind).Border, _ => Of(kind).Fg });
+        Built[key] = made;
+        return made;
+    }
+
+    public static IValueConverter PathOf { get; } = new FuncValueConverter<string?, Geometry>(k => Cached(k, "p", Geometry.Parse));
+    public static IValueConverter Background { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "b", s => new SolidColorBrush(Color.Parse(s))));
+    public static IValueConverter Border { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "o", s => new SolidColorBrush(Color.Parse(s))));
+    public static IValueConverter Foreground { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "f", s => new SolidColorBrush(Color.Parse(s))));
 }

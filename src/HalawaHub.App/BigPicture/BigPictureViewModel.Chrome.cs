@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HalawaHub.App.BigPicture.Input;
 
 namespace HalawaHub.App.BigPicture;
@@ -42,9 +43,21 @@ public sealed partial class BigPictureViewModel
         : _screen == BpScreen.Library && _overlay == BpOverlay.None ? LibraryCountText
         : T(_pad != null ? "bpController" : "bpNoController");
 
+    private IReadOnlyList<BpHint> _hints = Array.Empty<BpHint>();
+
+    /// نفس القائمة تُعاد ما لم تتغير، حتى لا يُعاد بناء الشريط السفلي مع كل ضغطة
     public IReadOnlyList<BpHint> Hints
     {
         get
+        {
+            var next = BuildHints();
+            if (!next.SequenceEqual(_hints)) _hints = next;
+            return _hints;
+        }
+    }
+
+    private IReadOnlyList<BpHint> BuildHints()
+    {
         {
             // مع تبديل التأكيد والرجوع يتبدل الرمزان في التلميحات أيضًا
             var a = Settings.SwapConfirmBack ? "b" : "a";

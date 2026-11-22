@@ -178,11 +178,30 @@ public class BigPictureNavigationTests : IDisposable
         vm.Press(BpButton.Down);
         vm.LibraryIndex.Should().Be(13);
         vm.Press(BpButton.Down);
-        vm.LibraryIndex.Should().Be(13, "there is no game at 20");
+        vm.LibraryIndex.Should().Be(19, "the last row is shorter: Down lands on its last game");
         vm.Press(BpButton.A);
         vm.Screen.Should().Be(BpScreen.Game);
         vm.Press(BpButton.B);
         vm.Screen.Should().Be(BpScreen.Library);
+    }
+
+    [AvaloniaFact]
+    public void Up_from_the_first_library_row_reaches_the_platform_bar()
+    {
+        var host = FakeBpHost.WithGames(6, i => FakeBpHost.Game(i, platform: i % 2 == 0 ? "Steam" : "Epic"));
+        var vm = Vm(host);
+        vm.GoTab(BpScreen.Library);
+
+        vm.Press(BpButton.Up);
+        vm.FocusKey.Should().Be("flt.all");
+        vm.Press(BpButton.Right);
+        vm.FocusKey.Should().Be("flt.Steam");
+        vm.LibraryCards.Should().OnlyContain(c => c.Game.Platform == "Steam");
+        vm.Press(BpButton.Down);
+        vm.FocusKey.Should().Be("lib.0");
+        vm.Press(BpButton.Up);
+        vm.Press(BpButton.A);
+        vm.FocusKey.Should().Be("lib.0", "A on the bar goes back to the games");
     }
 
     [AvaloniaFact]

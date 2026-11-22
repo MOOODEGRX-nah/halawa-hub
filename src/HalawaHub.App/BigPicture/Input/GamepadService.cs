@@ -14,6 +14,8 @@ public interface IGamepadSource : IDisposable
     event Action<BpButton>? ButtonPressed;
     /// تغيّرت اليد الموصولة (null = لا يد)
     event Action<PadInfo?>? PadChanged;
+    /// زر الشعار (Xbox / PS) ضُغط والشاشة الكبيرة ليست في المقدمة: يفتحها كما في Steam
+    event Action? GuidePressed;
     PadInfo? Current { get; }
     /// true أثناء فتح الشاشة الكبيرة: قراءة سريعة. false: نراقب التوصيل فقط، ببطء
     void SetActive(bool active);
@@ -30,6 +32,8 @@ public sealed unsafe class SdlGamepadSource : IGamepadSource
 {
     private const int ActivePollMs = 16;
     private const int NoPadPollMs = 250;
+    /// في الخلفية مع يد موصولة: زر الشعار يستجيب خلال خُمس ثانية
+    private const int BackgroundPadPollMs = 200;
     private const int IdlePollMs = 1000;
     private const long BatteryEveryMs = 30_000;
 
@@ -44,6 +48,7 @@ public sealed unsafe class SdlGamepadSource : IGamepadSource
 
     public event Action<BpButton>? ButtonPressed;
     public event Action<PadInfo?>? PadChanged;
+    public event Action? GuidePressed;
     public PadInfo? Current { get; private set; }
 
     public SdlGamepadSource()
@@ -92,7 +97,7 @@ public sealed unsafe class SdlGamepadSource : IGamepadSource
                     if (now >= _batteryAt) { _batteryAt = now + BatteryEveryMs; RefreshBattery(); }
                 }
 
-                _wake.WaitOne(!_active ? IdlePollMs : _open.Count > 0 ? ActivePollMs : NoPadPollMs);
+                _wake.WaitOne(!_active ? (_open.Count > 0 ? BackgroundPadPollMs : IdlePollMs) : _open.Count > 0 ? ActivePollMs : NoPadPollMs);
             }
         }
         catch (Exception ex)
@@ -118,7 +123,16 @@ public sealed unsafe class SdlGamepadSource : IGamepadSource
                 Close(e.gdevice.which);
                 break;
             case SDL_EventType.SDL_EVENT_GAMEPAD_BUTTON_DOWN:
-                if (!_active) break;
+                if (!_active)
+                {
+                    if ((SDL_GamepadButton)e.gbutton.button == SDL_GamepadButton.SDL_GAMEPAD_BUTTON_GUIDE)
+                    {
+                        MakeCurrent(e.gbutton.which);
+                        if (LogInput) Log.Info("gamepad guide button (Big Picture not in front)");
+                        try { GuidePressed?.Invoke(); } catch (Exception ex) { Log.Error("guide handler failed", ex); }
+                    }
+                    break;
+                }
                 MakeCurrent(e.gbutton.which);
                 var down = MapButton((SDL_GamepadButton)e.gbutton.button);
                 if (down is BpButton.Up or BpButton.Down or BpButton.Left or BpButton.Right)

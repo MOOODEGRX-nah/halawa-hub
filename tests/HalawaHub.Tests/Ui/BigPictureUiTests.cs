@@ -279,6 +279,34 @@ public class BigPictureUiTests : IDisposable
     }
 
     [AvaloniaFact]
+    public void A_press_is_handled_quickly_with_a_big_library()
+    {
+        // regression: each press took 120-200 ms of UI work (whole-window searches, virtual scroll passes)
+        var host = FakeBpHost.WithGames(1000);
+        var (window, vm) = Open(Loc.English, host);
+        double Measure(Func<int, App.BigPicture.Input.BpButton> button)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            for (var i = 0; i < 20; i++) { vm.Press(button(i)); Dispatcher.UIThread.RunJobs(); }
+            return sw.Elapsed.TotalMilliseconds / 20;
+        }
+
+        var home = Measure(i => i % 2 == 0 ? App.BigPicture.Input.BpButton.Right : App.BigPicture.Input.BpButton.Left);
+        vm.GoTab(BpScreen.Library);
+        Settle();
+        var down = Measure(_ => App.BigPicture.Input.BpButton.Down);
+        var side = Measure(i => i % 2 == 0 ? App.BigPicture.Input.BpButton.Right : App.BigPicture.Input.BpButton.Left);
+        System.IO.File.WriteAllText(Path.Combine(Path.GetTempPath(), "bp-press-ms.txt"), $"home {home:0.0} ms, library down {down:0.0} ms, library sideways {side:0.0} ms");
+
+        vm.LibraryIndex.Should().Be(140);
+        window.FocusRect().Should().NotBeNull("the focused row is in the visible window");
+        home.Should().BeLessThan(60);
+        down.Should().BeLessThan(60);
+        side.Should().BeLessThan(60);
+        window.Close();
+    }
+
+    [AvaloniaFact]
     public void Arrow_keys_move_the_focus_and_escape_on_home_does_nothing()
     {
         var (window, vm) = Open(Loc.English);

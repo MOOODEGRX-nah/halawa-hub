@@ -13,6 +13,8 @@ internal sealed class FakePads : IGamepadSource
 {
     public event Action<BpButton>? ButtonPressed;
     public event Action<PadInfo?>? PadChanged;
+    public event Action? GuidePressed;
+    public void Guide() => GuidePressed?.Invoke();
     public PadInfo? Current { get; set; }
     public bool Active { get; private set; }
     public void SetActive(bool active) => Active = active;
@@ -91,6 +93,24 @@ public class BigPictureEntryTests
         ui.Settle();
         controller.IsOpen.Should().BeTrue();
 
+        controller.Exit();
+        ui.Settle();
+        controller.Dispose();
+    }
+
+    [AvaloniaFact]
+    public void Guide_button_opens_big_picture_from_the_normal_window_like_steam()
+    {
+        using var ui = new UiHarness(Loc.English);
+        ui.Vm.BigPictureOnController = false;
+        var pads = new FakePads();
+        var controller = new BigPictureController(ui.Window, ui.Vm, () => pads);
+        controller.Start(forceBigPicture: false);
+
+        pads.Guide();
+        ui.Settle();
+
+        controller.IsOpen.Should().BeTrue("the guide button opens it even with open-on-connect turned off");
         controller.Exit();
         ui.Settle();
         controller.Dispose();

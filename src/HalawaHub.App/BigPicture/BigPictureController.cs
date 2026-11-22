@@ -57,7 +57,8 @@ public sealed class BigPictureController : IDisposable
     public void Start(bool forceBigPicture)
     {
         if (forceBigPicture || Settings.StartInBigPicture) Open();
-        else EnsureWatching();
+        // نراقب دائمًا: زر الشعار يفتح الشاشة الكبيرة كما في Steam، حتى لو كان الفتح التلقائي مطفأ
+        else EnsureWatching(force: true);
     }
 
     /// المراقبة تعمل فقط حين يحتاجها إعداد (أو والشاشة الكبيرة مفتوحة)
@@ -69,6 +70,15 @@ public sealed class BigPictureController : IDisposable
         _since.Restart();
         _lastPad = _pads.Current;
         _pads.PadChanged += pad => Dispatcher.UIThread.Post(() => OnPadChanged(pad));
+        _pads.GuidePressed += () => Dispatcher.UIThread.Post(OnGuide);
+    }
+
+    /// زر الشعار: يفتح الشاشة الكبيرة، أو يعيدها للمقدمة إن كانت خلف لعبة
+    internal void OnGuide()
+    {
+        if (_window == null) { Log.Info("guide button: opening Big Picture"); Open(); return; }
+        if (_window.WindowState == WindowState.Minimized) _window.WindowState = WindowState.FullScreen;
+        _window.Activate();
     }
 
     internal void OnPadChanged(PadInfo? pad)

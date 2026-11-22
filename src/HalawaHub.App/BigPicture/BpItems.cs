@@ -51,3 +51,47 @@ public sealed class BpFilterItem : BpItem
     public int Count { get; init; }
     public bool IsOn { get => _on; set { if (_on != value) { _on = value; Raise(); } } }
 }
+
+/// <summary>
+/// صف المكتبة بسبع خانات ثابتة: عند التمرير يُعاد استعمال بطاقات الصف بربطها بألعاب أخرى
+/// بدل بناء سبع بطاقات جديدة مع كل خطوة (كان ذلك نحو 200ms لكل ضغطة).
+/// </summary>
+/// <summary>خانة صف في نافذة المكتبة الظاهرة؛ Row يتبدل عند التمرير.</summary>
+public sealed class BpRowSlot : System.ComponentModel.INotifyPropertyChanged
+{
+    private BpCardRow? _row;
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+    public BpCardRow? Row
+    {
+        get => _row;
+        set
+        {
+            if (ReferenceEquals(_row, value)) return;
+            _row = value;
+            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(string.Empty));
+        }
+    }
+
+    public BpCardItem? C0 => _row?.C0;
+    public BpCardItem? C1 => _row?.C1;
+    public BpCardItem? C2 => _row?.C2;
+    public BpCardItem? C3 => _row?.C3;
+    public BpCardItem? C4 => _row?.C4;
+    public BpCardItem? C5 => _row?.C5;
+    public BpCardItem? C6 => _row?.C6;
+}
+
+public sealed class BpCardRow
+{
+    public BpCardRow(IReadOnlyList<BpCardItem> items) => Items = items;
+    public IReadOnlyList<BpCardItem> Items { get; }
+    public BpCardItem? C0 => At(0);
+    public BpCardItem? C1 => At(1);
+    public BpCardItem? C2 => At(2);
+    public BpCardItem? C3 => At(3);
+    public BpCardItem? C4 => At(4);
+    public BpCardItem? C5 => At(5);
+    public BpCardItem? C6 => At(6);
+    private BpCardItem? At(int i) => i < Items.Count ? Items[i] : null;
+}

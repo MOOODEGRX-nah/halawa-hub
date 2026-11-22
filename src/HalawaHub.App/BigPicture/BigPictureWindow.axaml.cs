@@ -28,6 +28,8 @@ public partial class BigPictureWindow : Window
     private readonly IGamepadSource? _pads;
     private readonly TranslateTransform _track = new();
     private readonly TranslateTransform _row = new();
+    private readonly TranslateTransform _libSlide = new();
+    private int _libFirst = -1;
     private readonly DispatcherTimer[] _ringTimers;
     private readonly DispatcherTimer _clock;
     private DispatcherTimer? _toastTimer;
@@ -46,6 +48,7 @@ public partial class BigPictureWindow : Window
 
         Track.RenderTransform = _track;
         RowStrip.RenderTransform = _row;
+        LibraryGrid.RenderTransform = _libSlide;
         ApplyMotion();
 
         _ringTimers = RingPasses.Select((ms, i) =>
@@ -117,9 +120,19 @@ public partial class BigPictureWindow : Window
         // الصفحات: الإزاحة سالبة دائمًا، والعربية تعكسها المرآة تلقائيًا
         _track.X = -_vm.TabIndex * _vm.CanvasWidth;
         _row.X = -_vm.RowOffsetCards * Pitch;
-        // المكتبة: الصف المركَّز يبقى أول صفين ظاهرين
-        var libY = Math.Max(0, _vm.LibraryRow - 1) * 340.0;
-        if (Math.Abs(LibraryScroll.Offset.Y - libY) > 0.5) LibraryScroll.Offset = new Vector(0, libY);
+        // المكتبة: الصفوف تتبدل فورًا، ثم تنزلق من مكانها القديم (كأنها تمررت)
+        var first = _vm.LibraryFirstRow;
+        if (first != _libFirst)
+        {
+            if (animate && _libFirst >= 0 && MotionSettings.Enabled && Math.Abs(first - _libFirst) <= 3)
+            {
+                _libSlide.Transitions = null;
+                _libSlide.Y = (first - _libFirst) * 340.0;
+                _libSlide.Transitions = new Transitions { new DoubleTransition { Property = TranslateTransform.YProperty, Duration = TimeSpan.FromSeconds(0.35), Easing = BpSprings.Glide } };
+                _libSlide.Y = 0;
+            }
+            _libFirst = first;
+        }
         ScheduleRing();
         if (animate) Animate();
     }
@@ -152,18 +165,56 @@ public partial class BigPictureWindow : Window
     {
         var key = _vm.FocusKey;
         if (key == null) return null;
-        return Root.GetVisualDescendants().OfType<Control>()
+        // نبحث في الجزء الذي يملك المفتاح فقط: البحث في كل النافذة كان يأخذ نحو 40ms مع كل ضغطة
+        Visual scope = key.Split('.')[0] switch
+        {
+            "card" or "more" or "hero" or "strip" => HomePage,
+            "lib" => LibraryGrid,
+            "flt" => LibraryPage,
+            "kb" or "res" => SearchPage,
+            "game" or "news" => GamePage,
+            "row" or "sec" => SettingsLayer,
+            "upd" => UpdatePanel,
+            "fail" => LaunchPanel,
+            "nt" => NotifSheet,
+            _ => Root,
+        };
+        return scope.GetVisualDescendants().OfType<Control>()
             .FirstOrDefault(c => BpFocus.GetKey(c) == key && c.IsEffectivelyVisible && c.Bounds.Width > 0);
     }
 
+    /// <summary>
+    /// مكان العنصر المركَّز بعد انتهاء كل الحركات: من التخطيط وحده (بلا تحويلات الرسم التي
+    /// قد تكون في منتصف حركتها)، ثم الإزاحات النهائية المعروفة (الصفحة، صف البطاقات، رفع
+    /// العنصر المركَّز). القياس في منتصف الحركة كان يجعل الحلقة تلحق العنصر على دفعات.
+    /// </summary>
     internal Rect? FocusRect()
     {
         if (FindFocused() is not { } target) return null;
-        var a = target.TranslatePoint(new Point(0, 0), Root);
-        var b = target.TranslatePoint(new Point(target.Bounds.Width, target.Bounds.Height), Root);
-        if (a is not { } p || b is not { } q) return null;
-        return new Rect(new Point(Math.Min(p.X, q.X), Math.Min(p.Y, q.Y)), new Point(Math.Max(p.X, q.X), Math.Max(p.Y, q.Y)));
+        double x = 0, y = 0, extraX = 0;
+        Visual? v = target;
+        while (v != null && v != Root)
+        {
+            x += v.Bounds.X;
+            y += v.Bounds.Y;
+            if (ReferenceEquals(v, RowStrip)) extraX += -_vm.RowOffsetCards * Pitch;
+            if (ReferenceEquals(v, Track)) extraX += -_vm.TabIndex * _vm.CanvasWidth;
+            v = v.GetVisualParent();
+        }
+        if (v == null) return null;
+        var (scale, dy) = FocusedTransform(target);
+        var w = target.Bounds.Width;
+        var h = target.Bounds.Height;
+        return new Rect(x + extraX - w * (scale - 1) / 2, y + dy - h * (scale - 1) / 2, w * scale, h * scale);
     }
+
+    /// تكبير العنصر المركَّز ورفعه كما في أنماطه (.c.f و.btn.f و.key.f و.qsr.f و.ntr.f)
+    private static (double Scale, double Dy) FocusedTransform(Control c) =>
+        c.Classes.Contains("bpcard") ? (1.06, -10)
+        : c.Classes.Contains("key") ? (1.08, 0)
+        : c.Classes.Contains("btn") ? (1.05, 0)
+        : c.Classes.Contains("qsr") || c.Classes.Contains("ntr") ? (1.02, 0)
+        : (1, 0);
 
     private void PlaceRing(bool flash)
     {

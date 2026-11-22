@@ -841,7 +841,7 @@
 
       <!-- ===== الشريط العلوي (.top) ===== -->
       <Grid x:Name="TopBar" Height="120" VerticalAlignment="Top" Margin="72,0" ColumnDefinitions="*,Auto,*">
-        <Button Grid.Column="0" Width="64" Height="64" HorizontalAlignment="Left" Focusable="False" Click="OnGuideClick" CornerRadius="14">
+        <Button x:Name="TopLogo" Grid.Column="0" Width="64" Height="64" HorizontalAlignment="Left" Focusable="False" Click="OnGuideClick" CornerRadius="14">
           <Border CornerRadius="14" BoxShadow="0 0 26 0 #4DEF4444" ClipToBounds="True" Background="Black" BorderBrush="{StaticResource BpLine}" BorderThickness="1">
             <Image Source="/Assets/logo.png" Stretch="UniformToFill"/>
           </Border>
@@ -1252,7 +1252,8 @@
       </Border>
 
       <!-- ===== بداية الشاشة الكبيرة: الشبكة تُرسم، شعاع يعبر، الشعار يلمع، الاسم يصعد حرفًا حرفًا، ثم عبور إلى الرئيسي ===== -->
-      <Panel x:Name="Intro" Background="#050202" IsVisible="False" ClipToBounds="True">
+      <Panel x:Name="Intro" IsVisible="False" ClipToBounds="True">
+        <Border x:Name="IntroBg" Background="#050202"/>
         <Border x:Name="IntroGlow" Width="1500" Height="1500" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0"
                 IsHitTestVisible="False" RenderTransformOrigin="50%,50%" Margin="0,-120,0,0">
           <Border.Background>
@@ -1274,25 +1275,23 @@
           </Border.Background>
         </Border>
         <StackPanel x:Name="IntroContent" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="30" Margin="0,-60,0,0" RenderTransformOrigin="50%,40%">
-          <Panel HorizontalAlignment="Center">
-            <Border x:Name="IntroHalo" Width="232" Height="232" CornerRadius="52" Opacity="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Background="#000000" BoxShadow="0 0 160 50 #80EF4444" RenderTransformOrigin="50%,50%"/>
-            <Border x:Name="IntroLogo" Width="232" Height="232" CornerRadius="52" ClipToBounds="True" Background="Black" HorizontalAlignment="Center"
-                    BorderBrush="#66EF4444" BorderThickness="1.5" BoxShadow="0 0 90 0 #B3EF4444" Opacity="0" RenderTransformOrigin="50%,50%">
-              <Panel>
-                <Image Source="/Assets/logo.png" Stretch="UniformToFill"/>
-                <!-- لمعة تمر على الشعار -->
-                <Border x:Name="IntroShine" Width="90" Height="420" VerticalAlignment="Center" HorizontalAlignment="Center" RenderTransformOrigin="50%,50%">
-                  <Border.Background>
-                    <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
-                      <GradientStop Color="#00FFFFFF" Offset="0"/><GradientStop Color="#8CFFFFFF" Offset="0.5"/><GradientStop Color="#00FFFFFF" Offset="1"/>
-                    </LinearGradientBrush>
-                  </Border.Background>
-                </Border>
-              </Panel>
-            </Border>
+          <!-- الشعار وحده بلا مربع داكن: توهج أحمر حوله، ولمعة تمر على حرف M فقط -->
+          <Panel x:Name="IntroLogo" Width="250" Height="250" HorizontalAlignment="Center" Opacity="0" RenderTransformOrigin="50%,50%">
+            <Image Source="/Assets/logo-mark.png" Stretch="Uniform">
+              <Image.Effect><DropShadowEffect BlurRadius="70" OffsetX="0" OffsetY="0" Color="#EF4444" Opacity="0.9"/></Image.Effect>
+            </Image>
+            <Panel ClipToBounds="True">
+              <Panel.OpacityMask><ImageBrush Source="/Assets/logo-mark.png" Stretch="Uniform"/></Panel.OpacityMask>
+              <Border x:Name="IntroShine" Width="110" Height="520" VerticalAlignment="Center" HorizontalAlignment="Center" RenderTransformOrigin="50%,50%">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
+                    <GradientStop Color="#00FFFFFF" Offset="0"/><GradientStop Color="#CCFFF4EC" Offset="0.5"/><GradientStop Color="#00FFFFFF" Offset="1"/>
+                  </LinearGradientBrush>
+                </Border.Background>
+              </Border>
+            </Panel>
           </Panel>
-          <StackPanel Spacing="10" HorizontalAlignment="Center">
+          <StackPanel x:Name="IntroWords" Spacing="10" HorizontalAlignment="Center">
             <StackPanel x:Name="IntroName" Orientation="Horizontal" HorizontalAlignment="Center" FlowDirection="LeftToRight"/>
             <TextBlock x:Name="IntroSub" Text="{l:Loc bp}" FontSize="30" FontWeight="SemiBold" Foreground="#F5A623" HorizontalAlignment="Center" Opacity="0"/>
           </StackPanel>

@@ -40,6 +40,8 @@ public partial class BigPictureWindow
         IntroRunning = true;
         Intro.IsVisible = true;
         Intro.Opacity = 1;
+        foreach (var v in new Visual[] { IntroBg, IntroGlow, IntroGrid, IntroLogo, IntroWords, IntroLine }) v.ClearValue(OpacityProperty);
+        IntroLogo.Opacity = 0;
         BuildIntroName();
         var cts = _introCts = new CancellationTokenSource();
         var cx = Root.Bounds.Width / 2;
@@ -59,10 +61,9 @@ public partial class BigPictureWindow
 
             // 3) الشعار يظهر كبيرًا بتوهج وارتداد، ثم لمعة تمر عليه
             await Task.Delay(380, cts.Token);
-            _ = Animate(IntroLogo, 0.8, 0, Spring, (OpacityProperty, 0.0, 1.0), (ScaleTransform.ScaleXProperty, 0.55, 1.0), (ScaleTransform.ScaleYProperty, 0.55, 1.0));
-            _ = Animate(IntroHalo, 1.0, 0.15, Out, (OpacityProperty, 0.0, 1.0), (ScaleTransform.ScaleXProperty, 0.6, 1.0), (ScaleTransform.ScaleYProperty, 0.6, 1.0));
-            IntroShine.RenderTransform = new TransformGroup { Children = { new RotateTransform(20), new TranslateTransform(-260, 0) } };
-            _ = Animate(IntroShine, 0.75, 0.55, InOut, (TranslateTransform.XProperty, -260.0, 260.0));
+            ElasticIn(IntroLogo);
+            IntroShine.RenderTransform = new TransformGroup { Children = { new RotateTransform(20), new TranslateTransform(-280, 0) } };
+            _ = Animate(IntroShine, 0.8, 0.75, InOut, (TranslateTransform.XProperty, -280.0, 280.0));
             await Task.Delay(320, cts.Token);
             IntroGrid.Wave(cx, 410);
 
@@ -104,22 +105,74 @@ public partial class BigPictureWindow
     {
         if (!IntroRunning || _introEnding) return;
         _introEnding = true;
-        var seconds = skipped ? 0.3 : 0.6;
+        var t = skipped ? 0.5 : 0.85;
 
-        // 5) عبور: الشعار والاسم يكبران ويتلاشيان، والرئيسي يدخل من خلفهما
-        _ = Animate(IntroContent, seconds, 0, InOut, (ScaleTransform.ScaleXProperty, 1.0, 1.6), (ScaleTransform.ScaleYProperty, 1.0, 1.6));
-        Intro.Transitions = new Transitions { new DoubleTransition { Property = OpacityProperty, Duration = TimeSpan.FromSeconds(seconds), Easing = Out } };
-        Intro.Opacity = 0;
-        _ = MotionSettings.AnimateAsync(PageView, TimeSpan.FromSeconds(seconds + 0.25), Out, 0, 1.06, 0);
-        _ = MotionSettings.AnimateAsync(TopBar, TimeSpan.FromSeconds(seconds + 0.25), Out, 0, 1, -30, delay: TimeSpan.FromSeconds(0.1));
-        await Task.Delay(TimeSpan.FromSeconds(seconds));
+        // 5) الشعار يطير إلى مكانه في الشريط العلوي ويصغر، والخلفية والاسم يتلاشيان،
+        //    والرئيسي يصعد من خلفه: انتقال متصل بدل اختفاء مفاجئ
+        var from = CenterInRoot(IntroLogo);
+        var to = CenterInRoot(TopLogo);
+        var scale = TopLogo.Bounds.Width / Math.Max(1, IntroLogo.Bounds.Width);
+        _ = Animate(IntroLogo, t, 0, InOut,
+            (TranslateTransform.XProperty, 0.0, to.X - from.X), (TranslateTransform.YProperty, 0.0, to.Y - from.Y),
+            (ScaleTransform.ScaleXProperty, 1.0, scale), (ScaleTransform.ScaleYProperty, 1.0, scale));
+        _ = Animate(IntroWords, t * 0.6, 0, Out, (OpacityProperty, 1.0, 0.0), (TranslateTransform.YProperty, 0.0, 30.0));
+        _ = Animate(IntroLine, t * 0.5, 0, Out, (OpacityProperty, 1.0, 0.0), (ScaleTransform.ScaleXProperty, 1.0, 0.0));
+        _ = Animate(IntroBg, t, 0.1, Out, (OpacityProperty, 1.0, 0.0));
+        _ = Animate(IntroGlow, t, 0, Out, (OpacityProperty, 1.0, 0.0));
+        _ = Animate(IntroGrid, t, 0, Out, (OpacityProperty, 1.0, 0.0));
+        _ = MotionSettings.AnimateAsync(PageView, TimeSpan.FromSeconds(t + 0.2), Out, 0, 1.04, 24, delay: TimeSpan.FromSeconds(t * 0.25));
+        _ = MotionSettings.AnimateAsync(TopBar, TimeSpan.FromSeconds(t), Out, 0, 1, -24, delay: TimeSpan.FromSeconds(t * 0.35));
+        await Task.Delay(TimeSpan.FromSeconds(t));
 
+        // وصل الشعار فوق زر الشعار الحقيقي: يذوب فيه
+        _ = Animate(IntroLogo, 0.18, 0, Out, (OpacityProperty, 1.0, 0.0));
+        await Task.Delay(180);
         Intro.IsVisible = false;
-        Intro.Transitions = null;
-        Intro.Opacity = 1;
         IntroRunning = false;
         _introEnding = false;
-        Stagger(RowItems, 45, 120);
+        Stagger(RowItems, 45);
+    }
+
+    /// مركز العنصر بإحداثيات الجذر من التخطيط وحده (بلا تحويلات الحركة)
+    private Point CenterInRoot(Visual v)
+    {
+        double x = v.Bounds.Width / 2, y = v.Bounds.Height / 2;
+        for (Visual? p = v; p != null && p != Root; p = Avalonia.VisualTree.VisualExtensions.GetVisualParent(p))
+        {
+            x += p.Bounds.X;
+            y += p.Bounds.Y;
+        }
+        return new Point(x, y);
+    }
+
+    /// دخول مرن كالهلام: يكبر أكثر من حجمه ثم يتمدد وينكمش حتى يستقر
+    private static void ElasticIn(Visual v)
+    {
+        EnsureTransforms(v);
+        (double Cue, double Sx, double Sy, double O)[] f =
+        {
+            (0, 0.25, 0.25, 0), (0.22, 1.2, 1.2, 1), (0.36, 1.12, 0.86, 1), (0.5, 0.9, 1.1, 1),
+            (0.64, 1.06, 0.95, 1), (0.78, 0.97, 1.03, 1), (0.9, 1.01, 0.99, 1), (1, 1, 1, 1),
+        };
+        var anim = new Animation { Duration = TimeSpan.FromSeconds(1.15), Easing = new CubicEaseOut(), FillMode = FillMode.Both };
+        foreach (var k in f)
+            anim.Children.Add(new KeyFrame
+            {
+                Cue = new Cue(k.Cue),
+                Setters =
+                {
+                    new Setter(ScaleTransform.ScaleXProperty, k.Sx),
+                    new Setter(ScaleTransform.ScaleYProperty, k.Sy),
+                    new Setter(OpacityProperty, k.O),
+                },
+            });
+        _ = RunSafe(anim, v);
+    }
+
+    private static async Task RunSafe(Animation anim, Visual v)
+    {
+        try { await anim.RunAsync(v); }
+        catch (Exception ex) { Log.Error("intro animation failed", ex); }
     }
 
     /// حركة من قيم بداية إلى نهاية؛ إن تكررت خاصية فالأولى تصل منتصف الحركة والثانية تكملها (ظهور ثم اختفاء)

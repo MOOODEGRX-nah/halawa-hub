@@ -29,10 +29,13 @@ public sealed class BpGridLight : Control
         AvaloniaProperty.Register<BpGridLight, double>(nameof(WaveRadius));
     public static readonly StyledProperty<double> WaveOpacityProperty =
         AvaloniaProperty.Register<BpGridLight, double>(nameof(WaveOpacity));
+    /// نصف قطر الظهور من الضوء (بداية الشاشة الكبيرة ترسم الشبكة من المركز للخارج). سالب = كامل
+    public static readonly StyledProperty<double> RevealProperty =
+        AvaloniaProperty.Register<BpGridLight, double>(nameof(Reveal), -1);
 
     static BpGridLight()
     {
-        AffectsRender<BpGridLight>(LightXProperty, LightYProperty, WaveRadiusProperty, WaveOpacityProperty);
+        AffectsRender<BpGridLight>(LightXProperty, LightYProperty, WaveRadiusProperty, WaveOpacityProperty, RevealProperty);
     }
 
     public BpGridLight()
@@ -48,6 +51,7 @@ public sealed class BpGridLight : Control
     public double WaveY { get => GetValue(WaveYProperty); set => SetValue(WaveYProperty, value); }
     public double WaveRadius { get => GetValue(WaveRadiusProperty); set => SetValue(WaveRadiusProperty, value); }
     public double WaveOpacity { get => GetValue(WaveOpacityProperty); set => SetValue(WaveOpacityProperty, value); }
+    public double Reveal { get => GetValue(RevealProperty); set => SetValue(RevealProperty, value); }
 
     /// cubic-bezier(.22,1.12,.36,1) في .95 ثانية، كما في --lx / --ly
     public void ApplyMotion()
@@ -97,6 +101,7 @@ public sealed class BpGridLight : Control
         var ly = LightY;
         var c = new Point(lx, ly);
 
+        using var clip = Reveal >= 0 ? ctx.PushGeometryClip(new EllipseGeometry(new Rect(c.X - Reveal, c.Y - Reveal, Reveal * 2, Reveal * 2))) : default(DrawingContext.PushedState?);
         // .gl0: الشبكة الخافتة
         for (var x = 0.0; x <= w; x += Cell) ctx.DrawLine(Faint, new Point(x, 0), new Point(x, h));
         for (var y = 0.0; y <= h; y += Cell) ctx.DrawLine(Faint, new Point(0, y), new Point(w, y));

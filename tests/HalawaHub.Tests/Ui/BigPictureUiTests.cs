@@ -275,12 +275,20 @@ public class BigPictureUiTests : IDisposable
     {
         MotionSettings.Enabled = true;
         BigPictureWindow.IntroHold = TimeSpan.FromSeconds(60);
+        string LogText() => Directory.Exists(HalawaHub.Core.Log.LogDir)
+            ? string.Concat(Directory.GetFiles(HalawaHub.Core.Log.LogDir).Select(f => { using var s = new FileStream(f, FileMode.Open, FileAccess.Read, FileShare.ReadWrite); return new StreamReader(s).ReadToEnd(); }))
+            : "";
+        var logBefore = LogText().Length;
         try
         {
         var (window, vm) = Open(language);
         window.IntroRunning.Should().BeTrue();
-        Thread.Sleep(900);
-        Shot(window, language, "00-intro");
+        Thread.Sleep(250);
+        Shot(window, language, "00a-intro");
+        Thread.Sleep(450);
+        Shot(window, language, "00b-intro");
+        Thread.Sleep(1200);
+        Shot(window, language, "00c-intro");
         window.IntroRunning.Should().BeTrue();
 
         window.KeyPress(Key.Right, RawInputModifiers.None, PhysicalKey.ArrowRight, null);
@@ -292,7 +300,9 @@ public class BigPictureUiTests : IDisposable
         window.GetVisualDescendants().OfType<Panel>().First(p => p.Name == "Intro").IsVisible.Should().BeFalse();
         var next = vm.IsRtl ? Key.Left : Key.Right;
         window.KeyPress(next, RawInputModifiers.None, vm.IsRtl ? PhysicalKey.ArrowLeft : PhysicalKey.ArrowRight, null);
-        vm.FocusKey.Should().Be("card.1");
+        vm.FocusKey.Should().Be(vm.IsRtl ? "card.1" : "card.1");
+        var log = LogText();
+        log[Math.Min(logBefore, log.Length)..].Should().NotContain("failed ::", "no intro animation may fail");
         window.Close();
         }
         finally { BigPictureWindow.IntroHold = TimeSpan.FromMilliseconds(1250); }

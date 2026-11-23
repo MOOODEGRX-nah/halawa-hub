@@ -51,6 +51,7 @@ internal sealed class FakeBpHost : IBpHost
     public event Action<BpNotification>? NotificationArrived;
     public event Action<bool>? DataChanged;
     public void Rescan(params BpGame[] added) { GameList.AddRange(added); DataChanged?.Invoke(true); }
+    public void RaiseChanged() => DataChanged?.Invoke(false);
     public void Arrive(BpNotification n) { NotificationList.Insert(0, n); NotificationArrived?.Invoke(n); }
     public IReadOnlyList<BpNotification> Notifications => NotificationList;
     public void DismissNotification(BpNotification item) => NotificationList.Remove(item);
@@ -161,6 +162,48 @@ public class BigPictureNavigationTests : IDisposable
         vm.Screen.Should().Be(BpScreen.Library);
         vm.Press(BpButton.RB);
         vm.Screen.Should().Be(BpScreen.Home);
+    }
+
+    [AvaloniaFact]
+    public void English_keys_in_the_arabic_interface_move_the_way_the_arrow_points()
+    {
+        Loc.Instance.Language = Loc.Arabic;
+        var vm = Vm(FakeBpHost.WithGames(3));
+        vm.Press(BpButton.RB);
+        vm.Screen.Should().Be(BpScreen.Search);
+
+        // «ع/EN» يبدّل الحروف إلى الإنجليزية، فتُرسم من اليسار: Z X C V …
+        vm.ClickKey(3, 2);
+        vm.KeyboardLanguage.Should().Be("en");
+        vm.Press(BpButton.Up);
+        vm.FocusKey.Should().Be("kb.2.2");
+        vm.Press(BpButton.Left);
+        vm.FocusKey.Should().Be("kb.2.1", "left moves to the key on the left (X), not the one on the right");
+        vm.Press(BpButton.Right);
+        vm.FocusKey.Should().Be("kb.2.2");
+
+        // النتائج على يسار الشاشة بالعربية: اليسار من أول حرف يذهب إليها، واليمين منها يعود لأقرب حرف
+        vm.Press(BpButton.Left);
+        vm.Press(BpButton.Left);
+        vm.Press(BpButton.Left);
+        vm.FocusKey.Should().Be("res.0");
+        vm.Press(BpButton.Right);
+        vm.FocusKey.Should().Be("kb.2.0");
+    }
+
+    [AvaloniaFact]
+    public void Size_on_disk_updates_once_it_is_calculated()
+    {
+        var size = "…";
+        var host = new FakeBpHost();
+        host.GameList.Add(new BpGame { Key = "s", Name = "Sized", Platform = "Steam", PlatformShort = "Steam", SizeLookup = () => size });
+        var vm = Vm(host);
+        vm.OpenGame(host.GameList[0]);
+        vm.HeroSize.Should().Be("…");
+
+        size = "12.4 GB";
+        host.RaiseChanged();
+        vm.HeroSize.Should().Be("12.4 GB");
     }
 
     [AvaloniaFact]

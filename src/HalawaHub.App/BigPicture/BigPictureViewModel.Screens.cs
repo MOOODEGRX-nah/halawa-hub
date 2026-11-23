@@ -36,6 +36,9 @@ public sealed partial class BigPictureViewModel
     public int RowVersion { get; private set; }
 
     /// اللعبة المعروضة في الأعلى: البطاقة المركَّزة، أو آخر لعبة رُكّز عليها
+    /// الحجم يُحسب في الخلفية؛ ربط Hero.SizeShown لا يتحدث لأن Hero نفس الكائن، فالنص هنا يتغير ويُعاد قراءته
+    public string HeroSize => _hero?.SizeShown ?? "";
+
     public BpGame? Hero
     {
         get => _hero;
@@ -518,11 +521,16 @@ public sealed partial class BigPictureViewModel
         }
     }
 
+    /// <summary>
+    /// dx منطقي باتجاه الواجهة (موجب = نحو النتائج). لوحة المفاتيح لها اتجاه حروفها: حروف
+    /// إنجليزية داخل الواجهة العربية تُرسم من اليسار، فالسهم الأيسر ينقص العمود لا يزيده.
+    /// </summary>
     private void NavSearch(int dx, int dy)
     {
+        var flipped = (_kbLang == "ar") != IsRtl;
         if (_kbZone == 1)
         {
-            if (dx < 0) { _kbZone = 0; _kbCol = RowLength(_kbRow) - 1; return; }
+            if (dx < 0) { _kbZone = 0; _kbCol = flipped ? 0 : RowLength(_kbRow) - 1; return; }
             _resIndex = Math.Clamp(_resIndex + dy, 0, Math.Max(0, Results.Count - 1));
             return;
         }
@@ -532,9 +540,13 @@ public sealed partial class BigPictureViewModel
             _kbCol = Math.Clamp(_kbCol, 0, RowLength(_kbRow) - 1);
             return;
         }
-        var c = _kbCol + dx;
-        if (c > RowLength(_kbRow) - 1) { if (Results.Count > 0) { _kbZone = 1; _resIndex = 0; } return; }
-        _kbCol = Math.Max(0, c);
+        var c = _kbCol + (flipped ? -dx : dx);
+        if (c < 0 || c > RowLength(_kbRow) - 1)
+        {
+            if (dx > 0 && Results.Count > 0) { _kbZone = 1; _resIndex = 0; }
+            return;
+        }
+        _kbCol = c;
     }
 
     private void ActSearch()

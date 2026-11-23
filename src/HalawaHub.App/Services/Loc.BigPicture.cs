@@ -16,7 +16,7 @@ public sealed partial class Loc
         ["bigPicture"] = "الشاشة الكبيرة (التلفاز ويد التحكم)", ["bpAutoMain"] = "الشاشة الكبيرة عند توصيل يد تحكم",
         ["bp"] = "الشاشة الكبيرة", ["bpHome"] = "الرئيسي", ["bpLibrary"] = "المكتبة", ["bpSearch"] = "البحث", ["bpSettings"] = "الإعدادات",
         ["bpCont"] = "تابع اللعب", ["bpFavs"] = "المفضل", ["bpInstalled"] = "المثبتة", ["bpRecent"] = "المضاف حديثًا",
-        ["bpPlay"] = "تشغيل", ["bpDetails"] = "التفاصيل", ["bpAddFav"] = "إضافة للمفضلة", ["bpInFav"] = "في المفضلة",
+        ["bpPlay"] = "تشغيل", ["bpDetails"] = "التفاصيل", ["bpAddFav"] = "أضف للمفضلة", ["bpInFav"] = "في المفضلة",
         ["bpUpdAvail"] = "تحديث متوفر",
         ["bpNever"] = "لم تُشغَّل بعد", ["bpToday"] = "اليوم", ["bpYesterday"] = "أمس",
         ["bpLongAgo"] = "قبل أكثر من سنة",
@@ -95,7 +95,7 @@ public sealed partial class Loc
         ["bpNtUpdT"] = "{0}: update available", ["bpNtUpdB"] = "Steam downloads it before the game starts.", ["bpNtScanT"] = "Scan finished",
         ["bpNtAppT"] = "A new version of Halawa-Hub", ["bpNtAppB"] = "Open the normal window, then Settings › Updates, to install it.", ["bpNtFreeT"] = "Free this week on Epic",
         ["bpNow"] = "Now",
-        ["bpWhyDrive"] = "The drive isn't connected", ["bpWhyFiles"] = "The game files are missing", ["bpWhyLauncher"] = "The launcher isn't installed", ["bpWhySteam"] = "Steam is not signed in",
+        ["bpWhyDrive"] = "The drive isn't connected", ["bpWhyFiles"] = "The game files are missing", ["bpWhyLauncher"] = "The launcher isn't installed", ["bpWhySteam"] = "Steam isn't signed in",
         ["bpController"] = "Controller connected", ["bpNoController"] = "Keyboard", ["bpSaved"] = "Changes are saved automatically",
     };
 }

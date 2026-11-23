@@ -14,6 +14,8 @@ public static class BpIs
 
     /// زر المفضلة (لرسم القلب)
     public static IValueConverter Fav { get; } = new FuncValueConverter<string?, bool>(id => id == "fav");
+    public static IValueConverter Update { get; } = new FuncValueConverter<string?, bool>(id => id == "update");
+    public static IValueConverter Settings { get; } = new FuncValueConverter<string?, bool>(id => id == "settings");
 
     /// لون إطار القلب: أحمر في المفضلة
     private static readonly IBrush Red = new SolidColorBrush(Color.Parse("#EF4444"));

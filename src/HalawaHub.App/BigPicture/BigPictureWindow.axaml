@@ -868,9 +868,11 @@
           </Border>
         </Button>
 
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+        <!-- LB وRB في مكانهما على ذراع التحكم في اللغتين؛ التبويبات وحدها تتبع اتجاه اللغة -->
+        <StackPanel x:Name="TabBar" Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center" FlowDirection="LeftToRight">
           <bpc:BpGlyph Button="lb" Ps="{Binding UsePsGlyphs}" VerticalAlignment="Center"/>
           <Border Width="660" Height="76" Padding="8" CornerRadius="26" Background="{StaticResource BpSurface}"
+                  FlowDirection="{Binding #TopBar.FlowDirection}"
                   BorderBrush="{StaticResource BpLine}" BorderThickness="1" BoxShadow="0 8 24 0 #73000000">
             <Panel>
               <c:SlidingPill ItemCount="3" SelectedIndex="{Binding TabIndex}">

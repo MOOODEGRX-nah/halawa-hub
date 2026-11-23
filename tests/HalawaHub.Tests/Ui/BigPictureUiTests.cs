@@ -94,6 +94,26 @@ public class BigPictureUiTests : IDisposable
     [AvaloniaTheory]
     [InlineData(Loc.Arabic)]
     [InlineData(Loc.English)]
+    public void Lb_sits_left_of_rb_and_tabs_follow_the_language(string language)
+    {
+        var (window, _) = Open(language);
+        var glyphs = window.GetVisualDescendants().OfType<App.BigPicture.Controls.BpGlyph>().ToList();
+        double X(Visual v) => v.TranslatePoint(new Point(0, 0), window)!.Value.X;
+        var lb = glyphs.First(g => g.Button == "lb");
+        var rb = glyphs.First(g => g.Button == "rb");
+        X(lb).Should().BeLessThan(X(rb), "LB is the left button on the controller in both languages");
+
+        var tabs = window.GetVisualDescendants().OfType<Button>().Where(b => b.Classes.Contains("tbtn")).ToList();
+        var home = tabs.First(b => (string?)b.Tag == "0");
+        var search = tabs.First(b => (string?)b.Tag == "2");
+        if (language == Loc.Arabic) X(home).Should().BeGreaterThan(X(search), "Arabic tabs run right to left");
+        else X(home).Should().BeLessThan(X(search));
+        window.Close();
+    }
+
+    [AvaloniaTheory]
+    [InlineData(Loc.Arabic)]
+    [InlineData(Loc.English)]
     public void Home_renders_with_the_ring_around_the_focused_card(string language)
     {
         var (window, vm) = Open(language);

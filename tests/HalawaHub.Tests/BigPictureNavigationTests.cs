@@ -147,6 +147,23 @@ public class BigPictureNavigationTests : IDisposable
     }
 
     [AvaloniaFact]
+    public void Shoulder_buttons_move_the_way_they_sit_on_the_controller_in_arabic()
+    {
+        Loc.Instance.Language = Loc.Arabic;
+        var vm = Vm(FakeBpHost.WithGames(3));
+
+        // بالعربية: الرئيسي يمينًا ثم المكتبة ثم البحث يسارًا، فـLB (يسار) يذهب نحو البحث
+        vm.Press(BpButton.LB);
+        vm.Screen.Should().Be(BpScreen.Library);
+        vm.Press(BpButton.LB);
+        vm.Screen.Should().Be(BpScreen.Search);
+        vm.Press(BpButton.RB);
+        vm.Screen.Should().Be(BpScreen.Library);
+        vm.Press(BpButton.RB);
+        vm.Screen.Should().Be(BpScreen.Home);
+    }
+
+    [AvaloniaFact]
     public void Shoulder_buttons_cycle_the_tabs_and_b_returns_home_from_the_library()
     {
         var vm = Vm(FakeBpHost.WithGames(3));

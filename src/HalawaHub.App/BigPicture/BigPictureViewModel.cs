@@ -85,8 +85,9 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpButton.Right: Nav(IsRtl ? -1 : 1, 0); break;
             case BpButton.A: Activated?.Invoke(); Act(); break;
             case BpButton.B: Back(); break;
-            case BpButton.LB: if (_overlay == BpOverlay.None) CycleTab(-1); break;
-            case BpButton.RB: if (_overlay == BpOverlay.None) CycleTab(1); break;
+            // LB يسار ذراع التحكم فيحرك الاختيار لليسار، وRB لليمين، في اللغتين
+            case BpButton.LB: if (_overlay == BpOverlay.None) CycleTab(IsRtl ? 1 : -1); break;
+            case BpButton.RB: if (_overlay == BpOverlay.None) CycleTab(IsRtl ? -1 : 1); break;
             case BpButton.X:
                 if (_overlay == BpOverlay.Notifications) DismissFocusedNotification();
                 else if (_overlay == BpOverlay.None && _screen == BpScreen.Library) CyclePlatform();

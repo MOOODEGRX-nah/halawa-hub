@@ -85,18 +85,17 @@
         <Style Selector="Button.bpb:pointerover"><Setter Property="BorderBrush" Value="#7F1D1D"/></Style>
     </UserControl.Styles>
 
-    <Grid ColumnDefinitions="*,Auto,*" Margin="0,16">
-        <!-- الشعار -->
-        <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10" Background="#000000"
-                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1"
-                HorizontalAlignment="Left" BoxShadow="{DynamicResource GlowTop}">
-            <Border CornerRadius="9" ClipToBounds="True">
-                <Image Source="avares://Halawa-Hub/Assets/logo.png" Stretch="UniformToFill"/>
-            </Border>
-        </Border>
+    <!-- كبسولة زجاجية عائمة (.top في التصميم): زوايا 22، حد رفيع فاتح، ظل، وهوامش حولها -->
+    <Border Name="TopCapsule" Margin="-12,12,-12,10" Padding="12,8" CornerRadius="22"
+            Background="{DynamicResource GlassBarBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1"
+            BoxShadow="{DynamicResource GlassShadow}">
+    <Grid ColumnDefinitions="*,Auto,*">
+        <!-- الشعار: حرف M العائم -->
+        <c:HalawaMark Name="Logo" Grid.Column="0" Width="44" Height="44" HorizontalAlignment="Left"
+                      AutomationProperties.Name="Halawa Hub"/>
 
         <!-- المكتبة / العروض / المطورين -->
-        <Border Grid.Column="1" Width="520" Height="56" CornerRadius="20"
+        <Border Grid.Column="1" Width="540" Height="56" CornerRadius="20"
                 Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrushCard}"
                 BorderThickness="1" BoxShadow="0 6 18 0 #73000000">
             <Panel>
@@ -146,4 +145,5 @@
         </Panel>
         </StackPanel>
     </Grid>
+    </Border>
 </UserControl>

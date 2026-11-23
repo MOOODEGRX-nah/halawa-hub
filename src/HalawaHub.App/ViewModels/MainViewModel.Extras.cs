@@ -12,7 +12,7 @@ using HalawaHub.Core.Store;
 
 namespace HalawaHub.App.ViewModels;
 
-public sealed class NotificationItem
+public sealed class NotificationItem : System.ComponentModel.INotifyPropertyChanged
 {
     public required string Category { get; init; }
     /// يُحسب عند العرض، فالإشعار يتبع لغة الواجهة الحالية لا لغة لحظة إنشائه
@@ -25,6 +25,52 @@ public sealed class NotificationItem
     /// اللعبة المعنية (تحديث، فشل تشغيل) إن وُجدت: الشاشة الكبيرة تعرض لها زر إجراء
     public GameCardViewModel? Game { get; init; }
     public bool CanOpen => Open != null;
+
+    // ===== بطاقة الإشعار في النافذة العادية (.panel.nt في التصميم) =====
+
+    /// upd / free / scan / fail / app: لون الأيقونة وشكلها
+    public string Kind => Category switch
+    {
+        "update" => "upd",
+        "free" => "free",
+        "launch" => "fail",
+        "appupdate" => "app",
+        _ => "scan"
+    };
+
+    /// مسارات الأيقونات من NT_PATH في التصميم (شبكة 24×24)
+    public Avalonia.Media.Geometry Icon => Avalonia.Media.Geometry.Parse(Kind switch
+    {
+        "upd" => "M12 4v12M6 11l6 6 6-6M5 20h14",
+        "free" => "M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H8a2.5 2.5 0 0 1 0-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 0 0 0-5c-3 0-4 5-4 5z",
+        "fail" => "M12 8v5M12 16.5v.5M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z",
+        "app" => "M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5",
+        _ => "M5 12.5l4.5 4.5L19 7.5"
+    });
+
+    /// العنوان والنص وزر الإجراء يحسبها MainViewModel.Describe بلغة الواجهة الحالية
+    public string Title { get; internal set; } = "";
+    public string Body { get; internal set; } = "";
+    public bool HasBody => Body.Length > 0;
+    public string RelativeTimeText { get; internal set; } = "";
+    public string? ActionLabel { get; internal set; }
+    public bool HasAction => ActionLabel != null && Act != null;
+    internal Action? Act { get; set; }
+
+    private bool _isUnread;
+    /// غير مقروء: نقطة حمراء حتى تُغلق قائمة الإشعارات بعد رؤيته
+    public bool IsUnread
+    {
+        get => _isUnread;
+        internal set
+        {
+            if (_isUnread == value) return;
+            _isUnread = value;
+            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(IsUnread)));
+        }
+    }
+
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 }
 
 public sealed class SubscriptionRow
@@ -78,34 +124,119 @@ public partial class MainViewModel
         private set { if (_isNotificationsOpen == value) return; _isNotificationsOpen = value; OnPropertyChanged(nameof(IsNotificationsOpen)); }
     }
 
-    private RelayCommand? _toggleNotificationsCommand, _dismissNotificationCommand, _clearNotificationsCommand, _openNotificationCommand;
+    private RelayCommand? _toggleNotificationsCommand, _dismissNotificationCommand, _clearNotificationsCommand, _openNotificationCommand, _runNotificationActionCommand;
 
     public RelayCommand OpenNotificationCommand => _openNotificationCommand ??= new RelayCommand(p =>
     {
         if (p is not NotificationItem { Open: { } open }) return;
-        IsNotificationsOpen = false;
+        CloseNotifications();
         open();
+    });
+
+    /// زر الإجراء في بطاقة الإشعار: حدّث في Steam، عرض، حاول مجددًا، افتح التحديثات
+    public RelayCommand RunNotificationActionCommand => _runNotificationActionCommand ??= new RelayCommand(p =>
+    {
+        if (p is not NotificationItem { Act: { } act }) return;
+        CloseNotifications();
+        act();
     });
 
     public RelayCommand ToggleNotificationsCommand => _toggleNotificationsCommand ??= new RelayCommand(_ =>
     {
-        IsNotificationsOpen = !IsNotificationsOpen;
-        if (IsNotificationsOpen) UnreadNotifications = 0;
+        if (IsNotificationsOpen) { CloseNotifications(); return; }
+        // الوقت النسبي ("قبل دقيقتين") يُحسب من جديد عند كل فتح
+        RefreshNotificationTexts();
+        IsNotificationsOpen = true;
+        UnreadNotifications = 0;
     });
 
     public RelayCommand DismissNotificationCommand => _dismissNotificationCommand ??= new RelayCommand(p =>
     {
         if (p is NotificationItem n) Notifications.Remove(n);
-        OnPropertyChanged(nameof(HasNoNotifications));
+        OnNotificationCountChanged();
     });
 
     public RelayCommand ClearNotificationsCommand => _clearNotificationsCommand ??= new RelayCommand(_ =>
     {
         Notifications.Clear();
-        OnPropertyChanged(nameof(HasNoNotifications));
+        OnNotificationCountChanged();
     });
 
-    public void CloseNotifications() => IsNotificationsOpen = false;
+    /// عند الإغلاق تصير كل الإشعارات المعروضة مقروءة، فتختفي نقاطها في الفتح التالي
+    public void CloseNotifications()
+    {
+        if (!IsNotificationsOpen) return;
+        IsNotificationsOpen = false;
+        foreach (var n in Notifications) n.IsUnread = false;
+    }
+
+    public int NotificationCount => Notifications.Count;
+
+    private void OnNotificationCountChanged()
+    {
+        OnPropertyChanged(nameof(HasNoNotifications));
+        OnPropertyChanged(nameof(NotificationCount));
+    }
+
+    /// عنوان الإشعار ونصه وزر إجرائه بلغة الواجهة الحالية (NT_ALL في Screen.dc.html)
+    internal void Describe(NotificationItem n)
+    {
+        var L = Loc.Instance;
+        var card = n.Game;
+        n.RelativeTimeText = HalawaHub.App.BigPicture.BigPictureHost.RelativeTime(n.At, DateTime.Now);
+        n.ActionLabel = null;
+        n.Act = null;
+        switch (n.Kind)
+        {
+            case "upd" when card != null:
+                n.Title = L.Format("bpNtUpdT", card.Name);
+                n.Body = L["bpNtUpdB"];
+                n.ActionLabel = L.Format("updateInLauncher", HalawaHub.Core.Library.LauncherActions.LauncherName(card.Game.Platform));
+                n.Act = () => OpenInLauncher(card);
+                break;
+            case "fail" when card != null:
+                n.Title = L.Format("bpFailTitle", card.Name);
+                n.Body = n.Text;
+                n.ActionLabel = L["bpRetry"];
+                n.Act = () => LaunchGame(card);
+                break;
+            case "free":
+                n.Title = L["bpNtFreeT"];
+                n.Body = FreeNotificationBody(n.Text);
+                n.ActionLabel = n.Open != null ? L["bpNtShow"] : null;
+                n.Act = n.Open;
+                break;
+            case "scan":
+                n.Title = L["bpNtScanT"];
+                n.Body = n.Text;
+                n.ActionLabel = L["bpNtShow"];
+                n.Act = () => { TopNavIndex = 0; SelectedNavItem = NavRecent; };
+                break;
+            case "app":
+                n.Title = L["bpNtAppT"];
+                n.Body = L["nAppB"];
+                n.ActionLabel = L["nAppAct"];
+                n.Act = () => { OpenSettings(); SettingsSection = SectionUpdates; };
+                break;
+            default:
+                n.Title = n.Text;
+                n.Body = "";
+                n.ActionLabel = n.Open != null ? L["bpNtShow"] : null;
+                n.Act = n.Open;
+                break;
+        }
+    }
+
+    /// نص المجانيات: أسماء الألعاب وموعد انتهائها كما في التصميم، أو النص الأصلي إن لم تُحمّل القائمة
+    internal string FreeNotificationBody(string fallback)
+    {
+        var games = FreeGames;
+        if (games.Count == 0) return fallback;
+        var sep = Loc.Instance.IsRtl ? "، " : ", ";
+        var ends = games[0].EndsText;
+        if (!Loc.Instance.IsRtl && ends.Length > 0) ends = char.ToLowerInvariant(ends[0]) + ends[1..];
+        return string.Join(sep, games.Select(g => g.Title)) + sep + ends + ".";
+    }
 
     private bool CategoryEnabled(string category) => category switch
     {
@@ -126,10 +257,12 @@ public partial class MainViewModel
     internal void Notify(string category, Func<string> render, Action? open = null, GameCardViewModel? game = null)
     {
         if (!CategoryEnabled(category) || string.IsNullOrWhiteSpace(render())) return;
-        Notifications.Insert(0, new NotificationItem { Category = category, Render = render, Open = open, Game = game });
+        var item = new NotificationItem { Category = category, Render = render, Open = open, Game = game, IsUnread = true };
+        Describe(item);
+        Notifications.Insert(0, item);
         while (Notifications.Count > MaxNotifications) Notifications.RemoveAt(Notifications.Count - 1);
         if (!IsNotificationsOpen) UnreadNotifications++;
-        OnPropertyChanged(nameof(HasNoNotifications));
+        OnNotificationCountChanged();
     }
 
     /// مرة واحدة في الجلسة لكل مفتاح (لعبة لها تحديث تُفحص حالتها مرارًا)
@@ -143,7 +276,7 @@ public partial class MainViewModel
     {
         var items = Notifications.ToList();
         Notifications.Clear();
-        foreach (var n in items) Notifications.Add(n);
+        foreach (var n in items) { Describe(n); Notifications.Add(n); }
     }
 
     public bool NotifyGameUpdates { get => _config.NotifyGameUpdates; set { _config.NotifyGameUpdates = value; SaveConfig(); OnPropertyChanged(nameof(NotifyGameUpdates)); } }

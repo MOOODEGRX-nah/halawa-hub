@@ -271,6 +271,9 @@ public sealed partial class Loc : INotifyPropertyChanged
         ["inFav"] = "في المفضلة",
         ["sgdbWhy"] = "SteamGridDB يجلب أغلفة الألعاب التي لا يوفرها متجرها. المفتاح مجاني من حسابك في الموقع، وتضيفه مرة واحدة فقط.",
         ["appName"] = "Halawa Hub",
+        // ===== تحديث التصميم (المرحلة 2) =====
+        ["nAppB"] = "ثبّته من الإعدادات › التحديثات.",
+        ["nAppAct"] = "افتح التحديثات",
     };
 
     private static readonly Dictionary<string, string> En = new()
@@ -475,5 +478,8 @@ public sealed partial class Loc : INotifyPropertyChanged
         ["inFav"] = "In favorites",
         ["sgdbWhy"] = "SteamGridDB fetches covers your stores don't provide. The key is free from your account on the site, and you add it once.",
         ["appName"] = "Halawa Hub",
+        // ===== تحديث التصميم (المرحلة 2) =====
+        ["nAppB"] = "Install it from Settings › Updates.",
+        ["nAppAct"] = "Open Updates",
     };
 }

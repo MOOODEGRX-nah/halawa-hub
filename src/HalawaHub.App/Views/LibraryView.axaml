@@ -152,8 +152,9 @@
                             ToolTip.Tip="{l:Loc notifications}" AutomationProperties.Name="{l:Loc notifications}">
                         <c:VectorIcon Data="{StaticResource IconBell}" Size="18"/>
                     </Button>
-                    <Ellipse Width="9" Height="9" Fill="{DynamicResource AmberBrush}" IsHitTestVisible="False"
-                             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,2,0" IsVisible="{Binding HasUnreadNotifications}"/>
+                    <!-- نقطة حمراء بحلقة بلون الزر (.ib .dot في التصميم) -->
+                    <Ellipse Name="BellDot" Width="11" Height="11" Fill="{DynamicResource RedHoverBrush}" Stroke="{DynamicResource SurfaceBrush}" StrokeThickness="2"
+                             IsHitTestVisible="False" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,7,8,0" IsVisible="{Binding HasUnreadNotifications}"/>
                 </Panel>
                 <Button Name="AddGameButton" Classes="ib" VerticalAlignment="Center"
                         Click="AddGame_Click" ToolTip.Tip="{l:Loc addGame}" AutomationProperties.Name="{l:Loc addGame}">

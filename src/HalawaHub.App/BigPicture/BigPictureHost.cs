@@ -216,7 +216,7 @@ public sealed class BigPictureHost : IBpHost
             "appupdate" => ("app", L["bpNtAppT"], L["bpNtAppB"], null, null),
             // نص الإشعار فيه أسماء المجانيات وموعد انتهائها؛ زر «فتح» كان يغلق الشاشة الكبيرة ليفتح العروض
             // في النافذة العادية، فلا زر هنا وصفحة العروض في النافذة العادية متاحة كالعادة
-            "free" => ("free", L["bpNtFreeT"], FreeBody(n.Text), (string?)null, (string?)null),
+            "free" => ("free", L["bpNtFreeT"], _main.FreeNotificationBody(n.Text), (string?)null, (string?)null),
             _ => ("scan", n.Text, "", null, null),
         };
         return new BpNotification
@@ -228,17 +228,6 @@ public sealed class BigPictureHost : IBpHost
             ActionId = actionId, ActionLabel = label, Game = game,
             Source = n,
         };
-    }
-
-    /// نص المجانيات في النافذة العادية يقول "اضغط لفتح العروض"؛ هنا أسماء الألعاب وموعد انتهائها كما في التصميم
-    private string FreeBody(string fallback)
-    {
-        var games = _main.FreeGames;
-        if (games.Count == 0) return fallback;
-        var sep = Loc.Instance.IsRtl ? "، " : ", ";
-        var ends = games[0].EndsText;
-        if (!Loc.Instance.IsRtl && ends.Length > 0) ends = char.ToLowerInvariant(ends[0]) + ends[1..];
-        return string.Join(sep, games.Select(g => g.Title)) + sep + ends + ".";
     }
 
     /// "الآن"، "قبل دقيقتين"، "قبل ساعة"، "أمس" كما في التصميم

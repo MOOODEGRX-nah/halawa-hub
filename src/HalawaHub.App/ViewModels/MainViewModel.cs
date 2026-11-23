@@ -278,7 +278,7 @@ public partial class MainViewModel : INotifyPropertyChanged
     }
 
     public string AppVersion => $"v{AppInfo.Version}";
-    public string WindowTitleText => $"Halawa-Hub {AppVersion}";
+    public string WindowTitleText => $"Halawa Hub {AppVersion}";
 
     public ObservableCollection<string> ChangelogEntries { get; } = new();
 

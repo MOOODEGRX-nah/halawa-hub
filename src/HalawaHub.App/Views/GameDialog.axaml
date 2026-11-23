@@ -142,9 +142,9 @@
                                 </c:CappedWidth>
                                 <c:CappedWidth Cap="560">
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,6">
-                                    <TextBlock Text="{l:Loc addFav}" FontSize="16" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{l:Loc inFav}" FontSize="16" VerticalAlignment="Center"/>
                                     <ToggleButton Grid.Column="1" Theme="{StaticResource SwitchTheme}" IsChecked="{Binding IsFavorite, Mode=TwoWay}"
-                                                  AutomationProperties.Name="{l:Loc addFav}"/>
+                                                  AutomationProperties.Name="{l:Loc inFav}"/>
                                 </Grid>
                                 </c:CappedWidth>
                                 <c:CappedWidth Cap="560">

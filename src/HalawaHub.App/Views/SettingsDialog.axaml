@@ -241,6 +241,7 @@
                                 <!-- مفاتيح API -->
                                 <StackPanel Spacing="12" IsVisible="{Binding SettingsSection, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=2}">
                                     <TextBlock Classes="lbl" Text="{l:Loc sgdb}"/>
+                                    <TextBlock Classes="lbl" Text="{l:Loc sgdbWhy}" TextWrapping="Wrap"/>
                                     <Grid ColumnDefinitions="*,Auto,Auto">
                                         <TextBox Classes="inp" PasswordChar="•" Text="{Binding SteamGridDbApiKey, Mode=TwoWay}"
                                                  Watermark="{l:Loc keyPh}" AutomationProperties.Name="SteamGridDB"/>

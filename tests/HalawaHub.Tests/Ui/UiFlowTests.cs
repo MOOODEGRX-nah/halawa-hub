@@ -140,7 +140,7 @@ public class UiFlowTests
         ui.Vm.OpenDetailsCommand.Execute(card);
         ui.Settle();
 
-        foreach (var (name, title) in new[] { ("Installed files", "Installed files"), ("Customization", "Customization"), ("Launch options", "Launch options"), ("General", "General") })
+        foreach (var (name, title) in new[] { ("Files", "Files"), ("Cover", "Cover"), ("Launch", "Launch"), ("General", "General") })
         {
             ui.Click(ui.All<Button>().First(b => b.Classes.Contains("si") && (b.Content as string) == name));
             ui.Vm.GameDialogTitle.Should().Be(title);

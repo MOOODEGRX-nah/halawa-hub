@@ -29,7 +29,7 @@ public partial class MainViewModel
         NewsEntries.Clear();
 
         if (HasUpdateMessage)
-            NewsEntries.Add(new NewsItem("Halawa-Hub", UpdateMessage ?? "", "", DateTime.UtcNow));
+            NewsEntries.Add(new NewsItem("Halawa Hub", UpdateMessage ?? "", "", DateTime.UtcNow));
 
         var steamGames = Games.Where(c => c.Platform == "Steam" && !string.IsNullOrEmpty(c.Game.Id))
                                .Take(2).ToList();

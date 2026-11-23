@@ -48,7 +48,7 @@ public partial class MainWindow
             var icon = new TrayIcon
             {
                 Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://Halawa-Hub/Assets/icon.ico"))),
-                ToolTipText = "Halawa-Hub"
+                ToolTipText = "Halawa Hub"
             };
             icon.Clicked += (_, _) => ShowAndFocus();
 

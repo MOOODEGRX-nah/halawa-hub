@@ -58,6 +58,7 @@ public partial class BigPictureWindow
             switch (vm.Overlay)
             {
                 case BpOverlay.Update: _ = MotionSettings.AnimateAsync(UpdatePanel, TimeSpan.FromSeconds(0.42), MotionSettings.DialogEasing, 0, 0.94, 18); break;
+                case BpOverlay.GameOptions: _ = MotionSettings.AnimateAsync(GameOptionsPanel, TimeSpan.FromSeconds(0.42), MotionSettings.DialogEasing, 0, 0.94, 18); break;
                 case BpOverlay.Launch: _ = MotionSettings.AnimateAsync(LaunchPanel, TimeSpan.FromSeconds(0.42), MotionSettings.DialogEasing, 0, 0.94, 18); break;
                 case BpOverlay.Guide: SlideIn(GuideSheet, -520, 0.5, 0, BpSprings.Track); break;
                 case BpOverlay.Notifications: SlideIn(NotifSheet, 660, 0.5, 0, BpSprings.Track); StaggerNotifications(); break;

@@ -219,6 +219,7 @@ public partial class BigPictureWindow : Window
     /// تكبير العنصر المركَّز ورفعه كما في أنماطه (.c.f و.btn.f و.key.f و.qsr.f و.ntr.f)
     private static (double Scale, double Dy) FocusedTransform(Control c) =>
         c.Classes.Contains("bpcard") ? (1.06, -10)
+        : c.Classes.Contains("wide") ? (1, 0)
         : c.Classes.Contains("key") ? (1.08, 0)
         : c.Classes.Contains("btn") ? (1.05, 0)
         : c.Classes.Contains("qsr") || c.Classes.Contains("ntr") ? (1.02, 0)
@@ -351,6 +352,11 @@ public partial class BigPictureWindow : Window
             var c = _vm.KeyRows[r].IndexOf(item);
             if (c >= 0) { _vm.ClickKey(r, c); return; }
         }
+    }
+
+    private void OnGameOptionClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpButtonItem>(sender) is { } item) _vm.ClickGameOption(_vm.GameOptions.IndexOf(item));
     }
 
     private void OnGameButtonClick(object? sender, RoutedEventArgs e)

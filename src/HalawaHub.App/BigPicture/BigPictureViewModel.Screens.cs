@@ -52,6 +52,8 @@ public sealed partial class BigPictureViewModel
     }
 
     public bool HasHero => _hero != null;
+    /// صورة اللعبة الصغيرة في صفحة اللعبة تكرر الخلفية حين للعبة صورة عريضة؛ تظهر فقط حين لا توجد
+    public bool ShowShowcase => _hero is { HeroUrl: null };
     public bool HeroHasNoArt => _hero is { HeroUrl: null } && _hero.CoverUrl != null;
     public bool HeroIsFavorite => _hero?.IsFavorite == true;
 
@@ -395,7 +397,7 @@ public sealed partial class BigPictureViewModel
             case "play": Play(g); break;
             case "update": _host.OpenUpdateInLauncher(g); ShowToast(F("bpOpenedSteam", g.Name)); break;
             case "fav": ToggleFavorite(g); break;
-            case "settings": _host.OpenGameSettings(g); break;
+            case "settings": OpenGameOptions(); break;
         }
     }
 

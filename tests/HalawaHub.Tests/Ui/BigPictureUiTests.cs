@@ -79,6 +79,14 @@ public class BigPictureUiTests : IDisposable
         Dispatcher.UIThread.RunJobs();
     }
 
+    /// مع الحركة: ساعة الحركة حقيقية، فننتظر حتى تنتهي الانتقالات (أطولها نحو 0.6 ثانية)
+    private static void SettleFor(bool motion)
+    {
+        if (!motion) { Settle(); return; }
+        var until = DateTime.UtcNow.AddMilliseconds(900);
+        while (DateTime.UtcNow < until) { Settle(); Thread.Sleep(16); }
+    }
+
     private static void Shot(Window window, string language, string name)
     {
         Settle();
@@ -90,6 +98,39 @@ public class BigPictureUiTests : IDisposable
     }
 
     private static Border Ring(Window w) => w.GetVisualDescendants().OfType<Border>().First(b => b.Name == "Ring");
+
+    [AvaloniaTheory]
+    [InlineData(Loc.Arabic, false)]
+    [InlineData(Loc.English, false)]
+    [InlineData(Loc.Arabic, true)]
+    [InlineData(Loc.English, true)]
+    public void Ring_hugs_the_drawn_edges_of_the_focused_game_button(string language, bool motion)
+    {
+        MotionSettings.Enabled = motion;
+        var (window, vm) = Open(language);
+        vm.OpenGame(vm.RowCards[0].Game);
+        SettleFor(motion);
+        foreach (var step in new[] { 0, 1, 1 })
+        {
+            if (step == 1) { vm.Press(App.BigPicture.Input.BpButton.Down); SettleFor(motion); }
+            var btn = window.GetVisualDescendants().OfType<Button>()
+                .First(b => App.BigPicture.Controls.BpFocus.GetKey(b) == vm.FocusKey);
+            var ring = Ring(window);
+            Rect Drawn(Visual v)
+            {
+                var a = v.TranslatePoint(new Point(0, 0), window)!.Value;
+                var b = v.TranslatePoint(new Point(v.Bounds.Width, v.Bounds.Height), window)!.Value;
+                return new Rect(new Point(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y)), new Point(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y)));
+            }
+            var r = Drawn(ring);
+            var d = Drawn(btn);
+            // الحلقة 7 بكسل حول الزر المرسوم من كل جهة، لا حول زر مكبّر لم يُرسم
+            (d.Left - r.Left).Should().BeApproximately(7, 2, $"{vm.FocusKey} left edge");
+            (r.Right - d.Right).Should().BeApproximately(7, 2, $"{vm.FocusKey} right edge");
+            (d.Top - r.Top).Should().BeApproximately(7, 2, $"{vm.FocusKey} top edge");
+        }
+        window.Close();
+    }
 
     [AvaloniaTheory]
     [InlineData(Loc.Arabic, true)]

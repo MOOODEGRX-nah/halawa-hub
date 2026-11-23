@@ -10,7 +10,7 @@ namespace HalawaHub.App.Services;
 /// design-source، وما يليها نصوص البرنامج التي لا يغطيها التصميم.
 /// تغيير اللغة يرفع PropertyChanged("Item[]") فتتحدث كل الروابط فورًا.
 /// </summary>
-public sealed class Loc : INotifyPropertyChanged
+public sealed partial class Loc : INotifyPropertyChanged
 {
     public static Loc Instance { get; } = new();
 

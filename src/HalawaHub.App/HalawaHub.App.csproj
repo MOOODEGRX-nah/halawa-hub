@@ -9,6 +9,8 @@
     <AssemblyName>Halawa-Hub</AssemblyName>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <!-- SDL3 (يد التحكم في الشاشة الكبيرة) واجهتها مؤشرات -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +25,8 @@
     <PackageReference Include="Avalonia.Diagnostics" Version="11.1.3" Condition="'$(Configuration)' == 'Debug'" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="AnimatedImage.Avalonia" Version="2.1.4" />
+    <!-- يد التحكم: SDL3 (zlib) عبر ربط ppy (MIT)، ومعه SDL3.dll وlibSDL3.so لويندوز ولينكس -->
+    <PackageReference Include="ppy.SDL3-CS" Version="2026.1002.1" />
   </ItemGroup>
 
   <ItemGroup>

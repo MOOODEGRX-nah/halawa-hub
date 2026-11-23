@@ -623,7 +623,7 @@ public partial class MainViewModel
         private set
         {
             _updateKind = value;
-            if (value == UpdateCheckKind.Available) NotifyOnce("appupdate", "app", "ntAppUpdate");
+            if (value == UpdateCheckKind.Available) NotifyOnce("appupdate", "app", "ntAppUpdate", null);
             OnPropertyChanged(nameof(UpdateKind));
             OnPropertyChanged(nameof(UpdateBadge));
             OnPropertyChanged(nameof(UpdateStatusText));

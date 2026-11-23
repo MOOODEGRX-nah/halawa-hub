@@ -118,4 +118,9 @@ public class AppConfig
 
     /// دمج اللعبة نفسها من أكثر من منصة في بطاقة واحدة
     public bool MergeDuplicates { get; set; } = true;
+
+    // ===== الشاشة الكبيرة (0.0.11.0) =====
+
+    /// الملفات القديمة بلا هذا الحقل تأخذ القيم الافتراضية
+    public HalawaHub.App.BigPicture.BpSettings BigPicture { get; set; } = new();
 }

@@ -53,6 +53,9 @@ public sealed partial class Loc
         ["bpNow"] = "الآن",
         ["bpWhyDrive"] = "القرص غير موصول", ["bpWhyFiles"] = "ملفات اللعبة غير موجودة", ["bpWhyLauncher"] = "المشغّل غير مثبت", ["bpWhySteam"] = "لم تُسجّل الدخول إلى Steam",
         ["bpController"] = "يد التحكم موصولة", ["bpNoController"] = "لوحة المفاتيح", ["bpSaved"] = "تُحفظ التغييرات تلقائيًا",
+        ["bpHideGame"] = "أخفِ من المكتبة", ["bpHideGameN"] = "تعيدها من الإعدادات › المكتبة › إظهار الألعاب المخفية في النافذة العادية.",
+        ["bpMoreSettings"] = "إعدادات أكثر في النافذة العادية", ["bpMoreSettingsN"] = "الاسم والغلاف وخيارات التشغيل. تعود الشاشة الكبيرة عند إغلاقها.",
+        ["bpHiddenToast"] = "أُخفيت {0} من المكتبة",
     };
 
     private static readonly Dictionary<string, string> BpEn = new()
@@ -97,5 +100,8 @@ public sealed partial class Loc
         ["bpNow"] = "Now",
         ["bpWhyDrive"] = "The drive isn't connected", ["bpWhyFiles"] = "The game files are missing", ["bpWhyLauncher"] = "The launcher isn't installed", ["bpWhySteam"] = "Steam isn't signed in",
         ["bpController"] = "Controller connected", ["bpNoController"] = "Keyboard", ["bpSaved"] = "Changes are saved automatically",
+        ["bpHideGame"] = "Hide from library", ["bpHideGameN"] = "Bring it back from Settings › Library › Show hidden games in the normal window.",
+        ["bpMoreSettings"] = "More settings in the normal window", ["bpMoreSettingsN"] = "Name, cover and launch options. Big Picture comes back when you close it.",
+        ["bpHiddenToast"] = "{0} is hidden from the library",
     };
 }

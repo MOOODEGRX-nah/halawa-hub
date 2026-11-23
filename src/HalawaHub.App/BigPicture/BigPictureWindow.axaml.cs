@@ -195,9 +195,14 @@ public partial class BigPictureWindow : Window
     {
         if (FindFocused() is not { } target) return null;
         double x = 0, y = 0, extraX = 0;
+        var tw = target.Bounds.Width;
         Visual? v = target;
         while (v != null && v != Root)
         {
+            // عنصر باتجاه غير اتجاه أبيه (حروف إنجليزية داخل الواجهة العربية) يُرسم معكوسًا داخل
+            // حدوده، فمكان العنصر فيه يُعكس قبل الصعود للأب، وإلا وقعت الحلقة على المفتاح المقابل
+            if (v is Control c && v.GetVisualParent() is Control p && c.FlowDirection != p.FlowDirection)
+                x = v.Bounds.Width - x - tw;
             x += v.Bounds.X;
             y += v.Bounds.Y;
             if (ReferenceEquals(v, RowStrip)) extraX += -_vm.RowOffsetCards * Pitch;
@@ -214,6 +219,7 @@ public partial class BigPictureWindow : Window
     /// تكبير العنصر المركَّز ورفعه كما في أنماطه (.c.f و.btn.f و.key.f و.qsr.f و.ntr.f)
     private static (double Scale, double Dy) FocusedTransform(Control c) =>
         c.Classes.Contains("bpcard") ? (1.06, -10)
+        : c.Classes.Contains("wide") ? (1, 0)
         : c.Classes.Contains("key") ? (1.08, 0)
         : c.Classes.Contains("btn") ? (1.05, 0)
         : c.Classes.Contains("qsr") || c.Classes.Contains("ntr") ? (1.02, 0)
@@ -346,6 +352,11 @@ public partial class BigPictureWindow : Window
             var c = _vm.KeyRows[r].IndexOf(item);
             if (c >= 0) { _vm.ClickKey(r, c); return; }
         }
+    }
+
+    private void OnGameOptionClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpButtonItem>(sender) is { } item) _vm.ClickGameOption(_vm.GameOptions.IndexOf(item));
     }
 
     private void OnGameButtonClick(object? sender, RoutedEventArgs e)

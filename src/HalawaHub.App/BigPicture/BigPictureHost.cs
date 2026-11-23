@@ -16,11 +16,14 @@ public sealed class BigPictureHost : IBpHost
     private readonly Action _closeApp;
     private List<BpGame>? _games;
 
-    public BigPictureHost(MainViewModel main, Action exit, Action closeApp)
+    private readonly Action<string>? _reopenAt;
+
+    public BigPictureHost(MainViewModel main, Action exit, Action closeApp, Action<string>? reopenAt = null)
     {
         _main = main;
         _exit = exit;
         _closeApp = closeApp;
+        _reopenAt = reopenAt;
         main.Config.BigPicture ??= new BpSettings();
         Watch();
         WatchLibrary();
@@ -131,9 +134,25 @@ public sealed class BigPictureHost : IBpHost
 
     public void OpenGameSettings(BpGame game)
     {
-        // إعدادات اللعبة (الغلاف، معاملات التشغيل...) في نافذة اللعبة العادية
+        // إعدادات اللعبة (الغلاف، معاملات التشغيل...) في نافذة اللعبة العادية، ثم العودة للشاشة الكبيرة
         _exit();
         _main.OpenDetailsCommand.Execute(Card(game));
+        if (_reopenAt == null || !_main.IsDetailsOpen) return;
+        var key = game.Key;
+        void OnChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(MainViewModel.IsDetailsOpen) || _main.IsDetailsOpen) return;
+            _main.PropertyChanged -= OnChanged;
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => _reopenAt(key));
+        }
+        _main.PropertyChanged += OnChanged;
+    }
+
+    public void HideGame(BpGame game)
+    {
+        Card(game).IsHidden = true;
+        _games = null;
+        DataChanged?.Invoke(true);
     }
 
     /// الخبر يُفتح داخل Steam (steam://openurl) كما في التصميم، وإن تعذّر ففي المتصفح
@@ -195,7 +214,9 @@ public sealed class BigPictureHost : IBpHost
             "launch" => ("fail", n.Text, "", (string?)null, (string?)null),
             "scan" => ("scan", L["bpNtScanT"], n.Text, "show", L["bpNtShow"]),
             "appupdate" => ("app", L["bpNtAppT"], L["bpNtAppB"], null, null),
-            "free" => ("free", L["bpNtFreeT"], FreeBody(n.Text), n.CanOpen ? "open" : null, n.CanOpen ? L["bpOpen"] : null),
+            // نص الإشعار فيه أسماء المجانيات وموعد انتهائها؛ زر «فتح» كان يغلق الشاشة الكبيرة ليفتح العروض
+            // في النافذة العادية، فلا زر هنا وصفحة العروض في النافذة العادية متاحة كالعادة
+            "free" => ("free", L["bpNtFreeT"], FreeBody(n.Text), (string?)null, (string?)null),
             _ => ("scan", n.Text, "", null, null),
         };
         return new BpNotification
@@ -205,7 +226,6 @@ public sealed class BigPictureHost : IBpHost
             Time = RelativeTime(n.At, DateTime.Now),
             Unread = unread,
             ActionId = actionId, ActionLabel = label, Game = game,
-            Action = actionId == "open" ? () => { _exit(); n.Open?.Invoke(); } : null,
             Source = n,
         };
     }

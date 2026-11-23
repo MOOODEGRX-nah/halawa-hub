@@ -127,6 +127,10 @@
       <Setter Property="Background" Value="#241010"/>
       <Setter Property="RenderTransform" Value="scale(1.05)"/>
     </Style>
+    <!-- الأزرار العريضة (قائمة صفحة اللعبة ولوحاتها) لا تكبر: الحلقة تحيط بحوافها المرسومة نفسها،
+         ولونها الأفتح يكفي. تكبيرها كان لا يُرسم أحيانًا فتظهر الحلقة مستطيلًا فارغًا حول الزر -->
+    <Style Selector="Button.btn.wide.f"><Setter Property="RenderTransform" Value="scale(1)"/></Style>
+    <Style Selector="Button.btn.wide.f:not(.pl)"><Setter Property="Background" Value="#3A1518"/></Style>
     <Style Selector="Button.btn /template/ ContentPresenter"><Setter Property="Transitions"><Transitions><BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.3"/></Transitions></Setter></Style>
     <Style Selector="Button.btn.f /template/ ContentPresenter"><Setter Property="BoxShadow" Value="0 10 30 0 #73EF4444"/></Style>
     <Style Selector="Button.btn.pri, Button.btn.pl">
@@ -809,7 +813,8 @@
         </StackPanel>
 
         <StackPanel x:Name="GameSide" Margin="0,150,72,0" Width="660" HorizontalAlignment="Right" VerticalAlignment="Top" Spacing="18">
-          <Border Height="372" CornerRadius="22" ClipToBounds="True" BorderBrush="#14FFFFFF" BorderThickness="1" BoxShadow="0 30 70 0 #80000000"
+          <!-- تظهر فقط حين لا توجد للعبة صورة عريضة؛ معها تكون الصورة نفسها خلفية الصفحة كلها -->
+          <Border IsVisible="{Binding ShowShowcase}" Height="372" CornerRadius="22" ClipToBounds="True" BorderBrush="#14FFFFFF" BorderThickness="1" BoxShadow="0 30 70 0 #80000000"
                   Background="{Binding Hero.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
             <Panel>
               <TextBlock Text="{Binding Hero.Letter}" FontFamily="fonts:Inter#Inter" FontWeight="Black" FontSize="220" Foreground="#21FFFFFF"
@@ -1056,6 +1061,33 @@
         </Border>
       </Panel>
 
+      <!-- إعدادات اللعبة داخل الشاشة الكبيرة -->
+      <Panel IsVisible="{Binding IsGameOptionsOpen}" Background="#C7060202">
+        <Border x:Name="GameOptionsPanel" Classes="panel" Width="760">
+          <StackPanel Spacing="18">
+            <StackPanel Spacing="4">
+              <TextBlock Text="{l:Loc bpGameSettings}" FontSize="30" FontWeight="Bold" Foreground="#EF4444"/>
+              <bpc:BpAutoText Text="{Binding GameOptionsTitle}" FontSize="21" Foreground="#D9C7C7" TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+            <ItemsControl ItemsSource="{Binding GameOptions}">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="12"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="bp:BpButtonItem">
+                  <Button Classes="btn wide" Classes.f="{Binding IsFocused}" Focusable="False" HorizontalAlignment="Stretch"
+                          Height="NaN" MinHeight="68" Padding="26,14" bpc:BpFocus.Key="{Binding FocusKey}" Click="OnGameOptionClick">
+                    <StackPanel Spacing="4">
+                      <TextBlock Text="{Binding Label}" FontSize="21" FontWeight="SemiBold" Foreground="{Binding $parent[Button].Foreground}"/>
+                      <TextBlock Text="{Binding Note}" IsVisible="{Binding Note, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                 FontSize="16" Foreground="#9C8A8A" TextWrapping="Wrap"/>
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </Panel>
+
       <Panel IsVisible="{Binding IsLaunchOpen}" Background="#C7060202">
         <Border x:Name="LaunchPanel" Classes="panel" Width="780">
           <StackPanel Spacing="18" HorizontalAlignment="Stretch">
@@ -1254,8 +1286,9 @@
                 BoxShadow="0 0 28 0 #99EF4444, inset 0 0 16 0 #40EF4444">
                     <Border x:Name="RingFlash" Margin="-3" CornerRadius="{Binding #Ring.CornerRadius}" BorderThickness="3" BorderBrush="#8CFFFFFF" Opacity="0"/>
         </Border>
-        <Ellipse x:Name="TapR" Width="64" Height="64" Stroke="White" StrokeThickness="3" Opacity="0"/>
-        <Ellipse x:Name="TapM" Width="64" Height="64" Fill="#61FFFFFF" Stroke="White" StrokeThickness="3.5" Opacity="0"/>
+        <!-- علامة الضغط بشكل الحلقة نفسه (مربع بزوايا مستديرة حول العنصر) بدل دائرة في وسطه -->
+        <Border x:Name="TapR" BorderBrush="White" BorderThickness="3" Opacity="0" RenderTransformOrigin="50%,50%" IsHitTestVisible="False"/>
+        <Border x:Name="TapM" Background="#40FFFFFF" BorderBrush="White" BorderThickness="3" Opacity="0" RenderTransformOrigin="50%,50%" IsHitTestVisible="False"/>
       </Canvas>
 
       <!-- ===== شريط التلميحات (.hb) ===== -->

@@ -58,6 +58,7 @@ public partial class BigPictureWindow
             switch (vm.Overlay)
             {
                 case BpOverlay.Update: _ = MotionSettings.AnimateAsync(UpdatePanel, TimeSpan.FromSeconds(0.42), MotionSettings.DialogEasing, 0, 0.94, 18); break;
+                case BpOverlay.GameOptions: _ = MotionSettings.AnimateAsync(GameOptionsPanel, TimeSpan.FromSeconds(0.42), MotionSettings.DialogEasing, 0, 0.94, 18); break;
                 case BpOverlay.Launch: _ = MotionSettings.AnimateAsync(LaunchPanel, TimeSpan.FromSeconds(0.42), MotionSettings.DialogEasing, 0, 0.94, 18); break;
                 case BpOverlay.Guide: SlideIn(GuideSheet, -520, 0.5, 0, BpSprings.Track); break;
                 case BpOverlay.Notifications: SlideIn(NotifSheet, 660, 0.5, 0, BpSprings.Track); StaggerNotifications(); break;
@@ -193,7 +194,7 @@ public partial class BigPictureWindow
         if (!MotionSettings.Enabled || FocusRect() is not { } r) return;
         var c = r.Center;
         foreach (var gl in Lights.Where(g => g.IsEffectivelyVisible)) gl.Wave(c.X, c.Y);
-        TapMark(c);
+        TapMark(r);
     }
 
     /// الضوء يتبع مركز العنصر المركَّز
@@ -211,14 +212,22 @@ public partial class BigPictureWindow
         }
     }
 
-    private async void TapMark(Point c)
+    /// علامة الضغط تأخذ مكان الحلقة وشكلها: وميض داخلها ثم إطار يتسع قليلًا ويختفي
+    private async void TapMark(Rect r)
     {
-        Canvas.SetLeft(TapM, c.X - 32); Canvas.SetTop(TapM, c.Y - 32);
-        Canvas.SetLeft(TapR, c.X - 32); Canvas.SetTop(TapR, c.Y - 32);
+        const double pad = 7;
+        var x = r.X - pad; var y = r.Y - pad; var w = r.Width + pad * 2; var h = r.Height + pad * 2;
+        foreach (var b in new[] { TapM, TapR })
+        {
+            Canvas.SetLeft(b, x); Canvas.SetTop(b, y);
+            b.Width = w; b.Height = h;
+            b.CornerRadius = Ring.CornerRadius;
+        }
         var ms = new ScaleTransform(); TapM.RenderTransform = ms;
         var rs = new ScaleTransform(); TapR.RenderTransform = rs;
-        var mark = new Animation { Duration = TimeSpan.FromMilliseconds(560), Easing = new CubicEaseOut(), Children = { Tap(0, 0, 1.25), Tap(0.45, 1, 0.8), Tap(0.7, 1, 1), Tap(1, 0, 1) } };
-        var ring = new Animation { Duration = TimeSpan.FromMilliseconds(420), Delay = TimeSpan.FromMilliseconds(240), Easing = new CubicEaseOut(), Children = { Tap(0, 0.7, 1), Tap(1, 0, 2.3) } };
+        // تكبير نسبي صغير: المربع كبير بخلاف الدائرة، فتكبيره 2.3 مرة كان سيغطي الشاشة
+        var mark = new Animation { Duration = TimeSpan.FromMilliseconds(480), Easing = new CubicEaseOut(), Children = { Tap(0, 0, 1.03), Tap(0.35, 0.9, 0.98), Tap(0.7, 0.6, 1), Tap(1, 0, 1) } };
+        var ring = new Animation { Duration = TimeSpan.FromMilliseconds(420), Delay = TimeSpan.FromMilliseconds(160), Easing = new CubicEaseOut(), Children = { Tap(0, 0.8, 1), Tap(1, 0, 1.1) } };
         try { await Task.WhenAll(mark.RunAsync(TapM), ring.RunAsync(TapR)); } catch (Exception ex) { Log.Error("tap mark failed", ex); }
         TapM.Opacity = 0;
         TapR.Opacity = 0;

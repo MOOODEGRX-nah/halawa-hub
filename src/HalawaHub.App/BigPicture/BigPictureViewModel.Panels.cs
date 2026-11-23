@@ -303,6 +303,57 @@ public sealed partial class BigPictureViewModel
         SyncFocus();
     }
 
+    // ===== إعدادات اللعبة داخل الشاشة الكبيرة =====
+    // كانت «إعدادات اللعبة» تغلق الشاشة الكبيرة فورًا. الآن لوحة هنا، والخروج للنافذة العادية خيار
+    // مسمّى صراحة وتعود الشاشة الكبيرة بعده.
+
+    private int _optIndex;
+    public ObservableCollection<BpButtonItem> GameOptions { get; } = new()
+    {
+        new BpButtonItem { FocusKey = "gopt.0", Id = "hide" },
+        new BpButtonItem { FocusKey = "gopt.1", Id = "advanced" },
+        new BpButtonItem { FocusKey = "gopt.2", Id = "close" },
+    };
+    public bool IsGameOptionsOpen => _overlay == BpOverlay.GameOptions;
+    public string GameOptionsTitle => _hero?.Name ?? "";
+
+    private void OpenGameOptions()
+    {
+        _overlay = BpOverlay.GameOptions;
+        _optIndex = 0;
+        RefreshOverlayLabels();
+        Changed();
+    }
+
+    private void RunGameOption(int index)
+    {
+        if (_hero is not { } g || index < 0 || index >= GameOptions.Count) return;
+        switch (GameOptions[index].Id)
+        {
+            case "hide":
+                // نخرج من صفحة اللعبة أولًا: بعد الإخفاء تختفي من القوائم
+                CloseOverlayQuiet();
+                GoTab(_from);
+                _host.HideGame(g);
+                ShowToast(F("bpHiddenToast", g.Name));
+                break;
+            case "advanced":
+                CloseOverlay();
+                _host.OpenGameSettings(g);
+                break;
+            default:
+                CloseOverlay();
+                break;
+        }
+    }
+
+    public void ClickGameOption(int index)
+    {
+        _optIndex = index;
+        RunGameOption(index);
+        SyncFocus();
+    }
+
     // ===== لوحة التشغيل =====
 
     private CancellationTokenSource? _launchCts;
@@ -347,6 +398,9 @@ public sealed partial class BigPictureViewModel
         UpdateButtons[0].Label = T("bpUpdNow");
         UpdateButtons[1].Label = T("bpPlayAnyway");
         UpdateButtons[2].Label = T("bpCancel");
+        GameOptions[0].Label = T("bpHideGame"); GameOptions[0].Note = T("bpHideGameN");
+        GameOptions[1].Label = T("bpMoreSettings"); GameOptions[1].Note = T("bpMoreSettingsN");
+        GameOptions[2].Label = T("bpClose");
         FailButtons[0].Label = _hero == null ? T("bpOpenLauncher") : F("bpOpenLauncherOf", PlatformOf(_hero));
         FailButtons[1].Label = T("bpRetry");
         FailButtons[2].Label = T("bpBack");

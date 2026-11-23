@@ -127,6 +127,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpOverlay.Notifications: if (dy != 0) NavNotifications(dy); return;
             case BpOverlay.Update: _updIndex = Math.Clamp(_updIndex + dx, 0, UpdateButtons.Count - 1); return;
             case BpOverlay.Launch: if (LaunchState == BpLaunchState.Failed) _failIndex = Math.Clamp(_failIndex + dx, 0, FailButtons.Count - 1); return;
+            case BpOverlay.GameOptions: _optIndex = Math.Clamp(_optIndex + dy, 0, GameOptions.Count - 1); return;
         }
 
         switch (_screen)
@@ -147,6 +148,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpOverlay.Notifications: RunNotificationAction(); return;
             case BpOverlay.Update: RunUpdateButton(_updIndex); return;
             case BpOverlay.Launch: if (LaunchState == BpLaunchState.Failed) RunFailButton(_failIndex); return;
+            case BpOverlay.GameOptions: RunGameOption(_optIndex); return;
         }
 
         switch (_screen)
@@ -258,7 +260,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
         HeroButtons.Cast<BpItem>().Concat(StripTabs).Concat(RowCards).Append(MoreCard)
             .Concat(LibraryCards).Concat(Filters).Concat(KeyRows.SelectMany(r => r)).Concat(Results)
             .Concat(GameButtons).Concat(NewsItems).Concat(SettingSections).Concat(SettingRows)
-            .Concat(GuideItems).Concat(UpdateButtons).Concat(FailButtons).Concat(NotifItems);
+            .Concat(GuideItems).Concat(UpdateButtons).Concat(FailButtons).Concat(NotifItems).Concat(GameOptions);
 
     private void SyncFocus() => Changed();
 
@@ -270,6 +272,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpOverlay.Notifications: return NotifItems.Count > 0 ? "nt." + _ntIndex : null;
             case BpOverlay.Update: return "upd." + _updIndex;
             case BpOverlay.Launch: return LaunchState == BpLaunchState.Failed ? "fail." + _failIndex : null;
+            case BpOverlay.GameOptions: return "gopt." + _optIndex;
         }
 
         return _screen switch

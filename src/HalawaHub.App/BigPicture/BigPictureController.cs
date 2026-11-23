@@ -113,12 +113,14 @@ public sealed class BigPictureController : IDisposable
         }
     }
 
-    public void Open()
+    /// <param name="gameKey">لعبة تُفتح صفحتها مباشرة (العودة من نافذة اللعبة العادية)</param>
+    public void Open(string? gameKey = null)
     {
         if (_window != null) { _window.Activate(); return; }
 
-        var host = new BigPictureHost(_vm, () => Exit(), CloseApp);
+        var host = new BigPictureHost(_vm, () => Exit(), CloseApp, key => Open(key));
         var vm = new BigPictureViewModel(host);
+        if (gameKey != null && host.Games.FirstOrDefault(g => g.Key == gameKey) is { } game) vm.OpenGame(game);
         EnsureWatching(force: true);
         var window = new BigPictureWindow(vm, _pads);
         _window = window;

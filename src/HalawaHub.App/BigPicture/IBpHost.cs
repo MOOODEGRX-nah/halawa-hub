@@ -37,7 +37,10 @@ public interface IBpHost
     Task<BpLaunchResult> LaunchAsync(BpGame game, CancellationToken token);
     void OpenUpdateInLauncher(BpGame game);
     void OpenLauncher(BpGame game);
+    /// نافذة اللعبة العادية (الاسم والغلاف وخيارات التشغيل)؛ تعود الشاشة الكبيرة على اللعبة نفسها بعد إغلاقها
     void OpenGameSettings(BpGame game);
+    /// إخفاء من المكتبة، ثم إعادة قراءة الألعاب
+    void HideGame(BpGame game);
     void OpenNews(BpGame game, string url);
     /// أخبار Steam للعبة (العنوان، التاريخ، الرابط)؛ فارغة لغير Steam
     Task<IReadOnlyList<(string Title, string Date, string Url)>> LoadNewsAsync(BpGame game);

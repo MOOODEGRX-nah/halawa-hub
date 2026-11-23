@@ -71,6 +71,7 @@ public sealed partial class BigPictureViewModel
                     ? new[] { H("a", "bpSelect"), H("x", "bpNtDismiss"), H("y", "bpNtClear"), H("b", "bpClose") }
                     : new[] { H("b", "bpClose") },
                 BpOverlay.Update => new[] { H("a", "bpSelect"), H("b", "bpCancel") },
+                BpOverlay.GameOptions => new[] { H("a", "bpSelect"), H("b", "bpClose") },
                 BpOverlay.Launch => LaunchState == BpLaunchState.Failed
                     ? new[] { H("a", "bpSelect"), H("b", "bpBack") }
                     : new[] { H("b", "bpCancel") },

@@ -214,7 +214,9 @@ public sealed class BigPictureHost : IBpHost
             "launch" => ("fail", n.Text, "", (string?)null, (string?)null),
             "scan" => ("scan", L["bpNtScanT"], n.Text, "show", L["bpNtShow"]),
             "appupdate" => ("app", L["bpNtAppT"], L["bpNtAppB"], null, null),
-            "free" => ("free", L["bpNtFreeT"], FreeBody(n.Text), n.CanOpen ? "open" : null, n.CanOpen ? L["bpOpen"] : null),
+            // نص الإشعار فيه أسماء المجانيات وموعد انتهائها؛ زر «فتح» كان يغلق الشاشة الكبيرة ليفتح العروض
+            // في النافذة العادية، فلا زر هنا وصفحة العروض في النافذة العادية متاحة كالعادة
+            "free" => ("free", L["bpNtFreeT"], FreeBody(n.Text), (string?)null, (string?)null),
             _ => ("scan", n.Text, "", null, null),
         };
         return new BpNotification
@@ -224,7 +226,6 @@ public sealed class BigPictureHost : IBpHost
             Time = RelativeTime(n.At, DateTime.Now),
             Unread = unread,
             ActionId = actionId, ActionLabel = label, Game = game,
-            Action = actionId == "open" ? () => { _exit(); n.Open?.Invoke(); } : null,
             Source = n,
         };
     }

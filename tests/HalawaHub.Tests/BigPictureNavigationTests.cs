@@ -193,6 +193,123 @@ public class BigPictureNavigationTests : IDisposable
     }
 
     [AvaloniaFact]
+    public void Game_settings_open_a_panel_inside_big_picture_instead_of_leaving()
+    {
+        var host = FakeBpHost.WithGames(3);
+        var vm = Vm(host);
+        vm.OpenGame(host.GameList[0]);
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.Down);
+        vm.FocusKey.Should().Be("game.2");
+
+        vm.Press(BpButton.A);
+        vm.Overlay.Should().Be(BpOverlay.GameOptions);
+        vm.FocusKey.Should().Be("gopt.0");
+        host.Calls.Should().NotContain(c => c == "exit" || c.StartsWith("settings:"), "the panel opens inside Big Picture");
+
+        // B يغلق اللوحة ويعيد التركيز لزر الإعدادات
+        vm.Press(BpButton.B);
+        vm.Overlay.Should().Be(BpOverlay.None);
+        vm.FocusKey.Should().Be("game.2");
+
+        // «إعدادات أكثر» هو الخيار الوحيد الذي يفتح النافذة العادية، والمضيف يعيد الشاشة الكبيرة بعدها
+        vm.Press(BpButton.A);
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.A);
+        host.Calls.Should().Contain("settings:g0");
+        vm.Overlay.Should().Be(BpOverlay.None);
+
+        // الإخفاء: يعود للصفحة السابقة وتختفي اللعبة
+        vm.Press(BpButton.A);
+        vm.Press(BpButton.A);
+        host.Calls.Should().Contain("hide:g0");
+        vm.Screen.Should().Be(BpScreen.Home);
+        host.GameList.Should().NotContain(g => g.Key == "g0");
+        host.Calls.Should().NotContain("exit");
+    }
+
+    /// <summary>
+    /// كل زر في الشاشة الكبيرة يُضغط، ولا يخرج منها إلا: «الخروج من الشاشة الكبيرة» و«إغلاق Halawa» في
+    /// القائمة، وسطر الخروج في الإعدادات. «إعدادات أكثر» يفتح النافذة العادية ثم يعيدها (OpenGameSettings).
+    /// </summary>
+    [AvaloniaFact]
+    public void No_button_leaves_big_picture_except_the_exit_ones()
+    {
+        var leaks = new List<string>();
+        void Case(string name, Action<BigPictureViewModel, FakeBpHost> steps, string? allowed = null, Func<FakeBpHost>? make = null)
+        {
+            Loc.Instance.Language = Loc.English;
+            var host = make?.Invoke() ?? FakeBpHost.WithGames(3);
+            var vm = Vm(host);
+            steps(vm, host);
+            var exits = host.Calls.Where(c => c is "exit" or "close").ToList();
+            if (exits.Any(e => e != allowed)) leaks.Add($"{name}: {string.Join(",", exits)}");
+            if (allowed != null && !exits.Contains(allowed)) leaks.Add($"{name}: expected {allowed}");
+        }
+        void A(BigPictureViewModel vm, params BpButton[] path) { foreach (var b in path) vm.Press(b); vm.Press(BpButton.A); }
+
+        // الرئيسي: أزرار البطل والبطاقات
+        Case("hero play", (vm, _) => A(vm, BpButton.Up, BpButton.Up));
+        Case("hero details", (vm, _) => A(vm, BpButton.Up, BpButton.Up, BpButton.Right));
+        Case("hero favorite", (vm, _) => A(vm, BpButton.Up, BpButton.Up, BpButton.Right, BpButton.Right));
+        Case("strip tab", (vm, _) => A(vm, BpButton.Up, BpButton.Right));
+        Case("row card", (vm, _) => A(vm));
+        Case("see all", (vm, _) => A(vm, BpButton.Right, BpButton.Right, BpButton.Right, BpButton.Right));
+
+        // صفحة اللعبة ولوحة إعداداتها
+        foreach (var i in new[] { 0, 1, 2 })
+            Case($"game button {i}", (vm, h) => { vm.OpenGame(h.GameList[0]); A(vm, Enumerable.Repeat(BpButton.Down, i).ToArray()); });
+        foreach (var i in new[] { 0, 1, 2 })
+            Case($"game option {i}", (vm, h) => { vm.OpenGame(h.GameList[0]); A(vm, BpButton.Down, BpButton.Down); A(vm, Enumerable.Repeat(BpButton.Down, i).ToArray()); });
+
+        // التحديث قبل التشغيل، وفشل التشغيل
+        foreach (var i in new[] { 0, 1, 2 })
+            Case($"update panel {i}", (vm, h) => { vm.Play(h.GameList[0]); A(vm, Enumerable.Repeat(BpButton.Right, i).ToArray()); },
+                make: () => FakeBpHost.WithGames(3, n => FakeBpHost.Game(n, update: true)));
+        foreach (var i in new[] { 0, 1, 2 })
+            Case($"launch failed {i}", (vm, h) =>
+            {
+                h.NextLaunch = new BpLaunchResult(false, "Steam isn't signed in", "Sign in", CanOpenLauncher: true);
+                vm.Play(h.GameList[0]);
+                A(vm, Enumerable.Repeat(BpButton.Right, i).ToArray());
+            });
+
+        // القائمة: العناصر 0-4 تبقى في الشاشة الكبيرة، 5 خروج منها، 6 إغلاق البرنامج
+        for (var i = 0; i < 7; i++)
+        {
+            var allowed = i == 5 ? "exit" : i == 6 ? "close" : null;
+            var steps = Enumerable.Repeat(BpButton.Down, i).ToArray();
+            Case($"guide {i}", (vm, _) => { vm.Press(BpButton.Menu); A(vm, steps); }, allowed);
+        }
+
+        // الإعدادات: كل سطر في كل قسم؛ سطر الخروج وحده يخرج
+        {
+            Loc.Instance.Language = Loc.English;
+            var host = FakeBpHost.WithGames(3);
+            var vm = Vm(host);
+            vm.OpenSettings();
+            var sections = vm.SettingSections.Count;
+            for (var s = 0; s < sections; s++)
+            {
+                vm.Press(BpButton.A);
+                for (var r = 0; r < vm.SettingRows.Count; r++)
+                {
+                    var before = host.Calls.Count(c => c is "exit" or "close");
+                    var row = vm.SettingRows[r];
+                    vm.Press(BpButton.A);
+                    var left = host.Calls.Count(c => c is "exit" or "close") > before;
+                    if (left != (row.Kind == BpRowKind.Button)) leaks.Add($"settings section {s} row {r} ({row.Kind}): left={left}");
+                    vm.Press(BpButton.Down);
+                }
+                vm.Press(BpButton.B);
+                vm.Press(BpButton.Down);
+            }
+        }
+
+        leaks.Should().BeEmpty();
+    }
+
+    [AvaloniaFact]
     public void Size_on_disk_updates_once_it_is_calculated()
     {
         var size = "…";

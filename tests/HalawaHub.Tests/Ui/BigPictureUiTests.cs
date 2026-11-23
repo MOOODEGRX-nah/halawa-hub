@@ -92,6 +92,30 @@ public class BigPictureUiTests : IDisposable
     private static Border Ring(Window w) => w.GetVisualDescendants().OfType<Border>().First(b => b.Name == "Ring");
 
     [AvaloniaTheory]
+    [InlineData(Loc.Arabic, true)]
+    [InlineData(Loc.Arabic, false)]
+    [InlineData(Loc.English, true)]
+    [InlineData(Loc.English, false)]
+    public void Ring_sits_on_the_focused_key_whichever_letters_are_shown(string language, bool switchLetters)
+    {
+        var (window, vm) = Open(language);
+        vm.GoTab(App.BigPicture.BpScreen.Search);
+        if (switchLetters) vm.ClickKey(3, 2);
+        vm.Press(App.BigPicture.Input.BpButton.Up);
+        vm.Press(App.BigPicture.Input.BpButton.Up);
+        Settle();
+
+        // مكان الرسم الفعلي للحلقة وللمفتاح (مع انعكاس الاتجاه)، لا القيم المحسوبة
+        var key = window.GetVisualDescendants().OfType<Button>()
+            .First(b => b.Classes.Contains("key") && App.BigPicture.Controls.BpFocus.GetKey(b) == vm.FocusKey);
+        var ring = Ring(window);
+        Point Center(Visual v) => v.TranslatePoint(new Point(v.Bounds.Width / 2, v.Bounds.Height / 2), window)!.Value;
+        Center(ring).X.Should().BeApproximately(Center(key).X, 2, $"the ring must sit on {vm.FocusKey}");
+        Center(ring).Y.Should().BeApproximately(Center(key).Y, 2);
+        window.Close();
+    }
+
+    [AvaloniaTheory]
     [InlineData(Loc.Arabic)]
     [InlineData(Loc.English)]
     public void Lb_sits_left_of_rb_and_tabs_follow_the_language(string language)

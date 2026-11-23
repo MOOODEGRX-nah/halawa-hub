@@ -1254,8 +1254,9 @@
                 BoxShadow="0 0 28 0 #99EF4444, inset 0 0 16 0 #40EF4444">
                     <Border x:Name="RingFlash" Margin="-3" CornerRadius="{Binding #Ring.CornerRadius}" BorderThickness="3" BorderBrush="#8CFFFFFF" Opacity="0"/>
         </Border>
-        <Ellipse x:Name="TapR" Width="64" Height="64" Stroke="White" StrokeThickness="3" Opacity="0"/>
-        <Ellipse x:Name="TapM" Width="64" Height="64" Fill="#61FFFFFF" Stroke="White" StrokeThickness="3.5" Opacity="0"/>
+        <!-- علامة الضغط بشكل الحلقة نفسه (مربع بزوايا مستديرة حول العنصر) بدل دائرة في وسطه -->
+        <Border x:Name="TapR" BorderBrush="White" BorderThickness="3" Opacity="0" RenderTransformOrigin="50%,50%" IsHitTestVisible="False"/>
+        <Border x:Name="TapM" Background="#40FFFFFF" BorderBrush="White" BorderThickness="3" Opacity="0" RenderTransformOrigin="50%,50%" IsHitTestVisible="False"/>
       </Canvas>
 
       <!-- ===== شريط التلميحات (.hb) ===== -->

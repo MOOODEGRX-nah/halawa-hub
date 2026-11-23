@@ -195,9 +195,14 @@ public partial class BigPictureWindow : Window
     {
         if (FindFocused() is not { } target) return null;
         double x = 0, y = 0, extraX = 0;
+        var tw = target.Bounds.Width;
         Visual? v = target;
         while (v != null && v != Root)
         {
+            // عنصر باتجاه غير اتجاه أبيه (حروف إنجليزية داخل الواجهة العربية) يُرسم معكوسًا داخل
+            // حدوده، فمكان العنصر فيه يُعكس قبل الصعود للأب، وإلا وقعت الحلقة على المفتاح المقابل
+            if (v is Control c && v.GetVisualParent() is Control p && c.FlowDirection != p.FlowDirection)
+                x = v.Bounds.Width - x - tw;
             x += v.Bounds.X;
             y += v.Bounds.Y;
             if (ReferenceEquals(v, RowStrip)) extraX += -_vm.RowOffsetCards * Pitch;

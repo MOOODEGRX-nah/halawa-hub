@@ -146,7 +146,7 @@ public class UiFlowTests
             ui.Vm.GameDialogTitle.Should().Be(title);
         }
 
-        ui.Vm.GameDialogSectionCount.Should().Be(4, "no tools for this game");
+        ui.Vm.GameDialogSectionCount.Should().Be(5, "general, collections, files, cover, launch; no tools for this game");
 
         ui.Window.KeyPress(Key.Escape, RawInputModifiers.None, PhysicalKey.Escape, null);
         ui.Settle();

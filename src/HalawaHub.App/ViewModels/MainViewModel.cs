@@ -316,7 +316,12 @@ public partial class MainViewModel : INotifyPropertyChanged
     public RelayCommand OpenInstallLocationCommand { get; }
     public RelayCommand SearchCoversCommand { get; }
     public RelayCommand CloseCoverSearchCommand { get; }
-    public RelayCommand PickCoverCandidateCommand { get; }
+    public RelayCommand PickSgdbCommand { get; }
+    public RelayCommand CheckKeyAndBrowseCommand { get; }
+    public RelayCommand SgdbTypeCommand { get; }
+    public RelayCommand SgdbStyleCommand { get; }
+    public RelayCommand SgdbAnimatedCommand { get; }
+    public RelayCommand SgdbSearchCommand { get; }
     public RelayCommand RestoreCoverCommand { get; }
 
     public MainViewModel(ILibraryService libraryService, IFilterService filterService, IUpdateService updateService)
@@ -396,10 +401,15 @@ public partial class MainViewModel : INotifyPropertyChanged
         SelectSettingsSectionCommand = new RelayCommand(param => { if (int.TryParse(param as string, out var i)) SettingsSection = i; });
         SetLanguageCommand = new RelayCommand(param => { if (param is string language) Language = language; });
         OpenInstallLocationCommand = new RelayCommand(_ => OpenInstallLocation());
-        SearchCoversCommand = new RelayCommand(_ => { _ = SearchCoversAsync(); });
+        SearchCoversCommand = new RelayCommand(_ => OpenCoverSearch());
         CloseCoverSearchCommand = new RelayCommand(_ => ResetCoverSearch());
-        PickCoverCandidateCommand = new RelayCommand(param => { _ = PickCoverCandidateAsync(param as CoverCandidate); });
-        RestoreCoverCommand = new RelayCommand(_ => DetailsGame?.RestoreOriginalCover());
+        PickSgdbCommand = new RelayCommand(param => { _ = PickSgdbAsync(param as SgdbTile); });
+        CheckKeyAndBrowseCommand = new RelayCommand(_ => { _ = CheckKeyAndBrowseAsync(); });
+        SgdbTypeCommand = new RelayCommand(param => { if (int.TryParse(param?.ToString(), out var i)) _ = Sgdb.SetTypeAsync(i); });
+        SgdbStyleCommand = new RelayCommand(param => { _ = Sgdb.SetStyleAsync(param as string); });
+        SgdbAnimatedCommand = new RelayCommand(_ => { _ = Sgdb.ToggleAnimatedAsync(); });
+        SgdbSearchCommand = new RelayCommand(_ => { _ = Sgdb.SearchAsync(); });
+        RestoreCoverCommand = new RelayCommand(_ => { DetailsGame?.RestoreOriginalCover(); ResetCoverSearch(); });
 
         // الاختبارات بلا حالة Steam حقيقية ولا ذاكرة مكتبة مشتركة
         StatusProbe = startBackgroundTasks ? GameStatusProbe.System : null;

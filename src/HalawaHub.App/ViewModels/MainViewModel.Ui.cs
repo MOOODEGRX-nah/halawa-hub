@@ -94,6 +94,7 @@ public partial class MainViewModel
         RefreshPluginTexts();
         OnPropertyChanged(nameof(WizardNextLabel));
         RefreshNotificationTexts();
+        _sgdb?.RefreshTexts();
         OnPropertyChanged(nameof(EditTitle));
         OnPropertyChanged(nameof(EditProblem));
         OnPropertyChanged(nameof(ReduceMotionStateText));
@@ -403,6 +404,7 @@ public partial class MainViewModel
         NewsSection => "news",
         ToolsSection => "tools",
         DetailsSection => "details",
+        CollectionsSection => "coll",
         _ => "general"
     }];
 
@@ -459,84 +461,121 @@ public partial class MainViewModel
         }
     }
 
-    // ===== بحث SteamGridDB من نافذة اللعبة =====
+    // ===== SteamGridDB من نافذة اللعبة: بطاقة المفتاح أو المتصفح =====
 
-    public ObservableCollection<CoverCandidate> CoverCandidates { get; } = new();
+    private SgdbBrowser? _sgdb;
+    /// متصفح SteamGridDB (يستعمله قسم الغلاف هنا والشاشة الكبيرة)
+    public SgdbBrowser Sgdb => _sgdb ??= new SgdbBrowser(() => _coverClient);
 
     public bool CanSearchCovers => !string.IsNullOrWhiteSpace(SteamGridDbApiKey);
 
     private bool _isCoverSearchOpen;
+    /// المتصفح مفتوح داخل النافذة (تكبر النافذة وتختفي الأقسام)
     public bool IsCoverSearchOpen
     {
         get => _isCoverSearchOpen;
         private set
         {
+            if (_isCoverSearchOpen == value) return;
             _isCoverSearchOpen = value;
             OnPropertyChanged(nameof(IsCoverSearchOpen));
+            OnPropertyChanged(nameof(IsCoverHome));
         }
     }
 
-    private bool _isCoverSearching;
-    public bool IsCoverSearching
+    private bool _isCoverKeyOpen;
+    /// لا مفتاح بعد: بطاقة المفتاح مكان بطاقات الغلاف
+    public bool IsCoverKeyOpen
     {
-        get => _isCoverSearching;
+        get => _isCoverKeyOpen;
         private set
         {
-            _isCoverSearching = value;
-            OnPropertyChanged(nameof(IsCoverSearching));
-            OnPropertyChanged(nameof(HasNoCoverCandidates));
+            if (_isCoverKeyOpen == value) return;
+            _isCoverKeyOpen = value;
+            OnPropertyChanged(nameof(IsCoverKeyOpen));
+            OnPropertyChanged(nameof(IsCoverHome));
         }
     }
 
-    public bool HasNoCoverCandidates => !IsCoverSearching && CoverCandidates.Count == 0;
+    /// الغلاف الحالي والبطاقات الثلاث
+    public bool IsCoverHome => !IsCoverSearchOpen && !IsCoverKeyOpen;
 
     private void ResetCoverSearch()
     {
         IsCoverSearchOpen = false;
-        CoverCandidates.Clear();
+        IsCoverKeyOpen = false;
     }
 
-    private async Task SearchCoversAsync()
+    /// بطاقة «ابحث في SteamGridDB»: المتصفح إن وُجد مفتاح، وإلا بطاقة المفتاح
+    private void OpenCoverSearch()
     {
         var card = DetailsGame;
-        if (card == null || !CanSearchCovers) return;
-
+        if (card == null) return;
+        if (!CanSearchCovers)
+        {
+            IsCoverKeyOpen = true;
+            return;
+        }
         FlushPendingSettings();
-        CoverCandidates.Clear();
+        IsCoverKeyOpen = false;
         IsCoverSearchOpen = true;
-        IsCoverSearching = true;
+        _ = Sgdb.OpenAsync(card.OriginalName);
+    }
 
-        var candidates = await _coverClient.FindCoverCandidatesAsync(card.OriginalName);
-
-        if (DetailsGame != card) return;
-
-        CoverCandidates.Clear();
-        foreach (var candidate in candidates) CoverCandidates.Add(candidate);
-        IsCoverSearching = false;
+    /// «تحقق واحفظ» في بطاقة المفتاح: مفتاح صالح يذهب مباشرة إلى النتائج
+    private async Task CheckKeyAndBrowseAsync()
+    {
+        await VerifyApiKeyAsync();
+        if (ApiKeyStatus == ApiKeyCheckState.Valid && IsCoverKeyOpen) OpenCoverSearch();
     }
 
     private static readonly HttpClient CoverDownloader = new() { Timeout = TimeSpan.FromSeconds(30) };
 
-    /// ينزّل الغلاف المختار لمجلد البيانات، فيبقى بعد إعادة التشغيل مثل أي غلاف مخصص
-    private async Task PickCoverCandidateAsync(CoverCandidate? candidate)
+    /// يختار صورة من المتصفح: تُنزَّل لمجلد البيانات ثم تُستعمل حسب نوعها، ويعود المتصفح إلى قسم الغلاف
+    internal async Task PickSgdbAsync(SgdbTile? tile)
     {
         var card = DetailsGame;
-        if (card == null || candidate == null) return;
-
+        if (card == null || tile == null) return;
         try
         {
-            var bytes = await CoverDownloader.GetByteArrayAsync(candidate.Url);
-            var path = BuildPickedCoverPath(card, candidate.Url);
-            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            await File.WriteAllBytesAsync(path, bytes);
-
-            card.SetCustomCover(path);
+            var path = BuildPickedCoverPath(card, tile.Image.Url);
+            if (!File.Exists(path))
+            {
+                var bytes = await CoverDownloader.GetByteArrayAsync(tile.Image.Url);
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                await File.WriteAllBytesAsync(path, bytes);
+            }
+            ApplySgdbArt(card, tile.Type, tile.Image.Style, path);
             IsCoverSearchOpen = false;
         }
         catch (Exception ex)
         {
-            Log.Error("could not download the chosen cover", ex);
+            Log.Error("could not download the chosen SteamGridDB image", ex);
             ShowStatus(Loc.Instance["sgdbFailed"]);
+        }
+    }
+
+    /// الأغلفة لغلاف المكتبة؛ الخلفيات للصورة العريضة في الشاشة الكبيرة؛ الأغلفة العريضة لنتائج البحث فيها؛
+    /// الشعارات والأيقونات تُحفظ للعبة (لا مكان لها في Halawa بعد)
+    internal static void ApplySgdbArt(GameCardViewModel card, SgdbArtType type, string style, string path)
+    {
+        switch (type)
+        {
+            case SgdbArtType.Cover:
+                card.SetCustomCover(path, "sgdb:" + style);
+                break;
+            case SgdbArtType.Background:
+                CustomArtService.Set(card.Platform, card.Game.Id, CustomArtService.Hero, path);
+                break;
+            case SgdbArtType.Wide:
+                CustomArtService.Set(card.Platform, card.Game.Id, CustomArtService.Wide, path);
+                break;
+            case SgdbArtType.Logo:
+                CustomArtService.Set(card.Platform, card.Game.Id, CustomArtService.Logo, path);
+                break;
+            case SgdbArtType.Icon:
+                CustomArtService.Set(card.Platform, card.Game.Id, CustomArtService.Icon, path);
+                break;
         }
     }
 

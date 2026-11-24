@@ -53,10 +53,16 @@ public partial class GameDialog : UserControl
                     toOpacity: 0, toScale: 0.96, toY: 10);
             }
         }
+        else if (e.PropertyName == nameof(MainViewModel.IsCoverSearchOpen))
+        {
+            // المتصفح يحتاج نافذة أطول (~660)
+            this.FindControl<HalawaHub.App.Controls.DialogFrame>("Frame")!.MinFrameHeight = _vm!.IsCoverSearchOpen ? 660 : 500;
+        }
         else if (e.PropertyName == nameof(MainViewModel.GameDialogSection) && _vm!.GameDialogSection >= 0)
         {
             // المحتوى يدخل من الأسفل أو الأعلى حسب اتجاه التنقل
-            var section = _vm.GameDialogSection;
+            // ترتيب الظهور لا رقم القسم (المجموعات رقمها 7 وتظهر ثانيًا)
+            var section = _vm.GameDialogPillIndex;
             var offset = section >= _lastSection ? 14 : -14;
             _lastSection = section;
             var duration = TimeSpan.FromSeconds(0.38);
@@ -67,6 +73,26 @@ public partial class GameDialog : UserControl
 
     private void Scrim_PointerPressed(object? sender, PointerPressedEventArgs e) =>
         _vm?.CloseDetailsCommand.Execute(null);
+
+    private void Shortcut_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_vm?.DetailsGame is { } card) _vm.CreateDesktopShortcut(card);
+    }
+
+    /// Enter في حقل الاسم يبحث من جديد (حين تكون اللعبة المطابقة خاطئة)
+    private void SgdbQuery_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter || _vm == null) return;
+        e.Handled = true;
+        _vm.SgdbSearchCommand.Execute(null);
+    }
+
+    /// الصفحة التالية عند الاقتراب من أسفل الشبكة: لا حد ثابت لعدد النتائج
+    private void SgdbBody_ScrollChanged(object? sender, ScrollChangedEventArgs e)
+    {
+        if (sender is not ScrollViewer sv || _vm == null) return;
+        if (sv.Offset.Y + sv.Viewport.Height >= sv.Extent.Height - 240) _ = _vm.Sgdb.LoadMoreAsync();
+    }
 
     private void CopyPath_Click(object? sender, RoutedEventArgs e) => SafeUi.Run(async () =>
     {

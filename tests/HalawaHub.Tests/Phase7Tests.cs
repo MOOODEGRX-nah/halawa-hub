@@ -160,7 +160,7 @@ public class SteamStoreClientTests
 
         var card = ui.Vm.Games.Single();
         ui.Vm.OpenDetailsCommand.Execute(card);
-        ui.Vm.GameDialogSectionCount.Should().Be(6, "General, Details, Files, Customization, Launch, News");
+        ui.Vm.GameDialogSectionCount.Should().Be(7, "General, Details, Collections, Files, Cover, Launch, News");
         ui.Vm.SelectGameDialogSectionCommand.Execute(MainViewModel.DetailsSection.ToString());
         await ui.Vm.LoadStoreDetailsAsync(card);
         ui.Settle();

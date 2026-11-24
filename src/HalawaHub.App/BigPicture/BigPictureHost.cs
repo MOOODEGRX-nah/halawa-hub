@@ -77,11 +77,16 @@ public sealed class BigPictureHost : IBpHost
         CoverUrl = c.CoverImageUrl,
         CoverFallbackUrl = c.CoverImageUrlFallback,
         SteamAppId = c.HasNews ? c.Game.Id : null,
-        HeroUrl = c.HasNews ? SteamHero(c.Game.Id) : null,
-        HeaderUrl = c.HasNews ? $"https://cdn.cloudflare.steamstatic.com/steam/apps/{c.Game.Id}/header.jpg" : c.CoverImageUrlFallback,
+        // خلفية أو غلاف عريض اختاره المستخدم من SteamGridDB يسبق صور المتجر
+        HeroUrl = ChosenArt(c, CustomArtService.Hero) ?? (c.HasNews ? SteamHero(c.Game.Id) : null),
+        HeaderUrl = ChosenArt(c, CustomArtService.Wide) ?? (c.HasNews ? $"https://cdn.cloudflare.steamstatic.com/steam/apps/{c.Game.Id}/header.jpg" : c.CoverImageUrlFallback),
         SizeLookup = () => { WatchSize(c); c.EnsureSizeRequested(); return c.SizeOnDiskText; },
         Source = c,
     };
+
+    /// صورة محفوظة محليًا كرابط file:// (مثل الأغلفة المخصصة)، أو null إن حُذف ملفها
+    internal static string? ChosenArt(GameCardViewModel c, string kind) =>
+        CustomArtService.Get(c.Game.Platform, c.Game.Id, kind) is { } path && System.IO.File.Exists(path) ? new Uri(path).AbsoluteUri : null;
 
     private static readonly Lazy<string?> SteamRoot = new(() =>
     {

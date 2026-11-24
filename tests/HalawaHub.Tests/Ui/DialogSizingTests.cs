@@ -191,13 +191,13 @@ public class DialogSizingTests
         // نتائج بحث جاهزة بدل طلب شبكة حقيقي إلى SteamGridDB
         typeof(HalawaHub.App.ViewModels.MainViewModel).GetProperty(nameof(ui.Vm.IsCoverSearchOpen))!.SetValue(ui.Vm, true);
         for (var i = 0; i < 24; i++)
-            ui.Vm.CoverCandidates.Add(new HalawaHub.Core.Covers.CoverCandidate("", ""));
+            ui.Vm.Sgdb.Tiles.Add(new HalawaHub.App.ViewModels.SgdbTile { Type = HalawaHub.Core.Covers.SgdbArtType.Cover, Image = new HalawaHub.Core.Covers.SgdbImage(i, "", "", "alternate", 3, false, 600, 900) });
         ui.Settle();
-        var body = box.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "Body");
+        var body = box.GetVisualDescendants().OfType<ScrollViewer>().First(s => s.Name == "SgdbBody");
 
         int PerRow()
         {
-            var thumbs = box.GetVisualDescendants().OfType<Button>().Where(b => b.Classes.Contains("thumb")).ToList();
+            var thumbs = box.GetVisualDescendants().OfType<Button>().Where(b => b.Classes.Contains("sgt")).ToList();
             thumbs.Should().HaveCount(24);
             var firstRow = InWindow(ui, thumbs[0]).Top;
             return thumbs.Count(t => Math.Abs(InWindow(ui, t).Top - firstRow) < 1);
@@ -208,7 +208,7 @@ public class DialogSizingTests
         body.Extent.Height.Should().BeGreaterThan(body.Viewport.Height, "24 covers do not fit the smallest dialog, so it scrolls");
 
         Resize(ui, 1920, 1080);
-        PerRow().Should().BeGreaterThan(narrow * 2, "the wider dialog fits more covers per row");
+        PerRow().Should().BeGreaterThan(narrow + 3, "the wider dialog fits more covers per row");
         body.Extent.Height.Should().BeLessThanOrEqualTo(body.Viewport.Height, "they all fit now, so there is no scroll bar");
 
         ui.Vm.CloseCoverSearchCommand.Execute(null);

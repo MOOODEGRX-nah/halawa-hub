@@ -6,6 +6,7 @@
         xmlns:l="using:HalawaHub.App.Services"
         xmlns:behaviors="using:HalawaHub.App.Behaviors"
         xmlns:vm="using:HalawaHub.App.ViewModels"
+        xmlns:wall="using:HalawaHub.App.BigPicture.Wallpaper"
         x:Class="HalawaHub.App.BigPicture.BigPictureWindow"
         x:DataType="bp:BigPictureViewModel"
         Title="{Binding Title, Source={x:Static bp:BpWindowTitle.Instance}}"
@@ -465,6 +466,8 @@
       <Setter Property="Background" Value="{DynamicResource BpC_FFDC2626}"/><Setter Property="HorizontalAlignment" Value="Right"/><Setter Property="VerticalAlignment" Value="Top"/>
       <Setter Property="Margin" Value="0,-8,-8,0"/>
     </Style>
+    <Style Selector="Border.wtile"><Setter Property="BorderThickness" Value="3"/><Setter Property="BorderBrush" Value="Transparent"/></Style>
+    <Style Selector="Border.wtile.on"><Setter Property="BorderBrush" Value="{DynamicResource BpC_FFEF4444}"/></Style>
     <Style Selector="Border.sgchip">
       <Setter Property="Padding" Value="18,8"/><Setter Property="CornerRadius" Value="14"/>
       <Setter Property="Background" Value="{DynamicResource BpC_FF140808}"/><Setter Property="BorderBrush" Value="{DynamicResource BpC_FF2E1616}"/><Setter Property="BorderThickness" Value="1"/>
@@ -497,6 +500,9 @@
           <GradientStop Color="{DynamicResource BpK_38B91C1C}" Offset="0"/><GradientStop Color="{DynamicResource BpK_000A0404}" Offset="1"/>
         </RadialGradientBrush>
       </Panel.Background>
+
+      <!-- ===== الخلفية المتحركة (7): سطح واحد خلف الصفحات؛ «شبكة الضوء» تبقى في كل صفحة ===== -->
+      <wall:WallpaperView x:Name="Wall" IsHitTestVisible="False" IsVisible="False"/>
 
       <!-- ===== الصفحات المنزلقة (.pview / .ptrack) ===== -->
       <Panel x:Name="PageView" ClipToBounds="True">
@@ -1366,6 +1372,20 @@
                           <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="{Binding Label}" FontSize="21" Foreground="{Binding IsDanger, Converter={x:Static bp:BpIs.DangerText}}"/>
                             <TextBlock Text="{Binding Note}" FontSize="16" Foreground="{DynamicResource BpMuted}" TextWrapping="Wrap" Margin="0,4,0,0" LineHeight="24"/>
+                            <!-- الخلفيات: يمين ويسار، والخلفية خلف النافذة تتبدل مباشرة -->
+                            <ItemsControl IsVisible="{Binding IsWallpaper}" ItemsSource="{Binding Walls}" Margin="0,14,0,4">
+                              <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="bp:BpWallTile">
+                                  <StackPanel Width="112" Margin="0,0,10,8" Spacing="4">
+                                    <Border Classes="wtile" Classes.on="{Binding IsOn}" Height="58" CornerRadius="10" ClipToBounds="True" Background="#0A0404">
+                                      <Image Source="{Binding Preview}" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding Label}" FontSize="13" Foreground="#B8A4A4" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                  </StackPanel>
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                             <!-- بطاقات الغلاف: يمين ويسار ثم A -->
                             <StackPanel IsVisible="{Binding IsTiles}" Orientation="Horizontal" Spacing="16" Margin="0,16,0,4">
                               <StackPanel Spacing="8" Width="160">

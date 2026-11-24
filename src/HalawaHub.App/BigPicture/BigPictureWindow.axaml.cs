@@ -73,6 +73,10 @@ public partial class BigPictureWindow : Window
         vm.Bumped += OnBumped;
         vm.Activated += OnActivated;
         vm.Toast += ShowToast;
+        // الخلفية: معاينات البطاقات، وإعادة الضبط عند تغييرها من الإعدادات
+        vm.WallPreview = id => _previews.TryGetValue(id, out var bmp) ? bmp : _previews[id] = Wallpaper.WallpaperView.Preview(id, BpPalette.Accent, BpPalette.Oled);
+        vm.WallpaperChanged += ApplyWallpaper;
+        Opened += (_, _) => ApplyWallpaper();
         // الحافظة ومنتقي الملفات في النافذة: نسخ المسار، لصق المفتاح، صورة غلاف من الجهاز
         vm.CopyRequested += text => _ = Clipboard?.SetTextAsync(text);
         vm.PasteKeyRequested += () => SafeUi.Run(async () =>
@@ -136,7 +140,17 @@ public partial class BigPictureWindow : Window
 
     // ===== مزامنة العرض مع الحالة =====
 
-    private void OnVmChanged(object? sender, PropertyChangedEventArgs e) => SyncView(animate: true);
+    /// تبدّل اللقطة كل 4.5 ثانية يغيّر صورتها فقط: لا مزامنة للنافذة كلها ولا نقرة على الخلفية (قاعدة الخمول)
+    private static readonly System.Collections.Generic.HashSet<string> ShotOnly = new()
+    {
+        nameof(BigPictureViewModel.ShotA), nameof(BigPictureViewModel.ShotB), nameof(BigPictureViewModel.ShowShotB), nameof(BigPictureViewModel.ShotCaption),
+    };
+
+    private void OnVmChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != null && ShotOnly.Contains(e.PropertyName)) return;
+        SyncView(animate: true);
+    }
 
     private void SyncView(bool animate)
     {

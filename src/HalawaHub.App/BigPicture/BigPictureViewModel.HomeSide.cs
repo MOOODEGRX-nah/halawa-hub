@@ -27,6 +27,12 @@ public sealed class BpWeekBar
 public sealed partial class BigPictureViewModel
 {
     public static readonly TimeSpan ShotInterval = TimeSpan.FromSeconds(4.5);
+    /// قاعدة الخمول: اللقطات تتبدل فقط خلال 30 ثانية من آخر ضغطة، ثم تثبت حتى الضغطة التالية
+    public static readonly TimeSpan ShotIdleStop = TimeSpan.FromSeconds(30);
+    internal DateTime LastInput { get; set; } = DateTime.UtcNow;
+    /// للاختبارات
+    internal Func<DateTime> Now { get; set; } = () => DateTime.UtcNow;
+    private bool RecentlyUsed => Now() - LastInput < ShotIdleStop;
     private const double WeekBarMax = 62;
 
     private IReadOnlyList<string> _shots = Array.Empty<string>();
@@ -109,7 +115,7 @@ public sealed partial class BigPictureViewModel
     /// المؤقت يعمل فقط والرئيسي ظاهر بلا لوحة فوقه، والحركة مفعّلة، وللعبة أكثر من لقطة
     private void UpdateShotTimer()
     {
-        var run = _screen == BpScreen.Home && _overlay == BpOverlay.None && MotionSettings.Enabled && _shots.Count > 1 && IsVisibleToUser;
+        var run = _screen == BpScreen.Home && _overlay == BpOverlay.None && MotionSettings.Enabled && _shots.Count > 1 && IsVisibleToUser && RecentlyUsed;
         if (run)
         {
             _shotTimer ??= new Avalonia.Threading.DispatcherTimer(ShotInterval, Avalonia.Threading.DispatcherPriority.Background, (_, _) => NextShot());
@@ -129,10 +135,13 @@ public sealed partial class BigPictureViewModel
     internal void NextShot()
     {
         if (_shots.Count < 2) return;
+        if (!RecentlyUsed) { _shotTimer?.Stop(); return; }
         _shot = (_shot + 1) % _shots.Count;
         SetShot(_shots[_shot]);
         for (var i = 0; i < ShotDots.Count; i++) ShotDots[i] = i == _shot;
-        Changed();
+        // صورة اللقطة فقط، لا كل الروابط
+        foreach (var name in new[] { nameof(ShotA), nameof(ShotB), nameof(ShowShotB), nameof(ShotCaption) })
+            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(name));
     }
 
     // ===== لعبك هذا الأسبوع (صفحة اللعبة) =====

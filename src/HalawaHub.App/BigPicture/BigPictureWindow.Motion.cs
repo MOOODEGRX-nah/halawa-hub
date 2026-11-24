@@ -193,7 +193,8 @@ public partial class BigPictureWindow
         _flash = true;
         if (!MotionSettings.Enabled || FocusRect() is not { } r) return;
         var c = r.Center;
-        foreach (var gl in Lights.Where(g => g.IsEffectivelyVisible)) gl.Wave(c.X, c.Y);
+        foreach (var gl in Lights.Where(g => g.IsEffectivelyVisible && g.ShowLight)) gl.Wave(c.X, c.Y);
+        if (Wall.IsVisible) Wall.TapAt(c);
         TapMark(r);
     }
 
@@ -202,9 +203,31 @@ public partial class BigPictureWindow
     /// أضواء الصفحات الأربع (تُجمع مرة واحدة: البحث في كل النافذة مع كل ضغطة مكلف)
     private BpGridLight[] Lights => _lights ??= Root.GetVisualDescendants().OfType<BpGridLight>().Where(g => !ReferenceEquals(g, IntroGrid)).ToArray();
 
+    private readonly System.Collections.Generic.Dictionary<string, Avalonia.Media.Imaging.Bitmap> _previews = new();
+    private string? _wallFocus;
+
+    /// يضبط الخلفية من الإعدادات: «شبكة الضوء» في الصفحات، وغيرها على السطح الواحد خلفها.
+    /// تقليل الحركة يجعلها «ثابتة» دائمًا (7.4)
+    internal void ApplyWallpaper()
+    {
+        var s = _vm.Settings;
+        var grid = s.Wallpaper is not { Length: > 0 } || s.Wallpaper == "grid";
+        foreach (var gl in Lights)
+        {
+            gl.IsVisible = grid;
+            gl.ShowLight = s.WallpaperReact;
+        }
+        Wall.IsVisible = !grid;
+        if (grid) return;
+        var mode = MotionSettings.Enabled ? s.WallpaperMotion : "still";
+        Wall.Configure(s.Wallpaper, BpPalette.Accent, BpPalette.Oled, mode, s.WallpaperReact);
+    }
+
     private void MoveLight(Rect r)
     {
         var c = r.Center;
+        // «النقرة» في كل مشهد مركز العنصر المركَّز، مع كل تنقل (7.3)؛ فقط حين يتغير العنصر المركَّز
+        if (Wall.IsVisible && _vm.FocusKey != _wallFocus) { _wallFocus = _vm.FocusKey; Wall.TapAt(c); }
         foreach (var gl in Lights)
         {
             gl.LightX = c.X;

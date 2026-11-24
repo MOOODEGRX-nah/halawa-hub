@@ -74,9 +74,20 @@ public sealed partial class BigPictureViewModel
                 SettingRows.Add(Toggle("swap", "bpSwapAB", "bpSwapABN", s.SwapConfirmBack, 1));
                 break;
             case "display":
+                SettingRows.Add(new BpSettingRow
+                {
+                    FocusKey = "row.0", Id = "wall", Kind = BpRowKind.Wallpaper, Label = T("bpWallpaper"), Note = T("bpWallpaperN"),
+                    OptionValues = HalawaHub.App.BigPicture.Wallpaper.WallpaperEngine.Ids,
+                    Options = HalawaHub.App.BigPicture.Wallpaper.WallpaperEngine.Ids.Select(WallLabel).ToArray(),
+                    Selected = Math.Max(0, Array.IndexOf(HalawaHub.App.BigPicture.Wallpaper.WallpaperEngine.Ids, s.Wallpaper)),
+                    Walls = HalawaHub.App.BigPicture.Wallpaper.WallpaperEngine.Ids.Select(id => new BpWallTile { Id = id, Label = WallLabel(id), Preview = WallPreview?.Invoke(id), IsOn = id == s.Wallpaper }).ToList(),
+                });
+                SettingRows.Add(Seg("wallmotion", "bpWpMotion", "bpWpMotionN", new[] { "move", "always", "still" },
+                    new[] { T("bpWpFocus"), T("bpWpAlways"), T("bpWpStill") }, s.WallpaperMotion, 1));
+                SettingRows.Add(Toggle("wallreact", "bpWpReact", "bpWpReactN", s.WallpaperReact, 2));
                 SettingRows.Add(Seg("text", "bpTextSize", "bpTextSizeN", new[] { "normal", "large" },
-                    new[] { T("bpTNormal"), T("bpTLarge") }, s.TextSize, 0));
-                SettingRows.Add(Toggle("clock", "bpShowClock", "bpShowClockN", s.ShowClock, 1));
+                    new[] { T("bpTNormal"), T("bpTLarge") }, s.TextSize, 3));
+                SettingRows.Add(Toggle("clock", "bpShowClock", "bpShowClockN", s.ShowClock, 4));
                 SettingRows.Add(new BpSettingRow { FocusKey = "info", Id = "motion", Kind = BpRowKind.Info, Label = T("bpMotionInfo") });
                 break;
             case "language":
@@ -91,6 +102,16 @@ public sealed partial class BigPictureViewModel
     }
 
     private int ControlRowCount => SettingRows.Count(r => r.IsControl);
+
+    private static string WallLabel(string id) => T(id switch
+    {
+        "blobs" => "bpWpblobs", "aurora" => "bpWpaurora", "grain" => "bpWpgrain", "dots" => "bpWpdots", "flow" => "bpWpflow",
+        "contour" => "bpWpcontour", "stars" => "bpWpstars", "spot" => "bpWpspot", "plain" => "bpWpnone", _ => "bpWpgrid",
+    });
+    /// معاينة كل خلفية (تضعها النافذة؛ الاختبارات بلا صور)
+    public Func<string, object?>? WallPreview { get; set; }
+    /// تغيّرت الخلفية أو حركتها أو تفاعلها: النافذة تعيد ضبط السطح
+    public event Action? WallpaperChanged;
 
     /// السطر رقم n بين الأسطر القابلة للتركيز (الشرح ورمز QR لا يُركَّز عليهما)
     private BpSettingRow? ControlRow(int n) => SettingRows.Where(r => r.IsControl).ElementAtOrDefault(n);
@@ -117,6 +138,13 @@ public sealed partial class BigPictureViewModel
 
         var row = _setRow < SettingRows.Count ? ControlRow(_setRow) : null;
         if (dx != 0 && row is { IsTiles: true } && MoveTiles(row, dx)) return;
+        if (dx != 0 && row is { IsWallpaper: true })
+        {
+            if (dx < 0 && row.Selected == 0) { _setCol = 0; return; }
+            if (dx > 0 && row.Selected == row.OptionValues.Count - 1) return;
+            ChangeRow(row, dx);
+            return;
+        }
         if (dx != 0 && row is { IsSegmented: true })
         {
             if (dx < 0 && row.Selected == 0) { _setCol = 0; return; }
@@ -170,6 +198,7 @@ public sealed partial class BigPictureViewModel
                     case "exit": s.ExitOnDisconnect = row.IsOn; break;
                     case "swap": s.SwapConfirmBack = row.IsOn; break;
                     case "clock": s.ShowClock = row.IsOn; break;
+                    case "wallreact": s.WallpaperReact = row.IsOn; WallpaperChanged?.Invoke(); break;
                 }
                 _host.SaveSettings();
                 break;
@@ -181,8 +210,18 @@ public sealed partial class BigPictureViewModel
                 {
                     case "glyphs": s.Glyphs = value; _host.SaveSettings(); break;
                     case "text": s.TextSize = value; _host.SaveSettings(); break;
+                    case "wallmotion": s.WallpaperMotion = value; _host.SaveSettings(); WallpaperChanged?.Invoke(); break;
                     case "lang": _host.SetLanguage(value); OnLanguageChanged(); break;
                 }
+                break;
+            case BpRowKind.Wallpaper:
+                // يمين ويسار يغيّران الخلفية مباشرة، والخلفية خلف النافذة تتبدل وهي مفتوحة
+                var count = row.OptionValues.Count;
+                row.Selected = Math.Clamp(row.Selected + (delta == 0 ? 1 : delta), 0, count - 1);
+                s.Wallpaper = row.OptionValues[row.Selected];
+                foreach (var w in row.Walls) w.IsOn = w.Id == s.Wallpaper;
+                _host.SaveSettings();
+                WallpaperChanged?.Invoke();
                 break;
             case BpRowKind.Button:
                 ShowToast(T("bpExiting"));

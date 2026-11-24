@@ -35,7 +35,7 @@ public sealed class BpGridLight : Control
 
     static BpGridLight()
     {
-        AffectsRender<BpGridLight>(LightXProperty, LightYProperty, WaveRadiusProperty, WaveOpacityProperty, RevealProperty);
+        AffectsRender<BpGridLight>(LightXProperty, LightYProperty, WaveRadiusProperty, WaveOpacityProperty, RevealProperty, ShowLightProperty);
     }
 
     public BpGridLight()
@@ -52,6 +52,11 @@ public sealed class BpGridLight : Control
     public double WaveRadius { get => GetValue(WaveRadiusProperty); set => SetValue(WaveRadiusProperty, value); }
     public double WaveOpacity { get => GetValue(WaveOpacityProperty); set => SetValue(WaveOpacityProperty, value); }
     public double Reveal { get => GetValue(RevealProperty); set => SetValue(RevealProperty, value); }
+
+    /// «تتفاعل مع التنقل» مطفأ: الشبكة الخافتة فقط، بلا ضوء ولا موجة
+    public static readonly StyledProperty<bool> ShowLightProperty =
+        AvaloniaProperty.Register<BpGridLight, bool>(nameof(ShowLight), true);
+    public bool ShowLight { get => GetValue(ShowLightProperty); set => SetValue(ShowLightProperty, value); }
 
     /// cubic-bezier(.22,1.12,.36,1) في .95 ثانية، كما في --lx / --ly
     public void ApplyMotion()
@@ -105,6 +110,7 @@ public sealed class BpGridLight : Control
         // .gl0: الشبكة الخافتة
         for (var x = 0.0; x <= w; x += Cell) ctx.DrawLine(Faint, new Point(x, 0), new Point(x, h));
         for (var y = 0.0; y <= h; y += Cell) ctx.DrawLine(Faint, new Point(0, y), new Point(w, y));
+        if (!ShowLight) return;
 
         // .gl1: الضوء نفسه (أحمر واسع، وكهرماني أصغر)
         ctx.DrawEllipse(Radial(c, 560, (0, BpPalette.Map(Color.FromArgb(51, 239, 68, 68))), (0.45, BpPalette.Map(Color.FromArgb(15, 239, 68, 68))), (0.7, BpPalette.Map(Color.FromArgb(0, 239, 68, 68)))), null, c, 560, 560);

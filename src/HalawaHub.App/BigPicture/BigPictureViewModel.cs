@@ -73,6 +73,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
     /// زر من يد التحكم أو لوحة المفاتيح. يعيد true إن تغيّر شيء.
     public bool Press(BpButton button)
     {
+        LastInput = Now();
         if (Settings.SwapConfirmBack && button is BpButton.A or BpButton.B)
             button = button == BpButton.A ? BpButton.B : BpButton.A;
 

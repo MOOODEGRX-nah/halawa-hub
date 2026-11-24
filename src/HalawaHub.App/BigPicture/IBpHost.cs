@@ -23,6 +23,12 @@ public sealed class BpSettings
     /// normal, large
     public string TextSize { get; set; } = "normal";
     public bool ShowClock { get; set; } = true;
+    /// الخلفية (7): grid الافتراضية، blobs، aurora، grain، dots، flow، contour، stars، spot، plain
+    public string Wallpaper { get; set; } = "grid";
+    /// move (عند التنقل، الافتراضي)، always، still
+    public string WallpaperMotion { get; set; } = "move";
+    /// «تتفاعل مع التنقل»
+    public bool WallpaperReact { get; set; } = true;
 }
 
 /// <summary>ما تحتاجه الشاشة الكبيرة من البرنامج. الاختبارات تمرر نسخة وهمية.</summary>

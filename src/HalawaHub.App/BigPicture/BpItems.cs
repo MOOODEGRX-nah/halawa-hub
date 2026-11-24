@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace HalawaHub.App.BigPicture;
 
 /// Tiles: بطاقات الغلاف الثلاث (يمين ويسار ثم A)؛ Qr: رمز صفحة مفتاح SteamGridDB
-public enum BpRowKind { Toggle, Segmented, Button, Info, Tiles, Qr }
+public enum BpRowKind { Toggle, Segmented, Button, Info, Tiles, Qr, Wallpaper }
 
 /// <summary>سطر في نافذة إعدادات الشاشة الكبيرة.</summary>
 public sealed class BpSettingRow : BpItem
@@ -33,8 +33,22 @@ public sealed class BpSettingRow : BpItem
     public bool IsInfo => Kind == BpRowKind.Info;
     public bool IsTiles => Kind == BpRowKind.Tiles;
     public bool IsQr => Kind == BpRowKind.Qr;
+    public bool IsWallpaper => Kind == BpRowKind.Wallpaper;
+    /// بطاقات معاينة الخلفيات
+    public IReadOnlyList<BpWallTile> Walls { get; init; } = [];
     public bool IsControl => Kind is not (BpRowKind.Info or BpRowKind.Qr);
     public bool IsButtonOrTiles => Kind is BpRowKind.Button;
+}
+
+/// بطاقة خلفية في الإعدادات: معاينتها واسمها، والمختارة عليها إطار
+public sealed class BpWallTile : System.ComponentModel.INotifyPropertyChanged
+{
+    private bool _on;
+    public required string Id { get; init; }
+    public required string Label { get; init; }
+    public object? Preview { get; init; }
+    public bool IsOn { get => _on; set { if (_on == value) return; _on = value; PropertyChanged?.Invoke(this, new(nameof(IsOn))); } }
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 }
 
 /// <summary>إشعار في اللوحة، مع حالة الخروج (يُخفى ثم يُحذف).</summary>

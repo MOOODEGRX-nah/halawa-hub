@@ -18,6 +18,10 @@ internal sealed class FakeBpHost : IBpHost
     public BpLaunchResult NextLaunch { get; set; } = BpLaunchResult.Success;
     public TaskCompletionSource<BpLaunchResult>? PendingLaunch { get; set; }
     public List<BpNotification> NotificationList { get; } = new();
+    public List<BpDealSource> DealList { get; } = new();
+    public IReadOnlyList<BpDealSource> Deals => DealList;
+    public string DealsUpdatedText { get; set; } = "";
+    public void OpenUrl(string url) => Calls.Add("url:" + url);
 
     public static FakeBpHost WithGames(int count, Func<int, BpGame>? make = null)
     {
@@ -154,11 +158,15 @@ public class BigPictureNavigationTests : IDisposable
         Loc.Instance.Language = Loc.Arabic;
         var vm = Vm(FakeBpHost.WithGames(3));
 
-        // بالعربية: الرئيسي يمينًا ثم المكتبة ثم البحث يسارًا، فـLB (يسار) يذهب نحو البحث
+        // بالعربية: الرئيسي يمينًا ثم المكتبة ثم العروض ثم البحث يسارًا، فـLB (يسار) يذهب نحو البحث
         vm.Press(BpButton.LB);
         vm.Screen.Should().Be(BpScreen.Library);
         vm.Press(BpButton.LB);
+        vm.Screen.Should().Be(BpScreen.Deals);
+        vm.Press(BpButton.LB);
         vm.Screen.Should().Be(BpScreen.Search);
+        vm.Press(BpButton.RB);
+        vm.Screen.Should().Be(BpScreen.Deals);
         vm.Press(BpButton.RB);
         vm.Screen.Should().Be(BpScreen.Library);
         vm.Press(BpButton.RB);
@@ -332,11 +340,15 @@ public class BigPictureNavigationTests : IDisposable
         vm.Press(BpButton.RB);
         vm.Screen.Should().Be(BpScreen.Library);
         vm.Press(BpButton.RB);
+        vm.Screen.Should().Be(BpScreen.Deals);
+        vm.Press(BpButton.RB);
         vm.Screen.Should().Be(BpScreen.Search);
         vm.Press(BpButton.RB);
         vm.Screen.Should().Be(BpScreen.Home);
         vm.Press(BpButton.LB);
         vm.Screen.Should().Be(BpScreen.Search);
+        vm.Press(BpButton.LB);
+        vm.Screen.Should().Be(BpScreen.Deals);
 
         vm.Press(BpButton.LB);
         vm.Press(BpButton.B);

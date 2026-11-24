@@ -16,7 +16,7 @@ namespace HalawaHub.App.BigPicture;
 /// </summary>
 public sealed partial class BigPictureViewModel : INotifyPropertyChanged
 {
-    public static readonly BpScreen[] Tabs = { BpScreen.Home, BpScreen.Library, BpScreen.Search };
+    public static readonly BpScreen[] Tabs = { BpScreen.Home, BpScreen.Library, BpScreen.Deals, BpScreen.Search };
 
     private readonly IBpHost _host;
     private readonly Func<TimeSpan, Task> _delay;
@@ -136,6 +136,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpScreen.Library: NavLibrary(dx, dy); break;
             case BpScreen.Game: NavGame(dx, dy); break;
             case BpScreen.Search: NavSearch(dx, dy); break;
+            case BpScreen.Deals: NavDeals(dx, dy); break;
             case BpScreen.Settings: NavSettings(dx, dy); break;
         }
     }
@@ -160,6 +161,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
                 break;
             case BpScreen.Game: ActGame(); break;
             case BpScreen.Search: ActSearch(); break;
+            case BpScreen.Deals: ActDeals(); break;
             case BpScreen.Settings: ActSettings(); break;
         }
     }
@@ -179,6 +181,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
                 else GoTab(BpScreen.Home);
                 break;
             case BpScreen.Library: GoTab(BpScreen.Home); break;
+            case BpScreen.Deals: GoTab(BpScreen.Home); break;
             // الرئيسي: B لا يفعل شيئًا، الخروج من القائمة أو الإعدادات
         }
     }
@@ -190,6 +193,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
         if (!Tabs.Contains(tab)) return;
         _navForward = Array.IndexOf(Tabs, tab) > TabIndex;
         CloseOverlayQuiet();
+        if (tab == BpScreen.Deals) BuildDeals();
         _screen = tab;
         _from = tab;
         Changed();
@@ -260,7 +264,8 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
         HeroButtons.Cast<BpItem>().Concat(StripTabs).Concat(RowCards).Append(MoreCard)
             .Concat(LibraryCards).Concat(Filters).Concat(KeyRows.SelectMany(r => r)).Concat(Results)
             .Concat(GameButtons).Concat(NewsItems).Concat(SettingSections).Concat(SettingRows)
-            .Concat(GuideItems).Concat(UpdateButtons).Concat(FailButtons).Concat(NotifItems).Concat(GameOptions);
+            .Concat(GuideItems).Concat(UpdateButtons).Concat(FailButtons).Concat(NotifItems).Concat(GameOptions)
+            .Concat(DealItems());
 
     private void SyncFocus() => Changed();
 
@@ -287,6 +292,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             BpScreen.Game => _gameCol == 0 ? "game." + _gameIndex : "news." + _gameIndex,
             BpScreen.Search => _kbZone == 0 ? "kb." + _kbRow + "." + _kbCol : "res." + _resIndex,
             BpScreen.Settings => _setCol == 0 ? "sec." + _section : "row." + _setRow,
+            BpScreen.Deals => DealsFocusKey(),
             _ => null,
         };
     }

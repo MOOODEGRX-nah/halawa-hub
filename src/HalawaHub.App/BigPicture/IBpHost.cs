@@ -54,6 +54,13 @@ public interface IBpHost
     void ClearNotifications();
     void MarkNotificationsRead();
 
+    // ===== العروض (تبويب العروض) =====
+    /// صفوف العروض بالترتيب: مجانيات Epic، تخفيضات Steam، متاجر أخرى
+    IReadOnlyList<BpDealSource> Deals => Array.Empty<BpDealSource>();
+    /// «آخر تحديث قبل N دقيقة · يتحدّث كل ساعة»، أو فارغ
+    string DealsUpdatedText => "";
+    void OpenUrl(string url) { }
+
     void ExitBigPicture();
     void CloseApp();
 }

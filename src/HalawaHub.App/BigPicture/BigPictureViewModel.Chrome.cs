@@ -37,6 +37,7 @@ public sealed partial class BigPictureViewModel
     public bool IsHomeTab => TabScreen == BpScreen.Home;
     public bool IsLibraryTab => TabScreen == BpScreen.Library;
     public bool IsSearchTab => TabScreen == BpScreen.Search;
+    public bool IsDealsTab => TabScreen == BpScreen.Deals;
     public BpUpper Upper => BpUpper.Instance;
 
     public string ContextText => _overlay == BpOverlay.Guide ? ""
@@ -81,6 +82,7 @@ public sealed partial class BigPictureViewModel
                     BpScreen.Library => new[] { H("a", "bpOpen"), H("x", "bpFilter"), H("b", "bpBack"), H("menu", "bpGuide") },
                     BpScreen.Game => new[] { H("a", "bpSelect"), H("b", "bpBack"), H("menu", "bpGuide") },
                     BpScreen.Search => new[] { H("a", "bpType"), H("b", "bpDel"), H("menu", "bpGuide") },
+                    BpScreen.Deals => new[] { H("a", "bpOpen"), H("b", "bpBack"), H("menu", "bpGuide") },
                     _ => new[] { H("a", "bpSelect"), H("b", "bpBack") },
                 },
             };

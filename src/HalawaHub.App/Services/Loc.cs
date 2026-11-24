@@ -317,6 +317,18 @@ public sealed partial class Loc : INotifyPropertyChanged
         ["showAll"] = "عرض الكل",
         ["dealsUpdated"] = "آخر تحديث {0} · يتحدّث كل ساعة",
         ["dealsJustNow"] = "الآن",
+        // ===== تحديث التصميم (المرحلة 5) =====
+        ["bpShowAll"] = "عرض الكل",
+        ["bpOpensBrowser"] = "يُفتح في المتصفح",
+        ["bpFreeBadge"] = "مجانية",
+        ["bpDealsNote"] = "الأسعار كما تعرضها المتاجر الآن، وقد تختلف حسب بلدك.",
+        ["bpAboutGame"] = "عن اللعبة المحددة",
+        ["bpShotCap"] = "لقطة {0} / {1}",
+        ["bpLatestNews"] = "آخر خبر · Steam",
+        ["bpActivity"] = "نشاطك",
+        ["bpLastSession"] = "آخر جلسة: {0} · {1}",
+        ["bpYourWeek"] = "لعبك هذا الأسبوع",
+        ["bpNoActivity"] = "لم تلعبها بعد مع Halawa",
     };
 
     private static readonly Dictionary<string, string> En = new()
@@ -567,5 +579,17 @@ public sealed partial class Loc : INotifyPropertyChanged
         ["showAll"] = "Show all",
         ["dealsUpdated"] = "Updated {0} · refreshes every hour",
         ["dealsJustNow"] = "just now",
+        // ===== تحديث التصميم (المرحلة 5) =====
+        ["bpShowAll"] = "Show all",
+        ["bpOpensBrowser"] = "Opens in your browser",
+        ["bpFreeBadge"] = "Free",
+        ["bpDealsNote"] = "Prices are as the stores show them now and may differ by country.",
+        ["bpAboutGame"] = "About the selected game",
+        ["bpShotCap"] = "Screenshot {0} / {1}",
+        ["bpLatestNews"] = "Latest news · Steam",
+        ["bpActivity"] = "Your activity",
+        ["bpLastSession"] = "Last session: {0} · {1}",
+        ["bpYourWeek"] = "Your week",
+        ["bpNoActivity"] = "Not played with Halawa yet",
     };
 }

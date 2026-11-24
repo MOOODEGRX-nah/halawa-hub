@@ -175,6 +175,7 @@ public partial class BigPictureWindow : Window
             "lib" => LibraryGrid,
             "flt" => LibraryPage,
             "kb" or "res" => SearchPage,
+            "deal" => DealsPage,
             "game" or "news" => GamePage,
             "row" or "sec" => SettingsLayer,
             "upd" => UpdatePanel,
@@ -206,6 +207,9 @@ public partial class BigPictureWindow : Window
             x += v.Bounds.X;
             y += v.Bounds.Y;
             if (ReferenceEquals(v, RowStrip)) extraX += -_vm.RowOffsetCards * Pitch;
+            // صفوف العروض تنزلق أفقيًا، والقائمة كلها تصعد عند الصف الثالث
+            if (v is ItemsControl { DataContext: BpDealRow dealRow } ic && ic.Classes.Contains("dealrow")) extraX += dealRow.ShiftX;
+            if (ReferenceEquals(v, DealRowsList)) y += _vm.DealsShiftY;
             if (ReferenceEquals(v, Track)) extraX += -_vm.TabIndex * _vm.CanvasWidth;
             v = v.GetVisualParent();
         }
@@ -323,6 +327,11 @@ public partial class BigPictureWindow : Window
     }
 
     private void OnMoreClick(object? sender, RoutedEventArgs e) => _vm.ClickCard(_vm.RowCards.Count);
+
+    private void OnDealClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpDealItem>(sender) is { } item) _vm.ClickDeal(item.Row, item.Index);
+    }
 
     private void OnHeroButtonClick(object? sender, RoutedEventArgs e)
     {

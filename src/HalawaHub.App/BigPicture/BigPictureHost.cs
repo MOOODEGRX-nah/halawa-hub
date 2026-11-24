@@ -250,6 +250,22 @@ public sealed class BigPictureHost : IBpHost
     public void ClearNotifications() => _main.ClearNotificationsCommand.Execute(null);
     public void MarkNotificationsRead() => _main.MarkNotificationsReadFromBigPicture();
 
+    // ===== العروض =====
+
+    public IReadOnlyList<BpDealSource> Deals => new[]
+    {
+        new BpDealSource("freeThisWeek", _main.FreeGames.Select(g => new BpDealData(g.Title, g.EndsText, Loc.Instance["bpFreeBadge"], g.ImageUrl, g.Url, true)).ToList(), MainViewModel.EpicFreeGamesPage),
+        new BpDealSource("dealsSteam", _main.SteamDeals.Select(Deal).ToList(), MainViewModel.SteamSpecialsPage),
+        new BpDealSource("dealsOther", _main.OtherDeals.Select(Deal).ToList(), MainViewModel.GogDealsPage),
+    };
+
+    private static BpDealData Deal(DealItem d) =>
+        new(d.Title, d.HasOldPrice ? d.PriceText + "  " + d.OldPriceText : d.PriceText, d.DiscountText, d.ImageUrl, d.Url, false);
+
+    public string DealsUpdatedText => _main.HasDealsUpdated ? _main.DealsUpdatedText : "";
+
+    public void OpenUrl(string url) => _main.OpenUrlCommand.Execute(url);
+
     public void ExitBigPicture() => _exit();
     public void CloseApp() => _closeApp();
 }

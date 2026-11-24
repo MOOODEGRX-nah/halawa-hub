@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace HalawaHub.App.BigPicture;
 
-public enum BpScreen { Home, Library, Search, Game, Settings }
+public enum BpScreen { Home, Library, Search, Game, Settings, Deals }
 public enum BpOverlay { None, Guide, Notifications, Update, Launch, GameOptions }
 public enum BpLaunchState { Starting, Done, Failed }
 

@@ -85,4 +85,26 @@ public class DesignPhase4Tests
         ((Control)arrow.GetVisualParent()!).RenderTransform.Should().BeNull();
         ui.Vm.GoLibraryCommand.Execute(null);
     }
+
+    [AvaloniaFact]
+    public async Task AFailedHourlyRefresh_KeepsTheRows_AndAHiddenWindowStopsTheTicker()
+    {
+        using var ui = new UiHarness(Loc.English);
+        ui.Vm.FetchDealsOverride = url => Task.FromResult<string?>(url == StoreDeals.SteamEndpoint ? StoreDealsTests.Steam : StoreDealsTests.Gog);
+        await ui.Vm.LoadStoreDealsAsync();
+        ui.Vm.SteamDeals.Should().NotBeEmpty();
+
+        ui.Vm.FetchDealsOverride = _ => Task.FromResult<string?>(null);
+        await ui.Vm.RefreshDealsAsync();
+        ui.Vm.SteamDeals.Should().NotBeEmpty("no internet on the hourly refresh keeps what was shown");
+        ui.Vm.OtherDeals.Should().NotBeEmpty();
+
+        ui.Vm.GoDealsCommand.Execute(null);
+        ui.Vm.IsDealsAgeTimerRunning.Should().BeTrue();
+        ui.Vm.IsWindowShown = false;
+        ui.Vm.IsDealsAgeTimerRunning.Should().BeFalse("no ticking while the window is in the tray or behind Big Picture");
+        ui.Vm.IsWindowShown = true;
+        ui.Vm.IsDealsAgeTimerRunning.Should().BeTrue();
+        ui.Vm.GoLibraryCommand.Execute(null);
+    }
 }

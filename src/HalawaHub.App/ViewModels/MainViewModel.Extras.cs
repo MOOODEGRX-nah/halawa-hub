@@ -464,14 +464,14 @@ public partial class MainViewModel
     /// للاختبارات: بدل الشبكة
     internal Func<Task<string?>>? FetchFreeGamesOverride { get; set; }
 
-    internal async Task LoadFreeGamesAsync()
+    internal async Task LoadFreeGamesAsync(bool refresh = false)
     {
         if (!_config.ShowFreeGames) return;
         try
         {
             var cachePath = AppPaths.InData("cache", "epic-free.json");
             string? json = null;
-            if (FetchFreeGamesOverride == null && File.Exists(cachePath) && DateTime.UtcNow - File.GetLastWriteTimeUtc(cachePath) < FreeGamesMaxAge)
+            if (!refresh && FetchFreeGamesOverride == null && File.Exists(cachePath) && DateTime.UtcNow - File.GetLastWriteTimeUtc(cachePath) < FreeGamesMaxAge)
             {
                 json = await File.ReadAllTextAsync(cachePath);
                 MarkDealsUpdated(File.GetLastWriteTimeUtc(cachePath));
@@ -488,6 +488,8 @@ public partial class MainViewModel
             }
 
             var games = EpicFreeGames.Parse(json, DateTime.UtcNow);
+            // تحديث فشل: تبقى المجانيات المعروضة
+            if (refresh && games.Count == 0 && FreeGames.Count > 0) return;
             FreeGames.Clear();
             foreach (var g in games)
                 FreeGames.Add(new FreeGameItem
@@ -499,7 +501,7 @@ public partial class MainViewModel
         catch (Exception ex)
         {
             Log.Error("free games load failed", ex);
-            FreeGames.Clear();
+            if (!refresh) FreeGames.Clear();
         }
         RaiseDeals();
         NotifyNewFreeGames();

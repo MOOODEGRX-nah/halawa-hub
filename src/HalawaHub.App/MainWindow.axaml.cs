@@ -52,6 +52,13 @@ public partial class MainWindow : Window
             vm.ExitRequested += (_, _) => ExitForReal();
         };
 
+        // النافذة ظاهرة؟ (مخفية في الصينية أو مصغّرة أو خلف الشاشة الكبيرة): لا مؤقتات واجهة وهي غير ظاهرة
+        PropertyChanged += (_, e) =>
+        {
+            if ((e.Property == IsVisibleProperty || e.Property == WindowStateProperty) && DataContext is MainViewModel vm)
+                vm.IsWindowShown = IsVisible && WindowState != WindowState.Minimized;
+        };
+
         // "ابدأ مصغّرًا": للصينية إن كانت تعمل، وإلا لشريط المهام
         Opened += (_, _) =>
         {

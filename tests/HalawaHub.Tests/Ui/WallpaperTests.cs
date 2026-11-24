@@ -24,7 +24,7 @@ public class WallpaperTests : IDisposable
         MotionSettings.Enabled = true;
     }
 
-    [Theory]
+    [AvaloniaTheory]
     [InlineData("blobs")]
     [InlineData("aurora")]
     [InlineData("grain")]
@@ -50,7 +50,7 @@ public class WallpaperTests : IDisposable
         if (id != "plain") bmp.Pixels.Distinct().Count().Should().BeGreaterThan(20, "the scene draws something, not a flat fill");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void The_palette_follows_the_accent_and_oled()
     {
         WallPalette.For("green").A.Should().Be("22,163,74");
@@ -65,7 +65,7 @@ public class WallpaperTests : IDisposable
         bmp.GetPixel(10, 10).Should().Be(new SKColor(0, 0, 0), "OLED is pure black");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Old_settings_load_with_the_grid_moving_when_you_move()
     {
         var old = System.Text.Json.JsonSerializer.Deserialize<BpSettings>("""{"OpenOnController":true,"ShowClock":false}""")!;

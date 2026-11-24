@@ -119,13 +119,26 @@ public sealed partial class BigPictureViewModel
         if (_sgIndex >= SgdbItems.Count - cols * 2) _ = _sgdb?.LoadMoreAsync();
     }
 
+    private bool _picking;
+
+    /// A: تنزيل الصورة واستعمالها. ضغطة ثانية أثناء التنزيل لا تبدأ تنزيلًا آخر
     private async void ActSgdb()
     {
-        if (_sgdbGame is not { } g || _sgIndex >= SgdbItems.Count) return;
+        if (_picking || _sgdbGame is not { } g || _sgIndex >= SgdbItems.Count) return;
         var tile = SgdbItems[_sgIndex].Tile;
-        var ok = await _host.PickSgdbAsync(g, tile);
-        ShowToast(T(ok ? "bpGsCoverSet" : "sgdbFailed"));
-        if (ok) CloseSgdb();
+        _picking = true;
+        try
+        {
+            var ok = await _host.PickSgdbAsync(g, tile);
+            ShowToast(T(ok ? "bpGsCoverSet" : "sgdbFailed"));
+            if (ok && _screen == BpScreen.Sgdb) CloseSgdb();
+        }
+        catch (Exception ex)
+        {
+            HalawaHub.Core.Log.Error("Big Picture SteamGridDB pick failed", ex);
+            ShowToast(T("sgdbFailed"));
+        }
+        finally { _picking = false; }
     }
 
     public void ClickSgdb(int index)

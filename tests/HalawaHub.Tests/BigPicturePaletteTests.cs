@@ -13,7 +13,7 @@ public class BigPicturePaletteTests : IDisposable
 {
     public void Dispose() => BpPalette.Use("red", "dark");
 
-    [Fact]
+    [AvaloniaFact]
     public void Red_becomes_the_chosen_accent_and_keeps_its_transparency()
     {
         BpPalette.Use("blue", "dark");
@@ -24,7 +24,7 @@ public class BigPicturePaletteTests : IDisposable
         BpPalette.Map("#F5A623").Should().Be(Color.Parse("#F5A623"), "amber is not an accent colour");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Oled_turns_the_neutrals_black_and_light_stays_dark()
     {
         BpPalette.Use("green", "oled");

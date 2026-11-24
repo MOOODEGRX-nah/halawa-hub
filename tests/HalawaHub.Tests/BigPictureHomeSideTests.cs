@@ -89,7 +89,7 @@ public class BigPictureHomeSideTests : IDisposable
         vm.NewsItems.Should().HaveCount(2);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Play_days_split_at_midnight_and_count_the_streak()
     {
         PlayDaysService.ResetForTests();

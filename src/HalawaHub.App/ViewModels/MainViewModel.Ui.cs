@@ -122,6 +122,7 @@ public partial class MainViewModel
             OnPropertyChanged(nameof(IsLibraryPage));
             OnPropertyChanged(nameof(IsDealsPage));
             OnPropertyChanged(nameof(IsDeveloperPage));
+            UpdateDealsAgeTimer();
         }
     }
 

@@ -3,6 +3,7 @@
              xmlns:vm="using:HalawaHub.App.ViewModels"
              xmlns:l="using:HalawaHub.App.Services"
              xmlns:c="using:HalawaHub.App.Controls"
+             xmlns:bp="using:HalawaHub.App.BigPicture"
              xmlns:conv="using:HalawaHub.App.Converters"
              xmlns:core="using:HalawaHub.Core.Covers"
              xmlns:news="using:HalawaHub.Core.News"
@@ -551,7 +552,9 @@
                 <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
                     <Button Classes="x" Command="{Binding #Root.((vm:MainViewModel)DataContext).CloseCoverSearchCommand}"
                             ToolTip.Tip="{l:Loc sgdbBack}" AutomationProperties.Name="{l:Loc sgdbBack}">
-                        <c:VectorIcon Data="{StaticResource IconChevronLeft}" Size="18"/>
+                        <Panel RenderTransform="{Binding IsRtl, Source={x:Static l:Loc.Instance}, Converter={x:Static bp:BpIs.FlipX}}">
+                            <c:VectorIcon Data="{StaticResource IconChevronLeft}" Size="18"/>
+                        </Panel>
                     </Button>
                     <StackPanel Grid.Column="1" Margin="10,0" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>

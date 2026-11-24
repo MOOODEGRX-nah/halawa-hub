@@ -413,7 +413,8 @@ public partial class MainViewModel
 
     // ===== مجانية هذا الأسبوع (Epic) =====
 
-    private static readonly TimeSpan FreeGamesMaxAge = TimeSpan.FromHours(6);
+    /// العروض تتحدّث كل ساعة، فالنسخة المخزّنة صالحة ساعة فقط
+    private static readonly TimeSpan FreeGamesMaxAge = DealsRefreshInterval;
 
     public ObservableCollection<FreeGameItem> FreeGames { get; } = new();
 
@@ -429,6 +430,7 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(HasSteamDeals));
         OnPropertyChanged(nameof(HasOtherDeals));
         OnPropertyChanged(nameof(DealsEmptyText));
+        OnPropertyChanged(nameof(HasDealsUpdated));
     }
 
     /// إشعار واحد عند ظهور مجانيات لم يرها المستخدم من قبل، والضغط عليه يفتح صفحة العروض
@@ -470,11 +472,15 @@ public partial class MainViewModel
             var cachePath = AppPaths.InData("cache", "epic-free.json");
             string? json = null;
             if (FetchFreeGamesOverride == null && File.Exists(cachePath) && DateTime.UtcNow - File.GetLastWriteTimeUtc(cachePath) < FreeGamesMaxAge)
+            {
                 json = await File.ReadAllTextAsync(cachePath);
+                MarkDealsUpdated(File.GetLastWriteTimeUtc(cachePath));
+            }
 
             if (json == null)
             {
                 json = await (FetchFreeGamesOverride ?? EpicFreeGames.FetchJsonAsync)();
+                if (json != null) MarkDealsUpdated(DateTime.UtcNow);
                 if (json != null && FetchFreeGamesOverride == null && EpicFreeGames.Parse(json, DateTime.UtcNow).Count > 0)
                 {
                     try { AtomicFile.WriteAllText(cachePath, json); } catch (Exception ex) { Log.Error("free games cache save failed", ex); }

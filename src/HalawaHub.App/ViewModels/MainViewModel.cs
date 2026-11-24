@@ -429,6 +429,7 @@ public partial class MainViewModel : INotifyPropertyChanged
             StartWizardIfFirstRun();
             _ = LoadFreeGamesAsync();
             _ = LoadStoreDealsAsync();
+            StartDealsRefresh();
             _ = RefreshOwnedGamesAsync();
         }
     }

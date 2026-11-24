@@ -3,9 +3,35 @@
              xmlns:vm="using:HalawaHub.App.ViewModels"
              xmlns:l="using:HalawaHub.App.Services"
              xmlns:behaviors="using:HalawaHub.App.Behaviors"
+             xmlns:c="using:HalawaHub.App.Controls"
+             xmlns:bp="using:HalawaHub.App.BigPicture"
              x:Class="HalawaHub.App.Views.DealsView"
              x:DataType="vm:MainViewModel"
              Name="Root">
+
+    <UserControl.Styles>
+        <!-- «عرض الكل» (.dmore): كبسولة صغيرة، السهم يتقدم عند المرور ويتبع اتجاه القراءة -->
+        <Style Selector="Button.dmore">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushControl}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.dmore:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+            <Setter Property="BorderBrush" Value="#7F1D1D"/>
+        </Style>
+        <Style Selector="Button.dmore c|VectorIcon">
+            <Setter Property="RenderTransform" Value="translateX(0px)"/>
+            <Setter Property="Transitions"><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="{x:Static l:Springs.Switch}"/></Transitions></Setter>
+        </Style>
+        <Style Selector="Button.dmore:pointerover c|VectorIcon"><Setter Property="RenderTransform" Value="translateX(3px)"/></Style>
+    </UserControl.Styles>
 
     <UserControl.Resources>
         <DataTemplate x:Key="DealCard" x:DataType="vm:DealItem">
@@ -40,13 +66,30 @@
     <!-- صفحة العروض: مجانيات Epic الآن، ومكان أي عروض تُضاف لاحقًا. كانت شريطًا يأخذ من ارتفاع المكتبة -->
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,8,0,40" Spacing="14">
-            <TextBlock Text="{l:Loc deals}" FontSize="28" FontWeight="Bold"/>
+            <!-- العنوان وسطر آخر تحديث بالنقطة الخضراء (.dhd / .dupd) -->
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{l:Loc deals}" FontSize="28" FontWeight="Bold"/>
+                <StackPanel Name="DealsUpdated" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" IsVisible="{Binding HasDealsUpdated}">
+                    <Ellipse Width="7" Height="7" Fill="#4ADE80"/>
+                    <TextBlock Text="{Binding DealsUpdatedText}" FontSize="12" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
 
             <TextBlock Name="DealsEmpty" Text="{Binding DealsEmptyText}" IsVisible="{Binding HasNoDeals}" FontSize="15"
                        Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" MaxWidth="560" HorizontalAlignment="Left"/>
 
             <StackPanel Name="FreeGamesSection" Spacing="10" IsVisible="{Binding HasFreeGames}">
-                <TextBlock Classes="lbl" Text="{l:Loc freeThisWeek}"/>
+                <Grid ColumnDefinitions="*,Auto" Name="FreeMore">
+                    <TextBlock Classes="lbl" Text="{l:Loc freeThisWeek}" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Classes="dmore" Command="{Binding OpenUrlCommand}" CommandParameter="{x:Static vm:MainViewModel.EpicFreeGamesPage}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{l:Loc showAll}" VerticalAlignment="Center"/>
+                            <Panel VerticalAlignment="Center" RenderTransform="{Binding IsRtl, Source={x:Static l:Loc.Instance}, Converter={x:Static bp:BpIs.FlipX}}">
+                                <c:VectorIcon Data="{StaticResource IconArrowRight}" Size="14" StrokeWidth="2.4"/>
+                            </Panel>
+                        </StackPanel>
+                    </Button>
+                </Grid>
                 <ItemsControl ItemsSource="{Binding FreeGames}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
@@ -75,7 +118,17 @@
 
             <!-- تخفيضات Steam، ثم باقي المتاجر: نفس البطاقة -->
             <StackPanel Name="SteamDealsSection" Spacing="10" IsVisible="{Binding HasSteamDeals}">
-                <TextBlock Classes="lbl" Text="{l:Loc dealsSteam}"/>
+                <Grid ColumnDefinitions="*,Auto" Name="SteamMore">
+                    <TextBlock Classes="lbl" Text="{l:Loc dealsSteam}" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Classes="dmore" Command="{Binding OpenUrlCommand}" CommandParameter="{x:Static vm:MainViewModel.SteamSpecialsPage}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{l:Loc showAll}" VerticalAlignment="Center"/>
+                            <Panel VerticalAlignment="Center" RenderTransform="{Binding IsRtl, Source={x:Static l:Loc.Instance}, Converter={x:Static bp:BpIs.FlipX}}">
+                                <c:VectorIcon Data="{StaticResource IconArrowRight}" Size="14" StrokeWidth="2.4"/>
+                            </Panel>
+                        </StackPanel>
+                    </Button>
+                </Grid>
                 <ItemsControl ItemsSource="{Binding SteamDeals}" ItemTemplate="{StaticResource DealCard}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
@@ -84,7 +137,17 @@
             </StackPanel>
 
             <StackPanel Name="OtherDealsSection" Spacing="10" IsVisible="{Binding HasOtherDeals}">
-                <TextBlock Classes="lbl" Text="{l:Loc dealsOther}"/>
+                <Grid ColumnDefinitions="*,Auto" Name="OtherMore">
+                    <TextBlock Classes="lbl" Text="{l:Loc dealsOther}" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Classes="dmore" Command="{Binding OpenUrlCommand}" CommandParameter="{x:Static vm:MainViewModel.GogDealsPage}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{l:Loc showAll}" VerticalAlignment="Center"/>
+                            <Panel VerticalAlignment="Center" RenderTransform="{Binding IsRtl, Source={x:Static l:Loc.Instance}, Converter={x:Static bp:BpIs.FlipX}}">
+                                <c:VectorIcon Data="{StaticResource IconArrowRight}" Size="14" StrokeWidth="2.4"/>
+                            </Panel>
+                        </StackPanel>
+                    </Button>
+                </Grid>
                 <ItemsControl ItemsSource="{Binding OtherDeals}" ItemTemplate="{StaticResource DealCard}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>

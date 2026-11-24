@@ -313,6 +313,10 @@ public sealed partial class Loc : INotifyPropertyChanged
         ["sgNoNet"] = "تعذّر الاتصال بـ SteamGridDB. تحقق من الإنترنت ثم جرّب مجددًا.",
         ["sgKeyBad"] = "رفض SteamGridDB المفتاح. تحقق منه من الإعدادات › مفاتيح API.",
         ["sgNone"] = "لا توجد صور بهذا الشكل لهذه اللعبة.",
+        // ===== تحديث التصميم (المرحلة 4) =====
+        ["showAll"] = "عرض الكل",
+        ["dealsUpdated"] = "آخر تحديث {0} · يتحدّث كل ساعة",
+        ["dealsJustNow"] = "الآن",
     };
 
     private static readonly Dictionary<string, string> En = new()
@@ -559,5 +563,9 @@ public sealed partial class Loc : INotifyPropertyChanged
         ["sgNoNet"] = "Couldn't reach SteamGridDB. Check your internet and try again.",
         ["sgKeyBad"] = "SteamGridDB rejected the key. Check it in Settings › API keys.",
         ["sgNone"] = "No images of this kind for this game.",
+        // ===== تحديث التصميم (المرحلة 4) =====
+        ["showAll"] = "Show all",
+        ["dealsUpdated"] = "Updated {0} · refreshes every hour",
+        ["dealsJustNow"] = "just now",
     };
 }

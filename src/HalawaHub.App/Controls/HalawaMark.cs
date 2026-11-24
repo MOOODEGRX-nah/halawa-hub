@@ -59,6 +59,16 @@ public class HalawaMark : Control
     public static readonly StyledProperty<bool> ShowShadeProperty =
         AvaloniaProperty.Register<HalawaMark, bool>(nameof(ShowShade), true);
 
+    /// لمعة تعبر الحرف (0 → 1)، داخل شكله فقط؛ خارج هذا المدى لا تُرسم
+    public static readonly StyledProperty<double> ShineProperty =
+        AvaloniaProperty.Register<HalawaMark, double>(nameof(Shine), -1);
+
+    /// قوة التوهج الأحمر حوله (1 = كما في الشريط العلوي)
+    public static readonly StyledProperty<double> GlowProperty =
+        AvaloniaProperty.Register<HalawaMark, double>(nameof(Glow), 1);
+
+    public double Shine { get => GetValue(ShineProperty); set => SetValue(ShineProperty, value); }
+    public double Glow { get => GetValue(GlowProperty); set => SetValue(GlowProperty, value); }
     public double Lift { get => GetValue(LiftProperty); set => SetValue(LiftProperty, value); }
     public bool LiftOnHover { get => GetValue(LiftOnHoverProperty); set => SetValue(LiftOnHoverProperty, value); }
     public bool ShowShade { get => GetValue(ShowShadeProperty); set => SetValue(ShowShadeProperty, value); }
@@ -67,7 +77,7 @@ public class HalawaMark : Control
 
     static HalawaMark()
     {
-        AffectsRender<HalawaMark>(LiftProperty, ShowShadeProperty);
+        AffectsRender<HalawaMark>(LiftProperty, ShowShadeProperty, ShineProperty);
     }
 
     public HalawaMark()
@@ -79,6 +89,16 @@ public class HalawaMark : Control
             // .35s cubic-bezier(.34,1.56,.64,1)
             new DoubleTransition { Property = LiftProperty, Duration = TimeSpan.FromMilliseconds(350), Easing = Springs.Pop }
         };
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == GlowProperty)
+        {
+            _glow.BlurRadius = 10 * Glow;
+            _glow.Color = Color.FromArgb((byte)Math.Clamp(0x80 * Math.Min(Glow, 1.8), 0, 255), 0xEF, 0x44, 0x44);
+        }
     }
 
     protected override void OnPointerEntered(PointerEventArgs e)
@@ -127,6 +147,22 @@ public class HalawaMark : Control
         {
             context.DrawGeometry(FaceBrush, null, Shape);
             context.DrawGeometry(null, RimPen, Shape);
+            if (Shine is > 0 and < 1)
+            {
+                // شريط ضوء مائل يمر من اليسار لليمين داخل حدود الحرف
+                using (context.PushGeometryClip(Shape))
+                {
+                    var x0 = ViewX - 260 + Shine * (ViewW + 520);
+                    var band = new LinearGradientBrush
+                    {
+                        StartPoint = new RelativePoint(0, 0.5, RelativeUnit.Relative),
+                        EndPoint = new RelativePoint(1, 0.5, RelativeUnit.Relative),
+                        GradientStops = { new GradientStop(Color.FromArgb(0, 255, 244, 236), 0), new GradientStop(Color.FromArgb(0xB3, 255, 244, 236), 0.5), new GradientStop(Color.FromArgb(0, 255, 244, 236), 1) },
+                    };
+                    using (context.PushTransform(Matrix.CreateSkew(-0.36, 0) * Matrix.CreateTranslation(x0, 0)))
+                        context.FillRectangle(band, new Rect(0, ViewY - 100, 180, ViewH + 200));
+                }
+            }
         }
     }
 

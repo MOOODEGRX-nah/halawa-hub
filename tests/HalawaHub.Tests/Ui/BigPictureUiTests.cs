@@ -394,7 +394,7 @@ public class BigPictureUiTests : IDisposable
         log[Math.Min(logBefore, log.Length)..].Should().NotContain("failed ::", "no intro animation may fail");
         window.Close();
         }
-        finally { BigPictureWindow.IntroHold = TimeSpan.FromMilliseconds(1250); }
+        finally { BigPictureWindow.IntroHold = TimeSpan.Zero; }
     }
 
     [AvaloniaFact]

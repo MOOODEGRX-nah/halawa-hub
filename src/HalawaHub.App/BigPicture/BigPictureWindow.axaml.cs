@@ -42,6 +42,9 @@ public partial class BigPictureWindow : Window
     public BigPictureWindow(BigPictureViewModel vm, IGamepadSource? pads)
     {
         InitializeComponent();
+        // لون التمييز وثيم OLED من الإعدادات › المظهر (6.4)
+        BpPalette.Use(ThemeManager.CurrentAccent, ThemeManager.CurrentTheme);
+        BpPalette.Apply(Resources);
         _vm = vm;
         _pads = pads;
         DataContext = vm;

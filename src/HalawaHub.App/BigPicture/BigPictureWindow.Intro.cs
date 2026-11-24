@@ -23,10 +23,11 @@ namespace HalawaHub.App.BigPicture;
 public partial class BigPictureWindow
 {
     private CancellationTokenSource? _introCts;
+    private CancellationTokenSource? _bobCts;
     private bool _introEnding;
     internal bool IntroRunning { get; private set; }
     /// مدة بقاء الشعار بعد اكتماله (الاختبارات تطيلها لتصوّر البداية وتجرّب التخطي)
-    internal static TimeSpan IntroHold { get; set; } = TimeSpan.FromMilliseconds(900);
+    internal static TimeSpan IntroHold { get; set; } = TimeSpan.Zero;
 
     private static readonly Easing Out = new CssBezierEasing(0.22, 1, 0.36, 1);
     private static readonly Easing Spring = new CssBezierEasing(0.34, 1.56, 0.64, 1);
@@ -36,50 +37,98 @@ public partial class BigPictureWindow
     private async void PlayIntro()
     {
         if (!MotionSettings.Enabled) { Intro.IsVisible = false; return; }
-
         IntroRunning = true;
         Intro.IsVisible = true;
         Intro.Opacity = 1;
-        foreach (var v in new Visual[] { IntroBg, IntroGlow, IntroGrid, IntroLogo, IntroWords, IntroLine }) v.ClearValue(OpacityProperty);
+        foreach (var v in new Visual[] { IntroBg, IntroGlow, IntroGrid, IntroLogo, IntroWords, IntroLine, IntroLine2, IntroRing, IntroShadow, IntroEmber }) v.ClearValue(OpacityProperty);
         IntroLogo.Opacity = 0;
+        IntroShadow.Opacity = 0;
+        IntroEmber.Opacity = 0;
+        IntroLine.Opacity = 0;
+        IntroLine2.Opacity = 0;
+        IntroLogo.Shine = -1;
+        IntroRing.StrokeDashOffset = 254;
         BuildIntroName();
         var cts = _introCts = new CancellationTokenSource();
         var cx = Root.Bounds.Width / 2;
         try
         {
-            // 1) الشبكة تُرسم من المركز للخارج، والضوء خلف الشعار
+            // التوقيت من .intro في BigPicture.dc.html (بالثواني من البداية)
+            // 0.00 جمرة تتوهج ثم تنفتح
+            _ = Animate(IntroEmber, 0.7, 0, Out, (OpacityProperty, 0.0, 1.0), (ScaleTransform.ScaleXProperty, 0.0, 1.4), (ScaleTransform.ScaleYProperty, 0.0, 1.4),
+                (OpacityProperty, 1.0, 0.0), (ScaleTransform.ScaleXProperty, 1.4, 9.0), (ScaleTransform.ScaleYProperty, 1.4, 9.0));
+            // 0.15 الحلقة ترسم نفسها (مدار مائل تحت الحرف)
+            _ = Animate(IntroRing, 0.85, 0.15, InOut, (Avalonia.Controls.Shapes.Shape.StrokeDashOffsetProperty, 254.0, 0.0));
+            // 0.20 التوهج خلف الحرف، 0.35 الشبكة تنتشر كموجة من المركز
+            _ = Animate(IntroGlow, 1.2, 0.2, Out, (OpacityProperty, 0.0, 1.0), (ScaleTransform.ScaleXProperty, 0.3, 1.0), (ScaleTransform.ScaleYProperty, 0.3, 1.0));
             IntroGrid.Transitions = null;
             IntroGrid.LightX = cx;
-            IntroGrid.LightY = 410;
-            _ = Animate(IntroGrid, 1.1, 0, InOut, (BpGridLight.RevealProperty, 0.0, 1400.0));
-            _ = Animate(IntroGlow, 1.4, 0.1, Out, (OpacityProperty, 0.0, 1.0), (ScaleTransform.ScaleXProperty, 0.55, 1.0), (ScaleTransform.ScaleYProperty, 0.55, 1.0));
-
-            // 2) شعاع ضوء مائل يعبر الشاشة
-            IntroStreak.RenderTransform = new TransformGroup { Children = { new RotateTransform(18), new TranslateTransform(-1300, 0) } };
-            _ = Animate(IntroStreak, 1.0, 0.25, InOut, (TranslateTransform.XProperty, -1300.0, 1300.0));
-            _ = Animate(IntroStreak, 1.0, 0.25, Linear, (OpacityProperty, 0.0, 1.0), (OpacityProperty, 1.0, 0.0));
-
-            // 3) الشعار يظهر كبيرًا بتوهج وارتداد، ثم لمعة تمر عليه
-            await Task.Delay(380, cts.Token);
-            ElasticIn(IntroLogo);
-            IntroShine.RenderTransform = new TransformGroup { Children = { new RotateTransform(20), new TranslateTransform(-280, 0) } };
-            _ = Animate(IntroShine, 0.8, 0.75, InOut, (TranslateTransform.XProperty, -280.0, 280.0));
-            await Task.Delay(320, cts.Token);
-            IntroGrid.Wave(cx, 410);
-
-            // 4) الاسم حرفًا حرفًا، ثم "الشاشة الكبيرة" والخط من الوسط
+            IntroGrid.LightY = 420;
+            _ = Animate(IntroGrid, 1.3, 0.35, InOut, (BpGridLight.RevealProperty, 0.0, 1500.0));
+            // 0.45 شعاع ضوء مائل يعبر الشاشة
+            IntroStreak.RenderTransform = new TransformGroup { Children = { new RotateTransform(18), new TranslateTransform(-1400, 0) } };
+            _ = Animate(IntroStreak, 1.1, 0.45, InOut, (TranslateTransform.XProperty, -1400.0, 1400.0));
+            _ = Animate(IntroStreak, 1.1, 0.45, Linear, (OpacityProperty, 0.0, 1.0), (OpacityProperty, 1.0, 0.0));
+            // 0.55 الحرف يطفو من الضباب ويستقر، وظله يظهر تحته
+            _ = Animate(IntroLogo, 0.75, 0.55, Spring, (OpacityProperty, 0.0, 1.0), (ScaleTransform.ScaleXProperty, 0.7, 1.0), (ScaleTransform.ScaleYProperty, 0.7, 1.0),
+                (TranslateTransform.YProperty, 30.0, 0.0));
+            _ = Animate(IntroShadow, 0.6, 0.7, Out, (OpacityProperty, 0.0, 1.0));
+            await Task.Delay(700, cts.Token);
+            IntroGrid.Wave(cx, 420);
+            // 0.95 الاسم حرفًا حرفًا
+            await Task.Delay(250, cts.Token);
             var i = 0;
             foreach (var child in IntroName.Children)
-                _ = Animate(child, 0.55, 0.04 * i++, Spring, (OpacityProperty, 0.0, 1.0), (TranslateTransform.YProperty, 26.0, 0.0));
-            _ = Animate(IntroSub, 0.6, 0.45, Out, (OpacityProperty, 0.0, 1.0), (TranslateTransform.YProperty, 14.0, 0.0));
-            _ = Animate(IntroLine, 0.8, 0.5, InOut, (OpacityProperty, 0.0, 1.0), (ScaleTransform.ScaleXProperty, 0.0, 1.0));
-
-            await Task.Delay(1100, cts.Token);
+                _ = Animate(child, 0.6, 0.04 * i++, Spring, (OpacityProperty, 0.0, 1.0), (TranslateTransform.YProperty, 28.0, 0.0));
+            // 1.10 يتأرجح فوق ظله حتى النهاية، 1.15 لمعة تعبره
+            await Task.Delay(150, cts.Token);
+            _bobCts = new CancellationTokenSource();
+            Bob(_bobCts.Token);
+            _ = Animate(IntroLogo, 0.8, 0.05, InOut, (HalawaHub.App.Controls.HalawaMark.ShineProperty, 0.0, 1.0));
+            // 1.40 «الشاشة الكبيرة»، 1.50 الخطان ينفتحان من جهتها
+            _ = Animate(IntroSub, 0.6, 0.3, Out, (OpacityProperty, 0.0, 1.0), (TranslateTransform.YProperty, 14.0, 0.0));
+            _ = Animate(IntroLine, 0.7, 0.4, InOut, (OpacityProperty, 0.0, 1.0), (ScaleTransform.ScaleXProperty, 0.0, 1.0));
+            _ = Animate(IntroLine2, 0.7, 0.4, InOut, (OpacityProperty, 0.0, 1.0), (ScaleTransform.ScaleXProperty, 0.0, 1.0));
+            // 2.10 النهاية (الاختبارات تطيلها بـ IntroHold)
+            await Task.Delay(1000, cts.Token);
             await Task.Delay(IntroHold, cts.Token);
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { Log.Error("intro failed", ex); }
         await EndIntro(skipped: cts.IsCancellationRequested);
+    }
+
+    /// يتأرجح الحرف صعودًا ونزولًا ويصغر ظله معه (iFloat / iShadow)، حتى تنتهي البداية.
+    /// الحركات المتكررة بلا نهاية لا تعمل بـ RunAsync في Avalonia، فهي ذهاب وإياب متتاليان.
+    private async void Bob(CancellationToken token)
+    {
+        var ease = new SineEaseInOut();
+        try
+        {
+            var up = true;
+            while (!token.IsCancellationRequested)
+            {
+                var (y0, y1, s0, s1, o0, o1) = up ? (0.0, -16.0, 1.0, 0.78, 1.0, 0.6) : (-16.0, 0.0, 0.78, 1.0, 0.6, 1.0);
+                _ = Swing(IntroShadow, ease, token, (ScaleTransform.ScaleXProperty, s0, s1), (ScaleTransform.ScaleYProperty, s0, s1), (OpacityProperty, o0, o1));
+                await Swing(IntroLogo, ease, token, (TranslateTransform.YProperty, y0, y1));
+                up = !up;
+            }
+        }
+        catch (Exception ex) { Log.Error("intro bob failed", ex); }
+    }
+
+    /// نصف تأرجحة (1.3 ثانية) تتوقف فورًا مع نهاية البداية، فلا تتعارض مع طيران الحرف
+    private static async Task Swing(Visual v, Easing easing, CancellationToken token, params (AvaloniaProperty P, double From, double To)[] props)
+    {
+        EnsureTransforms(v);
+        var anim = new Animation { Duration = TimeSpan.FromSeconds(1.3), Easing = easing, FillMode = FillMode.Forward };
+        var start = new KeyFrame { Cue = new Cue(0) };
+        var end = new KeyFrame { Cue = new Cue(1) };
+        foreach (var (p, from, to) in props) { start.Setters.Add(new Setter(p, from)); end.Setters.Add(new Setter(p, to)); }
+        anim.Children.Add(start);
+        anim.Children.Add(end);
+        try { await anim.RunAsync(v, token); }
+        catch (OperationCanceledException) { }
     }
 
     /// كل حرف عنصر مستقل حتى يصعد وحده
@@ -105,7 +154,8 @@ public partial class BigPictureWindow
     {
         if (!IntroRunning || _introEnding) return;
         _introEnding = true;
-        var t = skipped ? 0.5 : 0.85;
+        var t = skipped ? 0.5 : 0.68;
+        _bobCts?.Cancel();
 
         // 5) الشعار يطير إلى مكانه في الشريط العلوي ويصغر، والخلفية والاسم يتلاشيان،
         //    والرئيسي يصعد من خلفه: انتقال متصل بدل اختفاء مفاجئ
@@ -115,17 +165,21 @@ public partial class BigPictureWindow
         _ = Animate(IntroLogo, t, 0, InOut,
             (TranslateTransform.XProperty, 0.0, to.X - from.X), (TranslateTransform.YProperty, 0.0, to.Y - from.Y),
             (ScaleTransform.ScaleXProperty, 1.0, scale), (ScaleTransform.ScaleYProperty, 1.0, scale));
-        _ = Animate(IntroWords, t * 0.6, 0, Out, (OpacityProperty, 1.0, 0.0), (TranslateTransform.YProperty, 0.0, 30.0));
-        _ = Animate(IntroLine, t * 0.5, 0, Out, (OpacityProperty, 1.0, 0.0), (ScaleTransform.ScaleXProperty, 1.0, 0.0));
+        _ = Animate(IntroWords, 0.32, 0, Out, (OpacityProperty, 1.0, 0.0), (TranslateTransform.YProperty, 0.0, 24.0));
+        // الحلقة تنكمش وتختفي، والظل معها
+        _ = Animate(IntroRing, 0.45, 0, Out, (OpacityProperty, 1.0, 0.0), (ScaleTransform.ScaleXProperty, 1.0, 0.62), (ScaleTransform.ScaleYProperty, 1.0, 0.62));
+        _ = Animate(IntroShadow, 0.3, 0, Out, (OpacityProperty, 1.0, 0.0));
         _ = Animate(IntroBg, t, 0.1, Out, (OpacityProperty, 1.0, 0.0));
         _ = Animate(IntroGlow, t, 0, Out, (OpacityProperty, 1.0, 0.0));
         _ = Animate(IntroGrid, t, 0, Out, (OpacityProperty, 1.0, 0.0));
         _ = MotionSettings.AnimateAsync(PageView, TimeSpan.FromSeconds(t + 0.2), Out, 0, 1.04, 24, delay: TimeSpan.FromSeconds(t * 0.25));
-        _ = MotionSettings.AnimateAsync(TopBar, TimeSpan.FromSeconds(t), Out, 0, 1, -24, delay: TimeSpan.FromSeconds(t * 0.35));
+        _ = MotionSettings.AnimateAsync(TopGlass, TimeSpan.FromSeconds(0.6), Out, 0, 1, -24, delay: TimeSpan.FromSeconds(t * 0.35));
+        _ = MotionSettings.AnimateAsync(HintGlass, TimeSpan.FromSeconds(0.6), Out, 0, 1, 24, delay: TimeSpan.FromSeconds(t * 0.35));
         await Task.Delay(TimeSpan.FromSeconds(t));
 
-        // وصل الشعار فوق زر الشعار الحقيقي: يذوب فيه
-        _ = Animate(IntroLogo, 0.18, 0, Out, (OpacityProperty, 1.0, 0.0));
+        // وصل الشعار فوق زر الشعار الحقيقي: يذوب فيه، والحقيقي ينبض مرة (iLand)
+        _ = Animate(IntroLogo, 0.16, 0, Linear, (OpacityProperty, 1.0, 0.0));
+        _ = Animate(TopLogo, 0.5, 0, Spring, (ScaleTransform.ScaleXProperty, 0.9, 1.12), (ScaleTransform.ScaleYProperty, 0.9, 1.12), (ScaleTransform.ScaleXProperty, 1.12, 1.0), (ScaleTransform.ScaleYProperty, 1.12, 1.0));
         await Task.Delay(180);
         Intro.IsVisible = false;
         IntroRunning = false;

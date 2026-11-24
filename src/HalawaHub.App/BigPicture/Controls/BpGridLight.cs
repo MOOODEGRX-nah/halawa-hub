@@ -107,7 +107,7 @@ public sealed class BpGridLight : Control
         for (var y = 0.0; y <= h; y += Cell) ctx.DrawLine(Faint, new Point(0, y), new Point(w, y));
 
         // .gl1: الضوء نفسه (أحمر واسع، وكهرماني أصغر)
-        ctx.DrawEllipse(Radial(c, 560, (0, Color.FromArgb(51, 239, 68, 68)), (0.45, Color.FromArgb(15, 239, 68, 68)), (0.7, Color.FromArgb(0, 239, 68, 68))), null, c, 560, 560);
+        ctx.DrawEllipse(Radial(c, 560, (0, BpPalette.Map(Color.FromArgb(51, 239, 68, 68))), (0.45, BpPalette.Map(Color.FromArgb(15, 239, 68, 68))), (0.7, BpPalette.Map(Color.FromArgb(0, 239, 68, 68)))), null, c, 560, 560);
         ctx.DrawEllipse(Radial(c, 220, (0, Color.FromArgb(36, 245, 166, 35)), (0.7, Color.FromArgb(0, 245, 166, 35))), null, c, 220, 220);
 
         // .gl2: خطوط الشبكة المضاءة حول الضوء

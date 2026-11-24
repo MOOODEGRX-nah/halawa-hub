@@ -10,9 +10,14 @@
         x:DataType="bp:BigPictureViewModel"
         Title="{Binding Title, Source={x:Static bp:BpWindowTitle.Instance}}"
         SystemDecorations="None" CanResize="False" ShowInTaskbar="True"
-        Background="#0A0404" Icon="/Assets/icon.ico">
+        Background="{DynamicResource BpC_FF0A0404}" Icon="/Assets/icon.ico">
 
   <Window.Resources>
+    <!-- زجاج عائم (.top / .hb / .nsh / .gsh / .panel): بلا تمويه ما خلفه في Avalonia، فأعتم قليلًا من التصميم -->
+    <SolidColorBrush x:Key="BpGlassBar" Color="#BF140809"/>
+    <SolidColorBrush x:Key="BpGlassHint" Color="#CC140809"/>
+    <SolidColorBrush x:Key="BpGlassPanel" Color="#EB140809"/>
+    <SolidColorBrush x:Key="BpGlassEdge" Color="#14FFFFFF"/>
     <SolidColorBrush x:Key="BpText" Color="#F5EDED"/>
     <SolidColorBrush x:Key="BpMuted" Color="#B8A4A4"/>
     <SolidColorBrush x:Key="BpSurface" Color="#140808"/>
@@ -47,13 +52,13 @@
               <Border VerticalAlignment="Bottom" Padding="14,58,14,14">
                 <Border.Background>
                   <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
-                    <GradientStop Color="#000A0404" Offset="0"/><GradientStop Color="#F20A0404" Offset="0.55"/>
+                    <GradientStop Color="{DynamicResource BpK_000A0404}" Offset="0"/><GradientStop Color="{DynamicResource BpK_F20A0404}" Offset="0.55"/>
                   </LinearGradientBrush>
                 </Border.Background>
                 <StackPanel>
                   <bpc:BpAutoText Classes="cardtitle" Text="{Binding Game.Name}" TextTrimming="CharacterEllipsis"/>
-                  <TextBlock Text="{Binding Game.HoursText}" FontSize="15" Foreground="{StaticResource BpMuted}" Margin="0,2,0,0"/>
-                  <Border Classes="cpl" CornerRadius="10" Background="#DC2626" ClipToBounds="True">
+                  <TextBlock Text="{Binding Game.HoursText}" FontSize="15" Foreground="{DynamicResource BpMuted}" Margin="0,2,0,0"/>
+                  <Border Classes="cpl" CornerRadius="10" Background="{DynamicResource BpC_FFDC2626}" ClipToBounds="True">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
                       <c:VectorIcon Data="M6 4l14 8-14 8z" Size="15" IsFilled="True" Foreground="White"/>
                       <TextBlock Text="{l:Loc bpPlay}" FontSize="17" FontWeight="SemiBold" Foreground="White"/>
@@ -68,7 +73,7 @@
           </Border>
           <Border IsVisible="{Binding Game.HasUpdate}" Margin="12" Width="30" Height="30" CornerRadius="15" Background="#F5A623"
                   HorizontalAlignment="Right" VerticalAlignment="Top" BoxShadow="0 0 14 0 #8CF5A623">
-            <c:VectorIcon Data="M12 5v11M7 11l5 5 5-5" Size="16" StrokeWidth="3" Foreground="#1A0A0C" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <c:VectorIcon Data="M12 5v11M7 11l5 5 5-5" Size="16" StrokeWidth="3" Foreground="{DynamicResource BpC_FF1A0A0C}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
           </Border>
         </Panel>
       </Button>
@@ -77,7 +82,7 @@
 
   <Window.Styles>
     <Style Selector="TextBlock">
-      <Setter Property="Foreground" Value="{StaticResource BpText}"/>
+      <Setter Property="Foreground" Value="{DynamicResource BpText}"/>
     </Style>
     <Style Selector="Button">
       <Setter Property="Padding" Value="0"/>
@@ -94,7 +99,7 @@
     <!-- شارة (.bd) -->
     <Style Selector="Border.bd">
       <Setter Property="CornerRadius" Value="10"/>
-      <Setter Property="Background" Value="#C70A0404"/>
+      <Setter Property="Background" Value="{DynamicResource BpC_C70A0404}"/>
       <Setter Property="BorderBrush" Value="#1AFFFFFF"/>
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
@@ -103,12 +108,12 @@
     <Style Selector="Button.btn">
       <Setter Property="Height" Value="68"/>
       <Setter Property="CornerRadius" Value="14"/>
-      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
-      <Setter Property="BorderBrush" Value="#2E1616"/>
+      <Setter Property="Background" Value="{DynamicResource BpSurface}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpC_FF2E1616}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Padding" Value="30,0"/>
       <Setter Property="FontSize" Value="21"/>
-      <Setter Property="Foreground" Value="{StaticResource BpText}"/>
+      <Setter Property="Foreground" Value="{DynamicResource BpText}"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
       <Setter Property="RenderTransform" Value="scale(1)"/>
@@ -123,31 +128,31 @@
       <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}"/>
       <Setter Property="CornerRadius" Value="{Binding $parent[Button].CornerRadius}"/>
     </Style>
-    <Style Selector="Button.btn:pointerover"><Setter Property="Background" Value="#241010"/></Style>
+    <Style Selector="Button.btn:pointerover"><Setter Property="Background" Value="{DynamicResource BpC_FF241010}"/></Style>
     <Style Selector="Button.btn.f">
-      <Setter Property="Background" Value="#241010"/>
+      <Setter Property="Background" Value="{DynamicResource BpC_FF241010}"/>
       <Setter Property="RenderTransform" Value="scale(1.05)"/>
     </Style>
     <!-- الأزرار العريضة (قائمة صفحة اللعبة ولوحاتها) لا تكبر: الحلقة تحيط بحوافها المرسومة نفسها،
          ولونها الأفتح يكفي. تكبيرها كان لا يُرسم أحيانًا فتظهر الحلقة مستطيلًا فارغًا حول الزر -->
     <Style Selector="Button.btn.wide.f"><Setter Property="RenderTransform" Value="scale(1)"/></Style>
-    <Style Selector="Button.btn.wide.f:not(.pl)"><Setter Property="Background" Value="#3A1518"/></Style>
+    <Style Selector="Button.btn.wide.f:not(.pl)"><Setter Property="Background" Value="{DynamicResource BpC_FF3A1518}"/></Style>
     <Style Selector="Button.btn /template/ ContentPresenter"><Setter Property="Transitions"><Transitions><BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.3"/></Transitions></Setter></Style>
-    <Style Selector="Button.btn.f /template/ ContentPresenter"><Setter Property="BoxShadow" Value="0 10 30 0 #73EF4444"/></Style>
+    <Style Selector="Button.btn.f /template/ ContentPresenter"><Setter Property="BoxShadow" Value="{DynamicResource BpS_10}"/></Style>
     <Style Selector="Button.btn.pri, Button.btn.pl">
-      <Setter Property="Background" Value="#DC2626"/>
-      <Setter Property="BorderBrush" Value="#DC2626"/>
+      <Setter Property="Background" Value="{DynamicResource BpC_FFDC2626}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpC_FFDC2626}"/>
       <Setter Property="Foreground" Value="White"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
     <Style Selector="Button.btn.pl"><Setter Property="FontSize" Value="23"/><Setter Property="Padding" Value="36,0"/><Setter Property="BorderThickness" Value="0"/></Style>
-    <Style Selector="Button.btn.pri.f, Button.btn.pl.f, Button.btn.pl:pointerover, Button.btn.pri:pointerover"><Setter Property="Background" Value="#EF4444"/></Style>
+    <Style Selector="Button.btn.pri.f, Button.btn.pl.f, Button.btn.pl:pointerover, Button.btn.pri:pointerover"><Setter Property="Background" Value="{DynamicResource BpC_FFEF4444}"/></Style>
     <Style Selector="Button.btn:pressed"><Setter Property="RenderTransform" Value="scale(0.94)"/></Style>
 
     <!-- بطاقة اللعبة (.c) -->
     <Style Selector="Button.bpcard">
       <Setter Property="CornerRadius" Value="18"/>
-      <Setter Property="BorderBrush" Value="{StaticResource BpLine}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpLine}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="ZIndex" Value="0"/>
       <Setter Property="RenderTransform" Value="translateY(0px) scale(1)"/>
@@ -159,14 +164,14 @@
     </Style>
     <Style Selector="Button.bpcard /template/ ContentPresenter">
       <Setter Property="CornerRadius" Value="18"/>
-      <Setter Property="BorderBrush" Value="{StaticResource BpLine}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpLine}"/>
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
     <Style Selector="Button.bpcard.f">
       <Setter Property="ZIndex" Value="3"/>
       <Setter Property="RenderTransform" Value="translateY(-10px) scale(1.06)"/>
     </Style>
-    <Style Selector="Button.bpcard.f /template/ ContentPresenter"><Setter Property="BoxShadow" Value="0 18 44 0 #61EF4444"/></Style>
+    <Style Selector="Button.bpcard.f /template/ ContentPresenter"><Setter Property="BoxShadow" Value="{DynamicResource BpS_11}"/></Style>
     <Style Selector="Button.bpcard:pressed"><Setter Property="RenderTransform" Value="scale(0.98)"/></Style>
     <Style Selector="TextBlock.cardtitle"><Setter Property="FontSize" Value="19"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
     <Style Selector="Border.cpl">
@@ -185,7 +190,7 @@
 
     <!-- "عرض الكل" (.c.more) -->
     <Style Selector="Border.mi">
-      <Setter Property="Background" Value="#241010"/>
+      <Setter Property="Background" Value="{DynamicResource BpC_FF241010}"/>
       <Setter Property="RenderTransform" Value="translateX(0px)"/>
       <Setter Property="Transitions">
         <Transitions>
@@ -195,15 +200,15 @@
       </Setter>
     </Style>
     <Style Selector="Button.bpcard.f Border.mi">
-      <Setter Property="Background" Value="{StaticResource BpRedHot}"/>
-      <Setter Property="BoxShadow" Value="0 0 22 0 #8CEF4444"/>
+      <Setter Property="Background" Value="{DynamicResource BpRedHot}"/>
+      <Setter Property="BoxShadow" Value="{DynamicResource BpS_12}"/>
       <Setter Property="RenderTransform" Value="translateX(6px)"/>
     </Style>
-    <Style Selector="Rectangle.dash"><Setter Property="Stroke" Value="#3A1518"/><Setter Property="StrokeDashArray" Value="3,2"/></Style>
-    <Style Selector="Button.bpcard.f Rectangle.dash"><Setter Property="StrokeDashArray" Value="{x:Null}"/><Setter Property="Stroke" Value="#7F1D1D"/></Style>
+    <Style Selector="Rectangle.dash"><Setter Property="Stroke" Value="{DynamicResource BpC_FF3A1518}"/><Setter Property="StrokeDashArray" Value="3,2"/></Style>
+    <Style Selector="Button.bpcard.f Rectangle.dash"><Setter Property="StrokeDashArray" Value="{x:Null}"/><Setter Property="Stroke" Value="{DynamicResource BpC_FF7F1D1D}"/></Style>
     <Style Selector="Border.more">
       <Setter Property="CornerRadius" Value="18"/>
-      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
+      <Setter Property="Background" Value="{DynamicResource BpSurface}"/>
     </Style>
 
     <!-- أزرار دائرية في الشريط العلوي (.ib) -->
@@ -211,10 +216,10 @@
       <Setter Property="Width" Value="64"/>
       <Setter Property="Height" Value="64"/>
       <Setter Property="CornerRadius" Value="32"/>
-      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
-      <Setter Property="BorderBrush" Value="#2E1616"/>
+      <Setter Property="Background" Value="{DynamicResource BpSurface}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpC_FF2E1616}"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="Foreground" Value="#E8D8D8"/>
+      <Setter Property="Foreground" Value="{DynamicResource BpC_FFE8D8D8}"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
@@ -223,18 +228,18 @@
       <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}"/>
       <Setter Property="CornerRadius" Value="32"/>
     </Style>
-    <Style Selector="Button.ib:pointerover"><Setter Property="Background" Value="#241010"/></Style>
+    <Style Selector="Button.ib:pointerover"><Setter Property="Background" Value="{DynamicResource BpC_FF241010}"/></Style>
     <Style Selector="Button.ib.open">
-      <Setter Property="Background" Value="{StaticResource BpRedHot}"/>
+      <Setter Property="Background" Value="{DynamicResource BpRedHot}"/>
       <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
-    <Style Selector="Button.ib.open /template/ ContentPresenter"><Setter Property="BoxShadow" Value="0 0 22 0 #99EF4444"/></Style>
+    <Style Selector="Button.ib.open /template/ ContentPresenter"><Setter Property="BoxShadow" Value="{DynamicResource BpS_13}"/></Style>
 
     <!-- تبويبات الشريط العلوي (.tbtn) وشريط الرئيسي (.tstab) -->
     <Style Selector="Button.tbtn">
       <Setter Property="FontSize" Value="22"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="Foreground" Value="{StaticResource BpMuted}"/>
+      <Setter Property="Foreground" Value="{DynamicResource BpMuted}"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
       <Setter Property="Transitions"><Transitions><BrushTransition Property="Foreground" Duration="0:0:0.25"/></Transitions></Setter>
@@ -245,7 +250,7 @@
       <Setter Property="FontSize" Value="21"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="CornerRadius" Value="12,12,0,0"/>
-      <Setter Property="Foreground" Value="{StaticResource BpMuted}"/>
+      <Setter Property="Foreground" Value="{DynamicResource BpMuted}"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
       <Setter Property="Transitions"><Transitions><BrushTransition Property="Foreground" Duration="0:0:0.25"/></Transitions></Setter>
@@ -255,7 +260,7 @@
       <Setter Property="CornerRadius" Value="12,12,0,0"/>
     </Style>
     <Style Selector="Button.tstab.on"><Setter Property="Foreground" Value="White"/></Style>
-    <Style Selector="Button.tstab.f"><Setter Property="Background" Value="#1AEF4444"/></Style>
+    <Style Selector="Button.tstab.f"><Setter Property="Background" Value="{DynamicResource BpC_1AEF4444}"/></Style>
 
     <!-- إحصاءات البطل (.hst) -->
     <Style Selector="StackPanel.hst"><Setter Property="Spacing" Value="3"/></Style>
@@ -263,27 +268,27 @@
       <Setter Property="FontSize" Value="14"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="LetterSpacing" Value="1.1"/>
-      <Setter Property="Foreground" Value="{StaticResource BpMuted}"/>
+      <Setter Property="Foreground" Value="{DynamicResource BpMuted}"/>
     </Style>
     <Style Selector="StackPanel.hst > TextBlock.v"><Setter Property="FontSize" Value="21"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
 
     <!-- منصات المكتبة (.chip) -->
     <Style Selector="Button.chip">
-      <Setter Property="Foreground" Value="{StaticResource BpMuted}"/>
+      <Setter Property="Foreground" Value="{DynamicResource BpMuted}"/>
       <Setter Property="Transitions"><Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions></Setter>
     </Style>
     <Style Selector="Button.chip.on"><Setter Property="Foreground" Value="White"/></Style>
-    <Style Selector="Border.cnt"><Setter Property="Background" Value="#2A1313"/></Style>
+    <Style Selector="Border.cnt"><Setter Property="Background" Value="{DynamicResource BpC_FF2A1313}"/></Style>
     <Style Selector="Button.chip.on Border.cnt"><Setter Property="Background" Value="#4D000000"/></Style>
 
     <!-- مفاتيح لوحة المفاتيح (.key) -->
     <Style Selector="Button.key">
       <Setter Property="Height" Value="78"/>
       <Setter Property="CornerRadius" Value="14"/>
-      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
-      <Setter Property="BorderBrush" Value="#2E1616"/>
+      <Setter Property="Background" Value="{DynamicResource BpSurface}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpC_FF2E1616}"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="Foreground" Value="#D9C7C7"/>
+      <Setter Property="Foreground" Value="{DynamicResource BpC_FFD9C7C7}"/>
       <Setter Property="ZIndex" Value="0"/>
       <Setter Property="RenderTransform" Value="scale(1)"/>
       <Setter Property="Transitions">
@@ -295,15 +300,15 @@
       <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}"/>
       <Setter Property="CornerRadius" Value="14"/>
     </Style>
-    <Style Selector="Button.key.pri"><Setter Property="BorderBrush" Value="#7F1D1D"/><Setter Property="Foreground" Value="White"/></Style>
+    <Style Selector="Button.key.pri"><Setter Property="BorderBrush" Value="{DynamicResource BpC_FF7F1D1D}"/><Setter Property="Foreground" Value="White"/></Style>
     <Style Selector="Button.key.f">
-      <Setter Property="Background" Value="{StaticResource BpRedGrad}"/>
+      <Setter Property="Background" Value="{DynamicResource BpRedGrad}"/>
       <Setter Property="BorderBrush" Value="Transparent"/>
       <Setter Property="Foreground" Value="White"/>
       <Setter Property="ZIndex" Value="1"/>
       <Setter Property="RenderTransform" Value="scale(1.08)"/>
     </Style>
-    <Style Selector="Button.key.f /template/ ContentPresenter"><Setter Property="BoxShadow" Value="0 0 24 0 #8CEF4444"/></Style>
+    <Style Selector="Button.key.f /template/ ContentPresenter"><Setter Property="BoxShadow" Value="{DynamicResource BpS_14}"/></Style>
     <Style Selector="Button.key:pressed"><Setter Property="RenderTransform" Value="scale(0.92)"/></Style>
 
     <!-- نتائج البحث (.qsr) -->
@@ -311,7 +316,7 @@
       <Setter Property="Height" Value="92"/>
       <Setter Property="Padding" Value="14,0"/>
       <Setter Property="CornerRadius" Value="14"/>
-      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
+      <Setter Property="Background" Value="{DynamicResource BpSurface}"/>
       <Setter Property="RenderTransform" Value="scale(1)"/>
       <Setter Property="Transitions">
         <Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" Easing="{x:Static bp:BpSprings.Lift}"/></Transitions>
@@ -325,8 +330,8 @@
 
     <!-- البطاقات والأسطر (.cd / .tile / .row / .nti) -->
     <Style Selector="Border.cd">
-      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
-      <Setter Property="BorderBrush" Value="{StaticResource BpLine}"/>
+      <Setter Property="Background" Value="{DynamicResource BpSurface}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpLine}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="CornerRadius" Value="18"/>
     </Style>
@@ -342,7 +347,7 @@
       <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
       <Setter Property="CornerRadius" Value="12"/>
     </Style>
-    <Style Selector="Button.nti.f"><Setter Property="Background" Value="#241010"/></Style>
+    <Style Selector="Button.nti.f"><Setter Property="Background" Value="{DynamicResource BpC_FF241010}"/></Style>
     <Style Selector="Button.row">
       <Setter Property="Padding" Value="20,16"/>
       <Setter Property="CornerRadius" Value="14"/>
@@ -352,7 +357,7 @@
       <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
       <Setter Property="CornerRadius" Value="14"/>
     </Style>
-    <Style Selector="Button.row.f"><Setter Property="Background" Value="#241010"/></Style>
+    <Style Selector="Button.row.f"><Setter Property="Background" Value="{DynamicResource BpC_FF241010}"/></Style>
 
     <!-- عناصر القائمة الجانبية والإعدادات (.si) -->
     <Style Selector="Button.si">
@@ -362,7 +367,7 @@
       <Setter Property="Padding" Value="18,0"/>
       <Setter Property="FontSize" Value="20"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="Foreground" Value="{StaticResource BpMuted}"/>
+      <Setter Property="Foreground" Value="{DynamicResource BpMuted}"/>
       <Setter Property="Transitions"><Transitions><BrushTransition Property="Foreground" Duration="0:0:0.3"/></Transitions></Setter>
     </Style>
     <Style Selector="Button.si.on"><Setter Property="Foreground" Value="White"/></Style>
@@ -371,10 +376,10 @@
 
     <!-- اللوحات (.panel) وصندوق الحالة (.stat) -->
     <Style Selector="Border.panel">
-      <Setter Property="Background" Value="#0E0606"/>
-      <Setter Property="BorderBrush" Value="{StaticResource BpLine}"/>
+      <Setter Property="Background" Value="{DynamicResource BpGlassPanel}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpGlassEdge}"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius" Value="20"/>
+      <Setter Property="CornerRadius" Value="30"/>
       <Setter Property="Padding" Value="38,32"/>
       <Setter Property="BoxShadow" Value="0 40 110 0 #B3000000"/>
       <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -383,21 +388,21 @@
     <Style Selector="Border.stat">
       <Setter Property="Padding" Value="20,16"/>
       <Setter Property="CornerRadius" Value="16"/>
-      <Setter Property="Background" Value="#0A0404"/>
-      <Setter Property="BorderBrush" Value="{StaticResource BpLine}"/>
+      <Setter Property="Background" Value="{DynamicResource BpC_FF0A0404}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpLine}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Transitions"><Transitions><BrushTransition Property="BorderBrush" Duration="0:0:0.35"/></Transitions></Setter>
     </Style>
     <Style Selector="Border.stat.ok">
-      <Setter Property="BorderBrush" Value="#59EF4444"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpC_59EF4444}"/>
       <Setter Property="Background">
-        <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%"><GradientStop Color="#14EF4444" Offset="0"/><GradientStop Color="#0A0404" Offset="0.6"/></LinearGradientBrush>
+        <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%"><GradientStop Color="{DynamicResource BpK_14EF4444}" Offset="0"/><GradientStop Color="{DynamicResource BpK_FF0A0404}" Offset="0.6"/></LinearGradientBrush>
       </Setter>
     </Style>
     <Style Selector="Border.stat.bad">
-      <Setter Property="BorderBrush" Value="#8CDC2626"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpC_8CDC2626}"/>
       <Setter Property="Background">
-        <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%"><GradientStop Color="#477F1D1D" Offset="0"/><GradientStop Color="#0A0404" Offset="0.6"/></LinearGradientBrush>
+        <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%"><GradientStop Color="{DynamicResource BpK_477F1D1D}" Offset="0"/><GradientStop Color="{DynamicResource BpK_FF0A0404}" Offset="0.6"/></LinearGradientBrush>
       </Setter>
     </Style>
 
@@ -405,8 +410,8 @@
     <Style Selector="Border.ntr">
       <Setter Property="Padding" Value="18,16"/>
       <Setter Property="CornerRadius" Value="16"/>
-      <Setter Property="Background" Value="{StaticResource BpSurface}"/>
-      <Setter Property="BorderBrush" Value="{StaticResource BpLine}"/>
+      <Setter Property="Background" Value="{DynamicResource BpSurface}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource BpLine}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="RenderTransform" Value="translateX(0px) scale(1)"/>
@@ -418,7 +423,7 @@
         </Transitions>
       </Setter>
     </Style>
-    <Style Selector="Border.ntr.f"><Setter Property="Background" Value="#241010"/><Setter Property="RenderTransform" Value="translateX(0px) scale(1.02)"/></Style>
+    <Style Selector="Border.ntr.f"><Setter Property="Background" Value="{DynamicResource BpC_FF241010}"/><Setter Property="RenderTransform" Value="translateX(0px) scale(1.02)"/></Style>
     <Style Selector="Border.ntr.new"><Setter Property="BoxShadow" Value="0 0 26 0 #2E4ADE80"/><Setter Property="BorderBrush" Value="#594ADE80"/></Style>
     <Style Selector="Border.ntr.out"><Setter Property="Opacity" Value="0"/><Setter Property="RenderTransform" Value="translateX(420px) scale(1)"/></Style>
     <Style Selector="StackPanel.nacts">
@@ -450,23 +455,23 @@
     <Style Selector="Border.ctile">
       <Setter Property="CornerRadius" Value="12"/>
       <Setter Property="ClipToBounds" Value="True"/>
-      <Setter Property="Background" Value="#241010"/>
+      <Setter Property="Background" Value="{DynamicResource BpC_FF241010}"/>
       <Setter Property="BorderThickness" Value="3"/>
       <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
-    <Style Selector="Border.ctile.on"><Setter Property="BorderBrush" Value="#EF4444"/><Setter Property="BoxShadow" Value="0 0 18 0 #8CEF4444"/></Style>
+    <Style Selector="Border.ctile.on"><Setter Property="BorderBrush" Value="{DynamicResource BpC_FFEF4444}"/><Setter Property="BoxShadow" Value="{DynamicResource BpS_15}"/></Style>
     <Style Selector="Border.tick">
       <Setter Property="Width" Value="26"/><Setter Property="Height" Value="26"/><Setter Property="CornerRadius" Value="13"/>
-      <Setter Property="Background" Value="#DC2626"/><Setter Property="HorizontalAlignment" Value="Right"/><Setter Property="VerticalAlignment" Value="Top"/>
+      <Setter Property="Background" Value="{DynamicResource BpC_FFDC2626}"/><Setter Property="HorizontalAlignment" Value="Right"/><Setter Property="VerticalAlignment" Value="Top"/>
       <Setter Property="Margin" Value="0,-8,-8,0"/>
     </Style>
     <Style Selector="Border.sgchip">
       <Setter Property="Padding" Value="18,8"/><Setter Property="CornerRadius" Value="14"/>
-      <Setter Property="Background" Value="#140808"/><Setter Property="BorderBrush" Value="#2E1616"/><Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Background" Value="{DynamicResource BpC_FF140808}"/><Setter Property="BorderBrush" Value="{DynamicResource BpC_FF2E1616}"/><Setter Property="BorderThickness" Value="1"/>
     </Style>
     <Style Selector="Border.sgchip.sm"><Setter Property="Padding" Value="14,5"/><Setter Property="CornerRadius" Value="16"/></Style>
-    <Style Selector="Border.sgchip.on"><Setter Property="Background" Value="#DC2626"/><Setter Property="BorderBrush" Value="#DC2626"/></Style>
-    <Style Selector="Border.sgchip.sm.on"><Setter Property="Background" Value="Transparent"/><Setter Property="BorderBrush" Value="#EF4444"/></Style>
+    <Style Selector="Border.sgchip.on"><Setter Property="Background" Value="{DynamicResource BpC_FFDC2626}"/><Setter Property="BorderBrush" Value="{DynamicResource BpC_FFDC2626}"/></Style>
+    <Style Selector="Border.sgchip.sm.on"><Setter Property="Background" Value="Transparent"/><Setter Property="BorderBrush" Value="{DynamicResource BpC_FFEF4444}"/></Style>
 
     <!-- حلقة التركيز (.fring) -->
     <Style Selector="Border#Ring">
@@ -489,7 +494,7 @@
            TextElement.FontFamily="{Binding FontFamily, Source={x:Static l:Loc.Instance}}">
       <Panel.Background>
         <RadialGradientBrush Center="85%,-10%" GradientOrigin="85%,-10%" RadiusX="68%" RadiusY="52%">
-          <GradientStop Color="#38B91C1C" Offset="0"/><GradientStop Color="#000A0404" Offset="1"/>
+          <GradientStop Color="{DynamicResource BpK_38B91C1C}" Offset="0"/><GradientStop Color="{DynamicResource BpK_000A0404}" Offset="1"/>
         </RadialGradientBrush>
       </Panel.Background>
 
@@ -523,14 +528,14 @@
               <Border>
                 <Border.Background>
                   <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
-                    <GradientStop Color="#E00A0404" Offset="0"/><GradientStop Color="#8C0A0404" Offset="0.38"/><GradientStop Color="#000A0404" Offset="0.72"/>
+                    <GradientStop Color="{DynamicResource BpK_E00A0404}" Offset="0"/><GradientStop Color="{DynamicResource BpK_8C0A0404}" Offset="0.38"/><GradientStop Color="{DynamicResource BpK_000A0404}" Offset="0.72"/>
                   </LinearGradientBrush>
                 </Border.Background>
               </Border>
               <Border>
                 <Border.Background>
                   <LinearGradientBrush StartPoint="0%,100%" EndPoint="0%,0%">
-                    <GradientStop Color="#FF0A0404" Offset="0.42"/><GradientStop Color="#000A0404" Offset="0.72"/>
+                    <GradientStop Color="{DynamicResource BpK_FF0A0404}" Offset="0.42"/><GradientStop Color="{DynamicResource BpK_000A0404}" Offset="0.72"/>
                   </LinearGradientBrush>
                 </Border.Background>
               </Border>
@@ -542,7 +547,7 @@
                 <TextBlock Text="{Binding Hero.ShownPlatform}" FontSize="17" VerticalAlignment="Center"/>
               </Border>
               <TextBlock Text="{Binding Hero.Name}" FontSize="76" FontWeight="ExtraBold" TextTrimming="CharacterEllipsis"/>
-              <Border IsVisible="{Binding Hero.HasUpdate}" Height="40" Padding="16,0" CornerRadius="12" Background="#2A1313"
+              <Border IsVisible="{Binding Hero.HasUpdate}" Height="40" Padding="16,0" CornerRadius="12" Background="{DynamicResource BpC_FF2A1313}"
                       BorderBrush="#4A2A12" BorderThickness="1" HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                   <c:VectorIcon Data="M12 4v12M6 11l6 6 6-6M5 20h14" Size="18" StrokeWidth="2.6" Foreground="#F5A623"/>
@@ -605,7 +610,7 @@
                       <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#00000000" Offset="0"/><GradientStop Color="#B3000000" Offset="1"/></LinearGradientBrush>
                     </Border.Background>
                   </Border>
-                  <TextBlock Text="{Binding ShotCaption}" FontSize="15" Foreground="#E8D8D8" Margin="16,0,0,14" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+                  <TextBlock Text="{Binding ShotCaption}" FontSize="15" Foreground="{DynamicResource BpC_FFE8D8D8}" Margin="16,0,0,14" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
                   <ItemsControl ItemsSource="{Binding ShotDots}" Margin="0,0,16,18" VerticalAlignment="Bottom" HorizontalAlignment="Right">
                     <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="6"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
@@ -621,21 +626,21 @@
                 <Border Classes="cd" CornerRadius="14" Padding="16,12" Margin="0,0,6,0" IsVisible="{Binding HasLatestNews}">
                   <StackPanel Spacing="3">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                      <c:VectorIcon Data="M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h5" Size="14" StrokeWidth="2" Foreground="#9C8A8A" VerticalAlignment="Center"/>
-                      <TextBlock Text="{l:Loc bpLatestNews}" FontSize="13" Foreground="#9C8A8A"/>
+                      <c:VectorIcon Data="M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h5" Size="14" StrokeWidth="2" Foreground="{DynamicResource BpC_FF9C8A8A}" VerticalAlignment="Center"/>
+                      <TextBlock Text="{l:Loc bpLatestNews}" FontSize="13" Foreground="{DynamicResource BpC_FF9C8A8A}"/>
                     </StackPanel>
                     <bpc:BpAutoText Text="{Binding LatestNewsTitle}" FontSize="17" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-                    <TextBlock Text="{Binding LatestNewsDate}" FontSize="13" Foreground="#9C8A8A" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
+                    <TextBlock Text="{Binding LatestNewsDate}" FontSize="13" Foreground="{DynamicResource BpC_FF9C8A8A}" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
                   </StackPanel>
                 </Border>
                 <Border Classes="cd" CornerRadius="14" Padding="16,12" Margin="6,0,0,0">
                   <StackPanel Spacing="3">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                      <c:VectorIcon Data="M12 2c1 3 4 5 4 9a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-8z" Size="14" StrokeWidth="2" Foreground="#9C8A8A" VerticalAlignment="Center"/>
-                      <TextBlock Text="{l:Loc bpActivity}" FontSize="13" Foreground="#9C8A8A"/>
+                      <c:VectorIcon Data="M12 2c1 3 4 5 4 9a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-8z" Size="14" StrokeWidth="2" Foreground="{DynamicResource BpC_FF9C8A8A}" VerticalAlignment="Center"/>
+                      <TextBlock Text="{l:Loc bpActivity}" FontSize="13" Foreground="{DynamicResource BpC_FF9C8A8A}"/>
                     </StackPanel>
                     <TextBlock Text="{Binding StreakText}" FontSize="17" FontWeight="Bold" Foreground="#F5A623" TextTrimming="CharacterEllipsis"/>
-                    <TextBlock Text="{Binding LastSessionText}" FontSize="13" Foreground="#9C8A8A" IsVisible="{Binding HasActivity}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding LastSessionText}" FontSize="13" Foreground="{DynamicResource BpC_FF9C8A8A}" IsVisible="{Binding HasActivity}" TextTrimming="CharacterEllipsis"/>
                   </StackPanel>
                 </Border>
               </UniformGrid>
@@ -646,7 +651,7 @@
               <Border Height="2" VerticalAlignment="Bottom" Background="#12FFFFFF"/>
               <c:SlidingPill ItemCount="4" SelectedIndex="{Binding StripIndex}" EdgeInset="18" Motion="Underline" Height="6"
                              VerticalAlignment="Bottom" Margin="0,0,0,-2">
-                <Border CornerRadius="3" Background="{StaticResource BpRedGrad}" BoxShadow="0 0 14 0 #B3EF4444"/>
+                <Border CornerRadius="3" Background="{DynamicResource BpRedGrad}" BoxShadow="{DynamicResource BpS_0}"/>
               </c:SlidingPill>
               <ItemsControl ItemsSource="{Binding StripTabs}" VerticalAlignment="Top">
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1" Columns="4"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
@@ -676,7 +681,7 @@
                         <c:VectorIcon Data="M5 12h14M13 6l6 6-6 6" Size="26" StrokeWidth="2.4" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
                                       RenderTransform="{Binding IsRtl, Converter={x:Static bp:BpIs.FlipX}}"/>
                       </Border>
-                      <TextBlock Text="{Binding MoreCard.Label}" FontSize="19" FontWeight="SemiBold" Foreground="#D9C7C7" HorizontalAlignment="Center"/>
+                      <TextBlock Text="{Binding MoreCard.Label}" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource BpC_FFD9C7C7}" HorizontalAlignment="Center"/>
                     </StackPanel>
                   </Panel>
                 </Button>
@@ -690,12 +695,12 @@
             <bpc:BpGridLight Classes="gl"/>
             <DockPanel Margin="72,144,72,0" Height="70" VerticalAlignment="Top" LastChildFill="False">
               <TextBlock DockPanel.Dock="Left" Text="{l:Loc bpLibrary}" FontSize="40" FontWeight="ExtraBold" VerticalAlignment="Center"/>
-              <TextBlock DockPanel.Dock="Left" Text="{Binding LibraryCountText}" FontSize="20" Foreground="#9C8A8A" Margin="20,0,0,0" VerticalAlignment="Center"/>
-              <Border DockPanel.Dock="Right" Padding="6" CornerRadius="30" Background="{StaticResource BpSurface}" BorderBrush="{StaticResource BpLine}" BorderThickness="1"
+              <TextBlock DockPanel.Dock="Left" Text="{Binding LibraryCountText}" FontSize="20" Foreground="{DynamicResource BpC_FF9C8A8A}" Margin="20,0,0,0" VerticalAlignment="Center"/>
+              <Border DockPanel.Dock="Right" Padding="6" CornerRadius="30" Background="{DynamicResource BpSurface}" BorderBrush="{DynamicResource BpLine}" BorderThickness="1"
                       MinWidth="900" VerticalAlignment="Center">
                 <Panel>
                   <c:SlidingPill ItemCount="{Binding Filters.Count}" SelectedIndex="{Binding FilterIndex}">
-                    <Border CornerRadius="24" Background="{StaticResource BpRedGrad}" BoxShadow="0 0 18 0 #80EF4444"/>
+                    <Border CornerRadius="24" Background="{DynamicResource BpRedGrad}" BoxShadow="{DynamicResource BpS_1}"/>
                   </c:SlidingPill>
                   <ItemsControl ItemsSource="{Binding Filters}">
                     <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
@@ -745,10 +750,10 @@
               <TextBlock DockPanel.Dock="Left" Text="{l:Loc deals}" FontSize="40" FontWeight="ExtraBold" VerticalAlignment="Center"/>
               <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" IsVisible="{Binding HasDealsUpdated}">
                 <Ellipse Width="9" Height="9" Fill="#4ADE80" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding DealsUpdatedText}" FontSize="17" Foreground="#B8A4A4" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding DealsUpdatedText}" FontSize="17" Foreground="{DynamicResource BpC_FFB8A4A4}" VerticalAlignment="Center"/>
               </StackPanel>
             </DockPanel>
-            <TextBlock Margin="72,240,72,0" VerticalAlignment="Top" Text="{l:Loc dealsEmpty}" FontSize="20" Foreground="#9C8A8A" IsVisible="{Binding !HasDeals}"/>
+            <TextBlock Margin="72,240,72,0" VerticalAlignment="Top" Text="{l:Loc dealsEmpty}" FontSize="20" Foreground="{DynamicResource BpC_FF9C8A8A}" IsVisible="{Binding !HasDeals}"/>
             <Panel Margin="72,232,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" ClipToBounds="False">
               <ItemsControl x:Name="DealRowsList" ItemsSource="{Binding DealRows}" RenderTransform="{Binding DealsShiftOps}">
                 <ItemsControl.Transitions>
@@ -759,7 +764,7 @@
                     <StackPanel Spacing="14" Margin="0,0,0,26" Height="274">
                       <StackPanel Orientation="Horizontal" Spacing="12">
                         <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding Count}" FontSize="18" Foreground="#9C8A8A" VerticalAlignment="Center" FlowDirection="LeftToRight"/>
+                        <TextBlock Text="{Binding Count}" FontSize="18" Foreground="{DynamicResource BpC_FF9C8A8A}" VerticalAlignment="Center" FlowDirection="LeftToRight"/>
                       </StackPanel>
                       <ItemsControl Classes="dealrow" ItemsSource="{Binding Items}" RenderTransform="{Binding ShiftOps}">
                         <ItemsControl.Transitions>
@@ -772,10 +777,10 @@
                                     bpc:BpFocus.Key="{Binding FocusKey}" bpc:BpFocus.Radius="16" Width="280" Height="226">
                               <Panel>
                                 <!-- عرض -->
-                                <Border CornerRadius="16" ClipToBounds="True" Background="{StaticResource BpSurface}" IsVisible="{Binding !IsMore}"
-                                        BorderBrush="{StaticResource BpLine}" BorderThickness="1">
+                                <Border CornerRadius="16" ClipToBounds="True" Background="{DynamicResource BpSurface}" IsVisible="{Binding !IsMore}"
+                                        BorderBrush="{DynamicResource BpLine}" BorderThickness="1">
                                   <Grid RowDefinitions="158,*">
-                                    <Panel Background="#241010">
+                                    <Panel Background="{DynamicResource BpC_FF241010}">
                                       <TextBlock Text="{Binding Letter}" FontSize="64" FontWeight="ExtraBold" Foreground="#24FFFFFF"
                                                  HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="fonts:Inter#Inter"/>
                                       <Image Stretch="UniformToFill" behaviors:AsyncImage.DecodeWidth="560" behaviors:AsyncImage.SourceUrl="{Binding ImageUrl}"/>
@@ -786,7 +791,7 @@
                                     </Panel>
                                     <StackPanel Grid.Row="1" Margin="14,10" Spacing="3">
                                       <TextBlock Text="{Binding Title}" FontSize="17" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                      <TextBlock Text="{Binding Line}" FontSize="14" Foreground="#B8A4A4" TextTrimming="CharacterEllipsis"/>
+                                      <TextBlock Text="{Binding Line}" FontSize="14" Foreground="{DynamicResource BpC_FFB8A4A4}" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                   </Grid>
                                 </Border>
@@ -798,8 +803,8 @@
                                       <c:VectorIcon Data="M5 12h14M13 6l6 6-6 6" Size="24" StrokeWidth="2.4" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                     RenderTransform="{Binding IsRtl, Source={x:Static l:Loc.Instance}, Converter={x:Static bp:BpIs.FlipX}}"/>
                                     </Border>
-                                    <TextBlock Text="{Binding $parent[ItemsControl].((bp:BpDealRow)DataContext).MoreLabel}" FontSize="18" FontWeight="SemiBold" Foreground="#D9C7C7" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="{Binding $parent[ItemsControl].((bp:BpDealRow)DataContext).MoreNote}" FontSize="13" Foreground="#9C8A8A" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding $parent[ItemsControl].((bp:BpDealRow)DataContext).MoreLabel}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource BpC_FFD9C7C7}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding $parent[ItemsControl].((bp:BpDealRow)DataContext).MoreNote}" FontSize="13" Foreground="{DynamicResource BpC_FF9C8A8A}" HorizontalAlignment="Center"/>
                                   </StackPanel>
                                 </Panel>
                               </Panel>
@@ -818,19 +823,19 @@
           <Panel x:Name="SearchPage" Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}" ClipToBounds="True">
             <bpc:BpGridLight Classes="gl"/>
             <Border Margin="72,150,0,0" Width="1090" Height="84" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="26"
-                    BorderThickness="2.5" Background="{StaticResource BpSurface}" BoxShadow="0 0 16 0 #66EF4444" Padding="24,0">
+                    BorderThickness="2.5" Background="{DynamicResource BpSurface}" BoxShadow="{DynamicResource BpS_2}" Padding="24,0">
               <Border.BorderBrush>
                 <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
-                  <GradientStop Color="#B91C1C" Offset="0"/><GradientStop Color="#F5A623" Offset="1"/>
+                  <GradientStop Color="{DynamicResource BpK_FFB91C1C}" Offset="0"/><GradientStop Color="#F5A623" Offset="1"/>
                 </LinearGradientBrush>
               </Border.BorderBrush>
               <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
                 <Panel Width="30" Height="30">
-                  <c:VectorIcon x:Name="SearchIcon" Data="M4 11a7 7 0 1 0 14 0a7 7 0 1 0 -14 0 M21 21l-4.3-4.3" Size="30" StrokeWidth="2.4" Foreground="{StaticResource BpMuted}"/>
+                  <c:VectorIcon x:Name="SearchIcon" Data="M4 11a7 7 0 1 0 14 0a7 7 0 1 0 -14 0 M21 21l-4.3-4.3" Size="30" StrokeWidth="2.4" Foreground="{DynamicResource BpMuted}"/>
                   <Border x:Name="QBadge" IsVisible="{Binding NoMatch}" Width="34" Height="34" CornerRadius="17" Margin="0,-76,0,0"
-                          HorizontalAlignment="Left" BoxShadow="0 0 14 0 #80EF4444">
+                          HorizontalAlignment="Left" BoxShadow="{DynamicResource BpS_3}">
                     <Border.Background>
-                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%"><GradientStop Color="#EF4444" Offset="0"/><GradientStop Color="#F5A623" Offset="1"/></LinearGradientBrush>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%"><GradientStop Color="{DynamicResource BpK_FFEF4444}" Offset="0"/><GradientStop Color="#F5A623" Offset="1"/></LinearGradientBrush>
                     </Border.Background>
                     <TextBlock Text="?" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                   </Border>
@@ -880,7 +885,7 @@
                                    behaviors:AsyncImage.SourceUrl="{Binding Game.HeaderUrl}" behaviors:AsyncImage.FallbackUrl="{Binding Game.CoverUrl}"/>
                           </Panel>
                         </Border>
-                        <Border DockPanel.Dock="Right" CornerRadius="8" Background="#2A1313" Padding="10,3" VerticalAlignment="Center">
+                        <Border DockPanel.Dock="Right" CornerRadius="8" Background="{DynamicResource BpC_FF2A1313}" Padding="10,3" VerticalAlignment="Center">
                           <TextBlock Text="{Binding Game.ShownPlatform}" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
                         </Border>
                         <bpc:BpAutoText Text="{Binding Game.Name}" FontSize="21" FontWeight="SemiBold" Margin="18,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
@@ -890,8 +895,8 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
               <StackPanel IsVisible="{Binding NoMatch}" Margin="0,20" Spacing="4">
-                <TextBlock Text="{Binding NoMatchText}" FontSize="22" FontWeight="SemiBold" Foreground="#D9C7C7"/>
-                <TextBlock Text="{l:Loc bpTryOther}" FontSize="17" Foreground="#9C8A8A"/>
+                <TextBlock Text="{Binding NoMatchText}" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource BpC_FFD9C7C7}"/>
+                <TextBlock Text="{l:Loc bpTryOther}" FontSize="17" Foreground="{DynamicResource BpC_FF9C8A8A}"/>
               </StackPanel>
             </StackPanel>
           </Panel>
@@ -899,7 +904,7 @@
       </Panel>
 
       <!-- ===== صفحة اللعبة (.gpg) ===== -->
-      <Panel x:Name="GamePage" IsVisible="{Binding IsGameOpen}" Background="#0A0404">
+      <Panel x:Name="GamePage" IsVisible="{Binding IsGameOpen}" Background="{DynamicResource BpC_FF0A0404}">
         <Border Height="720" VerticalAlignment="Top" ClipToBounds="True" IsHitTestVisible="False"
                 Background="{Binding Hero.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
           <Border.OpacityMask>
@@ -916,13 +921,13 @@
         <Border IsHitTestVisible="False">
           <Border.Background>
             <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
-              <GradientStop Color="#E00A0404" Offset="0"/><GradientStop Color="#8C0A0404" Offset="0.38"/><GradientStop Color="#000A0404" Offset="0.72"/>
+              <GradientStop Color="{DynamicResource BpK_E00A0404}" Offset="0"/><GradientStop Color="{DynamicResource BpK_8C0A0404}" Offset="0.38"/><GradientStop Color="{DynamicResource BpK_000A0404}" Offset="0.72"/>
             </LinearGradientBrush>
           </Border.Background>
         </Border>
         <Border IsHitTestVisible="False">
           <Border.Background>
-            <LinearGradientBrush StartPoint="0%,100%" EndPoint="0%,0%"><GradientStop Color="#FF0A0404" Offset="0.42"/><GradientStop Color="#000A0404" Offset="0.72"/></LinearGradientBrush>
+            <LinearGradientBrush StartPoint="0%,100%" EndPoint="0%,0%"><GradientStop Color="{DynamicResource BpK_FF0A0404}" Offset="0.42"/><GradientStop Color="{DynamicResource BpK_000A0404}" Offset="0.72"/></LinearGradientBrush>
           </Border.Background>
         </Border>
 
@@ -934,11 +939,11 @@
           </Border>
           <TextBlock Text="{Binding Hero.Name}" FontSize="84" FontWeight="ExtraBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"/>
           <StackPanel Orientation="Horizontal" Spacing="14">
-            <TextBlock Text="{Binding Hero.HoursText}" FontSize="21" Foreground="#D9C7C7"/>
+            <TextBlock Text="{Binding Hero.HoursText}" FontSize="21" Foreground="{DynamicResource BpC_FFD9C7C7}"/>
             <Ellipse Width="6" Height="6" Fill="#6B4B4B" VerticalAlignment="Center"/>
-            <TextBlock Text="{Binding Hero.LastLongText}" FontSize="21" Foreground="#D9C7C7"/>
+            <TextBlock Text="{Binding Hero.LastLongText}" FontSize="21" Foreground="{DynamicResource BpC_FFD9C7C7}"/>
           </StackPanel>
-          <Border IsVisible="{Binding Hero.HasUpdate}" Height="40" Padding="16,0" CornerRadius="12" Background="#2A1313"
+          <Border IsVisible="{Binding Hero.HasUpdate}" Height="40" Padding="16,0" CornerRadius="12" Background="{DynamicResource BpC_FF2A1313}"
                   BorderBrush="#4A2A12" BorderThickness="1" HorizontalAlignment="Left">
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
               <c:VectorIcon Data="M12 4v12M6 11l6 6 6-6M5 20h14" Size="18" StrokeWidth="2.6" Foreground="#F5A623"/>
@@ -990,22 +995,22 @@
           <UniformGrid Rows="1" Columns="4">
             <Border Classes="cd" CornerRadius="16" Padding="16,14" Margin="0,0,12,0">
               <!-- القيمة تصغر لتتسع بدل أن تُقص إلى «…» في الخانة الضيقة -->
-              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpPlayTime}" FontSize="15" Foreground="{StaticResource BpMuted}" TextTrimming="CharacterEllipsis"/>
+              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpPlayTime}" FontSize="15" Foreground="{DynamicResource BpMuted}" TextTrimming="CharacterEllipsis"/>
                 <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" Height="28">
                   <TextBlock Text="{Binding Hero.HoursShortText}" FontSize="21" FontWeight="Bold"/></Viewbox></StackPanel>
             </Border>
             <Border Classes="cd" CornerRadius="16" Padding="16,14" Margin="0,0,12,0">
-              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpLastPlayed}" FontSize="15" Foreground="{StaticResource BpMuted}" TextTrimming="CharacterEllipsis"/>
+              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpLastPlayed}" FontSize="15" Foreground="{DynamicResource BpMuted}" TextTrimming="CharacterEllipsis"/>
                 <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" Height="28">
                   <TextBlock Text="{Binding Hero.LastShortText}" FontSize="21" FontWeight="Bold"/></Viewbox></StackPanel>
             </Border>
             <Border Classes="cd" CornerRadius="16" Padding="16,14" Margin="0,0,12,0">
-              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpSize}" FontSize="15" Foreground="{StaticResource BpMuted}" TextTrimming="CharacterEllipsis"/>
+              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpSize}" FontSize="15" Foreground="{DynamicResource BpMuted}" TextTrimming="CharacterEllipsis"/>
                 <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" Height="28">
                   <TextBlock Text="{Binding HeroSize}" FontSize="21" FontWeight="Bold" FlowDirection="LeftToRight"/></Viewbox></StackPanel>
             </Border>
             <Border Classes="cd" CornerRadius="16" Padding="16,14">
-              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpPlatform}" FontSize="15" Foreground="{StaticResource BpMuted}" TextTrimming="CharacterEllipsis"/>
+              <StackPanel Spacing="4"><TextBlock Text="{l:Loc bpPlatform}" FontSize="15" Foreground="{DynamicResource BpMuted}" TextTrimming="CharacterEllipsis"/>
                 <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" Height="28">
                   <TextBlock Text="{Binding Hero.ShownPlatform}" FontSize="21" FontWeight="Bold"/></Viewbox></StackPanel>
             </Border>
@@ -1014,7 +1019,7 @@
           <Border x:Name="WeekCard" Classes="cd" Padding="24,18">
             <StackPanel Spacing="10">
               <DockPanel>
-                <TextBlock DockPanel.Dock="Right" Text="{Binding WeekTotalText}" FontSize="16" Foreground="#B8A4A4" VerticalAlignment="Center"/>
+                <TextBlock DockPanel.Dock="Right" Text="{Binding WeekTotalText}" FontSize="16" Foreground="{DynamicResource BpC_FFB8A4A4}" VerticalAlignment="Center"/>
                 <TextBlock Text="{l:Loc bpYourWeek}" FontSize="21" FontWeight="Bold"/>
               </DockPanel>
               <ItemsControl ItemsSource="{Binding WeekBars}">
@@ -1039,31 +1044,31 @@
             <StackPanel Spacing="6">
               <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,8">
                 <TextBlock Text="{l:Loc bpNews}" FontSize="22" FontWeight="Bold"/>
-                <Border CornerRadius="10" Background="#2A1313" Padding="10,2" VerticalAlignment="Center"><TextBlock Text="Steam" FontSize="14" FontWeight="SemiBold"/></Border>
+                <Border CornerRadius="10" Background="{DynamicResource BpC_FF2A1313}" Padding="10,2" VerticalAlignment="Center"><TextBlock Text="Steam" FontSize="14" FontWeight="SemiBold"/></Border>
               </StackPanel>
               <ItemsControl ItemsSource="{Binding NewsItems}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="bp:BpButtonItem">
-                    <Border BorderBrush="#231010" BorderThickness="0,1,0,0">
+                    <Border BorderBrush="{DynamicResource BpC_FF231010}" BorderThickness="0,1,0,0">
                       <Button Classes="nti" Classes.f="{Binding IsFocused}" Focusable="False" bpc:BpFocus.Key="{Binding FocusKey}" bpc:BpFocus.Radius="12"
                               Click="OnNewsClick">
                         <StackPanel Spacing="4">
                           <bpc:BpAutoText Text="{Binding Label}" FontSize="19" TextTrimming="CharacterEllipsis"/>
-                          <TextBlock Text="{Binding Note}" FontSize="15" Foreground="#9C8A8A" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
+                          <TextBlock Text="{Binding Note}" FontSize="15" Foreground="{DynamicResource BpC_FF9C8A8A}" FlowDirection="LeftToRight" HorizontalAlignment="Left"/>
                         </StackPanel>
                       </Button>
                     </Border>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock IsVisible="{Binding !NewsItems.Count}" Text="{l:Loc bpNoNews}" FontSize="17" Foreground="#9C8A8A" Margin="16,8"/>
+              <TextBlock IsVisible="{Binding !NewsItems.Count}" Text="{l:Loc bpNoNews}" FontSize="17" Foreground="{DynamicResource BpC_FF9C8A8A}" Margin="16,8"/>
             </StackPanel>
           </Border>
         </StackPanel>
       </Panel>
 
       <!-- ===== صفحة SteamGridDB (من إعدادات اللعبة › الغلاف) ===== -->
-      <Panel x:Name="SgdbPage" IsVisible="{Binding IsSgdbOpen}" Background="#0A0404">
+      <Panel x:Name="SgdbPage" IsVisible="{Binding IsSgdbOpen}" Background="{DynamicResource BpC_FF0A0404}">
         <bpc:BpGridLight Classes="gl"/>
         <Border Margin="72,136,72,110" CornerRadius="30" Background="#E6140809" BorderBrush="#14FFFFFF" BorderThickness="1" BoxShadow="0 30 80 0 #99000000" Padding="36,28">
           <DockPanel>
@@ -1077,7 +1082,7 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                   <TextBlock Text="{Binding Sgdb.Title}" FontSize="28" FontWeight="Bold"/>
-                  <TextBlock Text="{Binding Sgdb.CountText}" FontSize="16" Foreground="#9C8A8A"/>
+                  <TextBlock Text="{Binding Sgdb.CountText}" FontSize="16" Foreground="{DynamicResource BpC_FF9C8A8A}"/>
                 </StackPanel>
               </StackPanel>
               <ItemsControl ItemsSource="{Binding Sgdb.TypeChips}">
@@ -1105,10 +1110,10 @@
                 </Border>
               </StackPanel>
             </StackPanel>
-            <TextBlock DockPanel.Dock="Bottom" Text="{l:Loc sgMore}" FontSize="15" Foreground="#9C8A8A" HorizontalAlignment="Center" Margin="0,10,0,0" IsVisible="{Binding Sgdb.HasMore}"/>
+            <TextBlock DockPanel.Dock="Bottom" Text="{l:Loc sgMore}" FontSize="15" Foreground="{DynamicResource BpC_FF9C8A8A}" HorizontalAlignment="Center" Margin="0,10,0,0" IsVisible="{Binding Sgdb.HasMore}"/>
             <Panel Margin="0,22,0,0" ClipToBounds="True">
               <TextBlock Text="{Binding Sgdb.Error}" IsVisible="{Binding Sgdb.HasError}" FontSize="19" Foreground="#FCA5A5" TextWrapping="Wrap"/>
-              <TextBlock Text="{l:Loc sgNone}" IsVisible="{Binding Sgdb.IsEmpty}" FontSize="19" Foreground="#9C8A8A"/>
+              <TextBlock Text="{l:Loc sgNone}" IsVisible="{Binding Sgdb.IsEmpty}" FontSize="19" Foreground="{DynamicResource BpC_FF9C8A8A}"/>
               <ItemsControl x:Name="SgdbGrid" ItemsSource="{Binding SgdbItems}" VerticalAlignment="Top" RenderTransform="{Binding SgdbShiftOps}">
                 <ItemsControl.Transitions>
                   <Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="{x:Static bp:BpSprings.Glide}"/></Transitions>
@@ -1121,7 +1126,7 @@
                             Width="{Binding $parent[Window].((bp:BigPictureViewModel)DataContext).SgdbTileWidth}">
                       <StackPanel Spacing="6">
                         <Border Height="{Binding $parent[Window].((bp:BigPictureViewModel)DataContext).SgdbTileHeight}" CornerRadius="12" ClipToBounds="True"
-                                Background="#241010" BorderBrush="#14FFFFFF" BorderThickness="1" FlowDirection="LeftToRight">
+                                Background="{DynamicResource BpC_FF241010}" BorderBrush="#14FFFFFF" BorderThickness="1" FlowDirection="LeftToRight">
                           <Panel>
                             <Image Stretch="Uniform" behaviors:AsyncImage.DecodeWidth="360" behaviors:AsyncImage.SourceUrl="{Binding Tile.ThumbUrl}"/>
                             <Border Margin="8" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Tile.IsAnimated}"
@@ -1131,10 +1136,10 @@
                           </Panel>
                         </Border>
                         <DockPanel>
-                          <TextBlock DockPanel.Dock="Right" FontSize="13" Foreground="#B8A4A4" FlowDirection="LeftToRight">
-                            <Run Text="♥" Foreground="#EF4444"/><Run Text=" "/><Run Text="{Binding Tile.ScoreText}"/>
+                          <TextBlock DockPanel.Dock="Right" FontSize="13" Foreground="{DynamicResource BpC_FFB8A4A4}" FlowDirection="LeftToRight">
+                            <Run Text="♥" Foreground="{DynamicResource BpC_FFEF4444}"/><Run Text=" "/><Run Text="{Binding Tile.ScoreText}"/>
                           </TextBlock>
-                          <TextBlock Text="{Binding Tile.StyleText}" FontSize="13" Foreground="#9C8A8A" TextTrimming="CharacterEllipsis"/>
+                          <TextBlock Text="{Binding Tile.StyleText}" FontSize="13" Foreground="{DynamicResource BpC_FF9C8A8A}" TextTrimming="CharacterEllipsis"/>
                         </DockPanel>
                       </StackPanel>
                     </Button>
@@ -1147,11 +1152,11 @@
       </Panel>
 
       <!-- ===== الكتابة بلوحة المفاتيح على الشاشة (الاسم، المعاملات، المفتاح) ===== -->
-      <Panel x:Name="EntryLayer" IsVisible="{Binding IsEntryOpen}" Background="#C7060202">
+      <Panel x:Name="EntryLayer" IsVisible="{Binding IsEntryOpen}" Background="{DynamicResource BpC_C7060202}">
         <Border x:Name="EntryPanel" Classes="panel" Width="1240" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="40,32">
           <StackPanel Spacing="22">
             <TextBlock Text="{Binding EntryTitle}" FontSize="28" FontWeight="Bold"/>
-            <Border Height="76" CornerRadius="22" BorderThickness="2" BorderBrush="#7F1D1D" Background="{StaticResource BpSurface}" Padding="24,0">
+            <Border Height="76" CornerRadius="22" BorderThickness="2" BorderBrush="{DynamicResource BpC_FF7F1D1D}" Background="{DynamicResource BpSurface}" Padding="24,0">
               <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <bpc:BpAutoText Text="{Binding EntryShown}" FontSize="28" Foreground="{Binding HasEntryText, Converter={x:Static bp:BpIs.QueryBrush}}" VerticalAlignment="Center"/>
                 <Border Width="3" Height="36" CornerRadius="2" Background="#F5A623" Margin="2,0,0,0" VerticalAlignment="Center"/>
@@ -1181,22 +1186,23 @@
       </Panel>
 
       <!-- ===== الشريط العلوي (.top) ===== -->
-      <Grid x:Name="TopBar" Height="120" VerticalAlignment="Top" Margin="72,0" ColumnDefinitions="*,Auto,*">
-        <Button x:Name="TopLogo" Grid.Column="0" Width="64" Height="64" HorizontalAlignment="Left" Focusable="False" Click="OnGuideClick" CornerRadius="14">
-          <Border CornerRadius="14" BoxShadow="0 0 26 0 #4DEF4444" ClipToBounds="True" Background="Black" BorderBrush="{StaticResource BpLine}" BorderThickness="1">
-            <Image Source="/Assets/logo.png" Stretch="UniformToFill"/>
-          </Border>
+      <Border x:Name="TopGlass" Height="92" VerticalAlignment="Top" Margin="44,22,44,0" Padding="18,0" CornerRadius="30"
+              Background="{DynamicResource BpGlassBar}" BorderBrush="{DynamicResource BpGlassEdge}" BorderThickness="1" BoxShadow="0 20 50 0 #73000000, inset 0 1 0 0 #12FFFFFF">
+      <Grid x:Name="TopBar" ColumnDefinitions="*,Auto,*">
+        <Button x:Name="TopLogo" Grid.Column="0" Width="64" Height="64" HorizontalAlignment="Left" Focusable="False" Click="OnGuideClick" CornerRadius="14"
+                Background="Transparent" BorderThickness="0" Padding="0">
+          <c:HalawaMark Width="64" Height="64" LiftOnHover="False"/>
         </Button>
 
         <!-- LB وRB في مكانهما على ذراع التحكم في اللغتين؛ التبويبات وحدها تتبع اتجاه اللغة -->
         <StackPanel x:Name="TabBar" Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center" FlowDirection="LeftToRight">
           <bpc:BpGlyph Button="lb" Ps="{Binding UsePsGlyphs}" VerticalAlignment="Center"/>
-          <Border Width="860" Height="76" Padding="8" CornerRadius="26" Background="{StaticResource BpSurface}"
+          <Border Width="860" Height="76" Padding="8" CornerRadius="26" Background="{DynamicResource BpSurface}"
                   FlowDirection="{Binding #TopBar.FlowDirection}"
-                  BorderBrush="{StaticResource BpLine}" BorderThickness="1" BoxShadow="0 8 24 0 #73000000">
+                  BorderBrush="{DynamicResource BpLine}" BorderThickness="1" BoxShadow="0 8 24 0 #73000000">
             <Panel>
               <c:SlidingPill ItemCount="4" SelectedIndex="{Binding TabIndex}">
-                <Border CornerRadius="19" Background="{StaticResource BpRedGrad}" BoxShadow="0 0 26 0 #8CEF4444"/>
+                <Border CornerRadius="19" Background="{DynamicResource BpRedGrad}" BoxShadow="{DynamicResource BpS_4}"/>
               </c:SlidingPill>
               <UniformGrid Rows="1" Columns="4">
                 <Button Classes="tbtn" Classes.on="{Binding IsHomeTab}" Focusable="False" Click="OnTabClick" Tag="0">
@@ -1219,7 +1225,7 @@
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="16" HorizontalAlignment="Right" VerticalAlignment="Center">
           <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,6,0" IsVisible="{Binding HasPad}" VerticalAlignment="Center">
-            <c:VectorIcon Size="24" StrokeWidth="2" Foreground="#D9C7C7" Width="34" Height="26"
+            <c:VectorIcon Size="24" StrokeWidth="2" Foreground="{DynamicResource BpC_FFD9C7C7}" Width="34" Height="26"
                           Data="M9 3h16c4.4 0 7 4 7.6 9.5.6 5.6-.6 10.5-4 10.5-2.6 0-3.7-3.4-6.6-3.4h-10c-2.9 0-4 3.4-6.6 3.4-3.4 0-4.6-4.9-4-10.5C2 7 4.6 3 9 3z M9 9v6 M6 12h6 M22.4 10.5a.6 .6 0 1 0 1.2 0a.6 .6 0 1 0 -1.2 0 M25.4 13.5a.6 .6 0 1 0 1.2 0a.6 .6 0 1 0 -1.2 0"/>
             <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasBattery}" FlowDirection="LeftToRight" VerticalAlignment="Center">
               <Border Width="6" Height="16" CornerRadius="2" Background="{Binding BatteryBars, Converter={x:Static bp:BpIs.Bar}, ConverterParameter=1}"/>
@@ -1232,12 +1238,12 @@
                      VerticalAlignment="Center" Margin="0,0,6,0" IsVisible="{Binding Settings.ShowClock}"/>
           <Panel>
             <Button x:Name="BellButton" Classes="ib" Focusable="False" Click="OnBellClick">
-              <c:VectorIcon x:Name="BellIcon" Data="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0" Size="24" Foreground="#E8D8D8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <c:VectorIcon x:Name="BellIcon" Data="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0" Size="24" Foreground="{DynamicResource BpC_FFE8D8D8}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
             <!-- عدد غير المقروء على حافة الجرس (.ib .cnt) -->
             <Border IsVisible="{Binding UnreadCount, Converter={x:Static bp:BpIs.Positive}}" IsHitTestVisible="False"
                     HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,2,0" MinWidth="26" Height="26" CornerRadius="13"
-                    Padding="7,0" Background="#EF4444" BorderBrush="#0A0404" BorderThickness="3">
+                    Padding="7,0" Background="{DynamicResource BpC_FFEF4444}" BorderBrush="{DynamicResource BpC_FF0A0404}" BorderThickness="3">
               <TextBlock Text="{Binding UnreadCount}" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="14" Foreground="White"
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
@@ -1246,24 +1252,23 @@
             <c:SlidersIcon IsFlipped="{Binding IsSettingsOpen}" Foreground="White"/>
           </Button>
           <Button Classes="ib" Classes.open="{Binding IsGuideOpen}" Focusable="False" Click="OnGuideClick">
-            <c:MenuCloseIcon IsOpen="{Binding IsGuideOpen}" Foreground="#E8D8D8" Width="26" Height="26"/>
+            <c:MenuCloseIcon IsOpen="{Binding IsGuideOpen}" Foreground="{DynamicResource BpC_FFE8D8D8}" Width="26" Height="26"/>
           </Button>
         </StackPanel>
       </Grid>
+      </Border>
 
       <!-- ===== نافذة الإعدادات (.setdlg) ===== -->
-      <Panel x:Name="SettingsLayer" IsVisible="{Binding IsSettingsOpen}" Background="#C7060202" PointerPressed="OnSettingsScrimPressed">
-        <Border x:Name="SettingsDialog" Width="1340" CornerRadius="20" ClipToBounds="True" BorderBrush="{StaticResource BpLine}" BorderThickness="1"
-                HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 40 110 0 #B3000000" Background="#0E0606">
+      <Panel x:Name="SettingsLayer" IsVisible="{Binding IsSettingsOpen}" Background="{DynamicResource BpC_C7060202}" PointerPressed="OnSettingsScrimPressed">
+        <Border x:Name="SettingsDialog" Width="1340" CornerRadius="30" ClipToBounds="True" BorderBrush="{DynamicResource BpGlassEdge}" BorderThickness="1"
+                HorizontalAlignment="Center" VerticalAlignment="Center" BoxShadow="0 40 110 0 #B3000000" Background="{DynamicResource BpGlassPanel}">
           <Grid ColumnDefinitions="340,*" MinHeight="740">
-            <Border Grid.Column="0" Background="#0F0607" BorderBrush="{StaticResource BpLine}" BorderThickness="0,0,1,0" Padding="16,28">
+            <Border Grid.Column="0" Background="{DynamicResource BpC_FF0F0607}" BorderBrush="{DynamicResource BpLine}" BorderThickness="0,0,1,0" Padding="16,28">
               <StackPanel Spacing="6">
-                <Border BorderBrush="#231010" BorderThickness="0,0,0,1" Padding="12,0,12,18" Margin="0,0,0,12">
+                <Border BorderBrush="{DynamicResource BpC_FF231010}" BorderThickness="0,0,0,1" Padding="12,0,12,18" Margin="0,0,0,12">
                   <Panel>
                   <StackPanel Orientation="Horizontal" Spacing="14" IsVisible="{Binding !IsGameSettings}">
-                    <Border Width="50" Height="50" CornerRadius="12" ClipToBounds="True" Background="Black" BoxShadow="0 0 16 0 #4DEF4444">
-                      <Image Source="/Assets/logo.png" Stretch="UniformToFill"/>
-                    </Border>
+                    <c:HalawaMark Width="50" Height="50" LiftOnHover="False"/>
                     <StackPanel VerticalAlignment="Center">
                       <TextBlock Text="Halawa Hub" FontSize="20" FontWeight="Bold"/>
                       <TextBlock Text="{l:Loc bp}" FontSize="15" Foreground="#F5A623"/>
@@ -1281,12 +1286,12 @@
                   </StackPanel>
                   </Panel>
                 </Border>
-                <TextBlock Text="{l:Loc bpSettings}" FontSize="20" FontWeight="Bold" Foreground="#EF4444" Margin="12,0,12,14" IsVisible="{Binding !IsGameSettings}"/>
-                <TextBlock Text="{l:Loc bpGsTitle}" FontSize="20" FontWeight="Bold" Foreground="#EF4444" Margin="12,0,12,14" IsVisible="{Binding IsGameSettings}"/>
+                <TextBlock Text="{l:Loc bpSettings}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource BpC_FFEF4444}" Margin="12,0,12,14" IsVisible="{Binding !IsGameSettings}"/>
+                <TextBlock Text="{l:Loc bpGsTitle}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource BpC_FFEF4444}" Margin="12,0,12,14" IsVisible="{Binding IsGameSettings}"/>
                 <Panel>
                   <c:SlidingPill Orientation="Vertical" ItemCount="{Binding SectionCount}" Pitch="70" SelectedIndex="{Binding SectionIndex}" Motion="Dialog"
                                  Opacity="{Binding SectionPillDim, Converter={x:Static bp:BpIs.Dim}}">
-                    <Border CornerRadius="14" Background="{StaticResource BpRedGrad}" BoxShadow="0 0 20 0 #73EF4444"/>
+                    <Border CornerRadius="14" Background="{DynamicResource BpRedGrad}" BoxShadow="{DynamicResource BpS_5}"/>
                   </c:SlidingPill>
                   <ItemsControl ItemsSource="{Binding SettingSections}">
                     <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="6"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
@@ -1304,19 +1309,19 @@
             <DockPanel Grid.Column="1" Margin="36,30">
               <DockPanel DockPanel.Dock="Top" Margin="0,0,0,20">
                 <Button DockPanel.Dock="Right" Width="60" Height="60" Focusable="False" Click="OnSettingsClick">
-                  <c:VectorIcon Data="M6 6l12 12M18 6L6 18" Size="26" Foreground="{StaticResource BpMuted}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                  <c:VectorIcon Data="M6 6l12 12M18 6L6 18" Size="26" Foreground="{DynamicResource BpMuted}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
                 <TextBlock Text="{Binding SectionTitle}" FontSize="30" FontWeight="Bold" VerticalAlignment="Center"/>
               </DockPanel>
-              <Border DockPanel.Dock="Bottom" BorderBrush="#231010" BorderThickness="0,1,0,0" Padding="0,14,0,0">
-                <TextBlock Text="{l:Loc bpSaved}" FontSize="16" Foreground="{StaticResource BpMuted}"/>
+              <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource BpC_FF231010}" BorderThickness="0,1,0,0" Padding="0,14,0,0">
+                <TextBlock Text="{l:Loc bpSaved}" FontSize="16" Foreground="{DynamicResource BpMuted}"/>
               </Border>
               <ItemsControl x:Name="SettingRowsList" ItemsSource="{Binding SettingRows}" VerticalAlignment="Top">
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="10"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="bp:BpSettingRow">
                     <Panel>
-                      <TextBlock IsVisible="{Binding IsInfo}" Text="{Binding Label}" FontSize="17" Foreground="{StaticResource BpMuted}" Margin="20,6" TextWrapping="Wrap"/>
+                      <TextBlock IsVisible="{Binding IsInfo}" Text="{Binding Label}" FontSize="17" Foreground="{DynamicResource BpMuted}" Margin="20,6" TextWrapping="Wrap"/>
                       <!-- رمز QR لصفحة المفتاح: من اليسار لليمين دائمًا، وإلا انعكس ولا يُقرأ -->
                       <Border IsVisible="{Binding IsQr}" Margin="20,4" Padding="0,4">
                         <StackPanel Orientation="Horizontal" Spacing="22">
@@ -1333,7 +1338,7 @@
                       <Button IsVisible="{Binding IsControl}" Classes="row" Classes.f="{Binding IsFocused}" Focusable="False"
                               bpc:BpFocus.Key="{Binding FocusKey}" Click="OnRowClick">
                         <DockPanel>
-                          <TextBlock DockPanel.Dock="Right" IsVisible="{Binding HasValue}" Text="{Binding Value}" FontSize="19" Foreground="#D9C7C7"
+                          <TextBlock DockPanel.Dock="Right" IsVisible="{Binding HasValue}" Text="{Binding Value}" FontSize="19" Foreground="{DynamicResource BpC_FFD9C7C7}"
                                      Margin="22,0,0,0" VerticalAlignment="Center" MaxWidth="360" TextTrimming="CharacterEllipsis"/>
                           <Border DockPanel.Dock="Right" IsVisible="{Binding HasChip}" Margin="22,0,0,0" Padding="12,4" CornerRadius="10" VerticalAlignment="Center"
                                   Background="#26F5A623" BorderBrush="#66F5A623" BorderThickness="1">
@@ -1342,17 +1347,17 @@
                           <bpc:BpSwitch DockPanel.Dock="Right" IsVisible="{Binding IsToggle}" IsOn="{Binding IsOn}" Margin="22,0,0,0" VerticalAlignment="Center"/>
                           <bpc:BpGlyph DockPanel.Dock="Right" IsVisible="{Binding IsButton}" Button="a" Ps="{Binding $parent[Window].((bp:BigPictureViewModel)DataContext).UsePsGlyphs}"
                                        Margin="22,0,0,0" VerticalAlignment="Center"/>
-                          <Border DockPanel.Dock="Right" IsVisible="{Binding IsSegmented}" Margin="22,0,0,0" Padding="5" CornerRadius="14" Background="#0A0404"
-                                  BorderBrush="{StaticResource BpLine}" BorderThickness="1" VerticalAlignment="Center">
+                          <Border DockPanel.Dock="Right" IsVisible="{Binding IsSegmented}" Margin="22,0,0,0" Padding="5" CornerRadius="14" Background="{DynamicResource BpC_FF0A0404}"
+                                  BorderBrush="{DynamicResource BpLine}" BorderThickness="1" VerticalAlignment="Center">
                             <Panel>
                               <c:SlidingPill ItemCount="{Binding Options.Count}" SelectedIndex="{Binding Selected}" Motion="Even">
-                                <Border CornerRadius="10" Background="#B91C1C" BoxShadow="0 0 14 0 #73EF4444"/>
+                                <Border CornerRadius="10" Background="{DynamicResource BpC_FFB91C1C}" BoxShadow="{DynamicResource BpS_6}"/>
                               </c:SlidingPill>
                               <ItemsControl ItemsSource="{Binding Options}">
                                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                   <DataTemplate>
-                                    <TextBlock Text="{Binding}" FontSize="18" Padding="22,0" Height="48" LineHeight="48" TextAlignment="Center" Foreground="#B8A4A4"/>
+                                    <TextBlock Text="{Binding}" FontSize="18" Padding="22,0" Height="48" LineHeight="48" TextAlignment="Center" Foreground="{DynamicResource BpC_FFB8A4A4}"/>
                                   </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                               </ItemsControl>
@@ -1360,7 +1365,7 @@
                           </Border>
                           <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="{Binding Label}" FontSize="21" Foreground="{Binding IsDanger, Converter={x:Static bp:BpIs.DangerText}}"/>
-                            <TextBlock Text="{Binding Note}" FontSize="16" Foreground="{StaticResource BpMuted}" TextWrapping="Wrap" Margin="0,4,0,0" LineHeight="24"/>
+                            <TextBlock Text="{Binding Note}" FontSize="16" Foreground="{DynamicResource BpMuted}" TextWrapping="Wrap" Margin="0,4,0,0" LineHeight="24"/>
                             <!-- بطاقات الغلاف: يمين ويسار ثم A -->
                             <StackPanel IsVisible="{Binding IsTiles}" Orientation="Horizontal" Spacing="16" Margin="0,16,0,4">
                               <StackPanel Spacing="8" Width="160">
@@ -1368,7 +1373,7 @@
                                   <Border Classes="ctile" Classes.on="{Binding Selected, Converter={x:Static bp:BpIs.IndexIs}, ConverterParameter=0}">
                                     <Panel>
                                       <Rectangle Classes="dash" StrokeThickness="2" RadiusX="12" RadiusY="12"/>
-                                      <c:VectorIcon Data="M12 5v14M5 12h14" Size="30" StrokeWidth="2.2" Foreground="#E8D8D8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                      <c:VectorIcon Data="M12 5v14M5 12h14" Size="30" StrokeWidth="2.2" Foreground="{DynamicResource BpC_FFE8D8D8}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Panel>
                                   </Border>
                                   <Border Classes="tick" IsVisible="{Binding Value, Converter={x:Static bp:BpIs.TextIs}, ConverterParameter=own}">
@@ -1376,7 +1381,7 @@
                                   </Border>
                                 </Panel>
                                 <TextBlock Text="{Binding Options[0]}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                <TextBlock Text="{l:Loc bpGsCvFileN}" FontSize="13" Foreground="#9C8A8A" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                <TextBlock Text="{l:Loc bpGsCvFileN}" FontSize="13" Foreground="{DynamicResource BpC_FF9C8A8A}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                               </StackPanel>
                               <StackPanel Spacing="8" Width="160">
                                 <Panel Width="120" Height="160" HorizontalAlignment="Center">
@@ -1391,7 +1396,7 @@
                                   </Border>
                                 </Panel>
                                 <TextBlock Text="{Binding Options[1]}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                <TextBlock Text="{l:Loc bpGsCvSearchN}" FontSize="13" Foreground="#9C8A8A" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                <TextBlock Text="{l:Loc bpGsCvSearchN}" FontSize="13" Foreground="{DynamicResource BpC_FF9C8A8A}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                               </StackPanel>
                               <StackPanel Spacing="8" Width="160">
                                 <Panel Width="120" Height="160" HorizontalAlignment="Center">
@@ -1405,7 +1410,7 @@
                                   </Border>
                                 </Panel>
                                 <TextBlock Text="{Binding Options[2]}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-                                <TextBlock Text="{l:Loc bpGsCvRestoreN}" FontSize="13" Foreground="#9C8A8A" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                <TextBlock Text="{l:Loc bpGsCvRestoreN}" FontSize="13" Foreground="{DynamicResource BpC_FF9C8A8A}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                               </StackPanel>
                             </StackPanel>
                           </StackPanel>
@@ -1421,16 +1426,16 @@
       </Panel>
 
       <!-- ===== التحديث قبل التشغيل، ولوحة التشغيل (.panel) ===== -->
-      <Panel IsVisible="{Binding IsUpdateOpen}" Background="#C7060202">
+      <Panel IsVisible="{Binding IsUpdateOpen}" Background="{DynamicResource BpC_C7060202}">
         <Border x:Name="UpdatePanel" Classes="panel" Width="900">
           <StackPanel Spacing="18">
             <StackPanel Orientation="Horizontal" Spacing="16">
-              <Border Width="52" Height="52" CornerRadius="14" Background="#2A1313" BorderBrush="#4A2A12" BorderThickness="1">
+              <Border Width="52" Height="52" CornerRadius="14" Background="{DynamicResource BpC_FF2A1313}" BorderBrush="#4A2A12" BorderThickness="1">
                 <c:VectorIcon Data="M12 4v12M6 11l6 6 6-6M5 20h14" Size="26" StrokeWidth="2.4" Foreground="#F5A623" HorizontalAlignment="Center" VerticalAlignment="Center"/>
               </Border>
-              <TextBlock Text="{Binding UpdateTitle}" FontSize="30" FontWeight="Bold" Foreground="#EF4444" VerticalAlignment="Center"/>
+              <TextBlock Text="{Binding UpdateTitle}" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource BpC_FFEF4444}" VerticalAlignment="Center"/>
             </StackPanel>
-            <TextBlock Text="{l:Loc bpUpdText}" FontSize="21" LineHeight="34" Foreground="#D9C7C7" TextWrapping="Wrap"/>
+            <TextBlock Text="{l:Loc bpUpdText}" FontSize="21" LineHeight="34" Foreground="{DynamicResource BpC_FFD9C7C7}" TextWrapping="Wrap"/>
             <ItemsControl ItemsSource="{Binding UpdateButtons}">
               <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="14"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
@@ -1446,12 +1451,12 @@
       </Panel>
 
       <!-- إعدادات اللعبة داخل الشاشة الكبيرة -->
-      <Panel IsVisible="{Binding IsGameOptionsOpen}" Background="#C7060202">
+      <Panel IsVisible="{Binding IsGameOptionsOpen}" Background="{DynamicResource BpC_C7060202}">
         <Border x:Name="GameOptionsPanel" Classes="panel" Width="760">
           <StackPanel Spacing="18">
             <StackPanel Spacing="4">
-              <TextBlock Text="{l:Loc bpGameSettings}" FontSize="30" FontWeight="Bold" Foreground="#EF4444"/>
-              <bpc:BpAutoText Text="{Binding GameOptionsTitle}" FontSize="21" Foreground="#D9C7C7" TextTrimming="CharacterEllipsis"/>
+              <TextBlock Text="{l:Loc bpGameSettings}" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource BpC_FFEF4444}"/>
+              <bpc:BpAutoText Text="{Binding GameOptionsTitle}" FontSize="21" Foreground="{DynamicResource BpC_FFD9C7C7}" TextTrimming="CharacterEllipsis"/>
             </StackPanel>
             <ItemsControl ItemsSource="{Binding GameOptions}">
               <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="12"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
@@ -1462,7 +1467,7 @@
                     <StackPanel Spacing="4">
                       <TextBlock Text="{Binding Label}" FontSize="21" FontWeight="SemiBold" Foreground="{Binding $parent[Button].Foreground}"/>
                       <TextBlock Text="{Binding Note}" IsVisible="{Binding Note, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                                 FontSize="16" Foreground="#9C8A8A" TextWrapping="Wrap"/>
+                                 FontSize="16" Foreground="{DynamicResource BpC_FF9C8A8A}" TextWrapping="Wrap"/>
                     </StackPanel>
                   </Button>
                 </DataTemplate>
@@ -1472,10 +1477,10 @@
         </Border>
       </Panel>
 
-      <Panel IsVisible="{Binding IsLaunchOpen}" Background="#C7060202">
+      <Panel IsVisible="{Binding IsLaunchOpen}" Background="{DynamicResource BpC_C7060202}">
         <Border x:Name="LaunchPanel" Classes="panel" Width="780">
           <StackPanel Spacing="18" HorizontalAlignment="Stretch">
-            <Border Width="220" Height="330" CornerRadius="16" ClipToBounds="True" BorderBrush="{StaticResource BpLine}" BorderThickness="1" HorizontalAlignment="Center"
+            <Border Width="220" Height="330" CornerRadius="16" ClipToBounds="True" BorderBrush="{DynamicResource BpLine}" BorderThickness="1" HorizontalAlignment="Center"
                     Background="{Binding Hero.Name, Converter={x:Static bp:BpArtConverter.Instance}}">
               <Panel>
                 <TextBlock Text="{Binding Hero.Letter}" FontFamily="fonts:Inter#Inter" FontWeight="ExtraBold" FontSize="100" Foreground="#24FFFFFF"
@@ -1489,12 +1494,12 @@
                 <Viewbox Width="56" Height="56"><c:StatusBadge State="{Binding LaunchBadge}"/></Viewbox>
                 <StackPanel VerticalAlignment="Center">
                   <TextBlock Text="{Binding LaunchTitle}" FontSize="22" FontWeight="Bold" Foreground="{Binding IsLaunchFailed, Converter={x:Static bp:BpIs.FailTitle}}"/>
-                  <TextBlock Text="{Binding LaunchSub}" FontSize="17" Foreground="{StaticResource BpMuted}"/>
+                  <TextBlock Text="{Binding LaunchSub}" FontSize="17" Foreground="{DynamicResource BpMuted}"/>
                 </StackPanel>
               </StackPanel>
             </Border>
             <StackPanel IsVisible="{Binding IsLaunchFailed}" Spacing="18">
-              <TextBlock Text="{Binding FailText}" FontSize="21" LineHeight="34" Foreground="#D9C7C7" TextWrapping="Wrap" TextAlignment="Center"/>
+              <TextBlock Text="{Binding FailText}" FontSize="21" LineHeight="34" Foreground="{DynamicResource BpC_FFD9C7C7}" TextWrapping="Wrap" TextAlignment="Center"/>
               <ItemsControl ItemsSource="{Binding FailButtons}" HorizontalAlignment="Center">
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="14"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -1512,15 +1517,14 @@
 
       <!-- ===== القائمة الجانبية (.gsh) ===== -->
       <Panel IsVisible="{Binding IsGuideOpen}">
-        <Border Background="#99060202" PointerPressed="OnGuideScrimPressed"/>
-        <Border x:Name="GuideSheet" Width="520" HorizontalAlignment="Left" Background="#0F0607" BorderBrush="{StaticResource BpLine}" BorderThickness="0,0,1,0"
-                Padding="22,40,22,120" BoxShadow="30 0 90 0 #99000000">
+        <Border Background="{DynamicResource BpC_99060202}" PointerPressed="OnGuideScrimPressed"/>
+        <Border x:Name="GuideSheet" Width="500" HorizontalAlignment="Left" Margin="44,22,0,110" CornerRadius="30" ClipToBounds="True"
+                Background="{DynamicResource BpGlassPanel}" BorderBrush="{DynamicResource BpGlassEdge}" BorderThickness="1"
+                Padding="20,30,20,22" BoxShadow="0 30 80 0 #99000000, inset 0 1 0 0 #12FFFFFF">
           <StackPanel Spacing="12">
-            <Border BorderBrush="#231010" BorderThickness="0,0,0,1" Padding="12,0,12,18" Margin="0,0,0,12">
+            <Border BorderBrush="{DynamicResource BpC_FF231010}" BorderThickness="0,0,0,1" Padding="12,0,12,18" Margin="0,0,0,12">
               <StackPanel Orientation="Horizontal" Spacing="14">
-                <Border Width="50" Height="50" CornerRadius="12" ClipToBounds="True" Background="Black" BoxShadow="0 0 16 0 #4DEF4444">
-                  <Image Source="/Assets/logo.png" Stretch="UniformToFill"/>
-                </Border>
+                <c:HalawaMark Width="50" Height="50" LiftOnHover="False"/>
                 <StackPanel VerticalAlignment="Center">
                   <TextBlock Text="Halawa Hub" FontSize="20" FontWeight="Bold"/>
                   <TextBlock Text="{l:Loc bp}" FontSize="15" Foreground="#F5A623"/>
@@ -1529,11 +1533,11 @@
             </Border>
             <TextBlock x:Name="GuideClock" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="54" Padding="12,0" FlowDirection="LeftToRight"
                        HorizontalAlignment="Left" IsVisible="{Binding Settings.ShowClock}"/>
-            <Border BorderBrush="#231010" BorderThickness="0,0,0,1" Padding="12,0,12,14" Margin="0,0,0,8">
+            <Border BorderBrush="{DynamicResource BpC_FF231010}" BorderThickness="0,0,0,1" Padding="12,0,12,14" Margin="0,0,0,8">
               <StackPanel Orientation="Horizontal" Spacing="12">
-                <c:VectorIcon Size="18" StrokeWidth="2.4" Foreground="{StaticResource BpMuted}" Width="26" Height="20"
+                <c:VectorIcon Size="18" StrokeWidth="2.4" Foreground="{DynamicResource BpMuted}" Width="26" Height="20"
                               Data="M9 3h16c4.4 0 7 4 7.6 9.5.6 5.6-.6 10.5-4 10.5-2.6 0-3.7-3.4-6.6-3.4h-10c-2.9 0-4 3.4-6.6 3.4-3.4 0-4.6-4.9-4-10.5C2 7 4.6 3 9 3z"/>
-                <TextBlock Text="{Binding ContextPadText}" FontSize="17" Foreground="{StaticResource BpMuted}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding ContextPadText}" FontSize="17" Foreground="{DynamicResource BpMuted}" VerticalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasBattery}" FlowDirection="LeftToRight" VerticalAlignment="Center">
                   <Border Width="6" Height="16" CornerRadius="2" Background="{Binding BatteryBars, Converter={x:Static bp:BpIs.Bar}, ConverterParameter=1}"/>
                   <Border Width="6" Height="16" CornerRadius="2" Background="{Binding BatteryBars, Converter={x:Static bp:BpIs.Bar}, ConverterParameter=2}"/>
@@ -1544,7 +1548,7 @@
             </Border>
             <Panel>
               <c:SlidingPill Orientation="Vertical" ItemCount="7" Pitch="70" SelectedIndex="{Binding GuideIndex}" Motion="Dialog">
-                <Border CornerRadius="14" Background="{StaticResource BpRedGrad}" BoxShadow="0 0 20 0 #73EF4444"/>
+                <Border CornerRadius="14" Background="{DynamicResource BpRedGrad}" BoxShadow="{DynamicResource BpS_5}"/>
               </c:SlidingPill>
               <ItemsControl ItemsSource="{Binding GuideItems}">
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="6"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
@@ -1553,7 +1557,7 @@
                     <Button Classes="si" Classes.on="{Binding IsOn}" Classes.dg="{Binding IsDanger}" Focusable="False" Click="OnGuideItemClick">
                       <DockPanel>
                         <Border DockPanel.Dock="Right" IsVisible="{Binding Badge, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" MinWidth="30" Height="30"
-                                CornerRadius="15" Background="#EF4444" Padding="9,0">
+                                CornerRadius="15" Background="{DynamicResource BpC_FFEF4444}" Padding="9,0">
                           <TextBlock Text="{Binding Badge}" FontFamily="fonts:Inter#Inter" FontWeight="Bold" FontSize="15" Foreground="White"
                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -1570,21 +1574,22 @@
 
       <!-- ===== لوحة الإشعارات من الحافة الأخرى (.nsh) ===== -->
       <Panel IsVisible="{Binding IsNotificationsOpen}">
-        <Border Background="#99060202" PointerPressed="OnGuideScrimPressed"/>
-        <Border x:Name="NotifSheet" Width="660" HorizontalAlignment="Right" Background="#0F0607" BorderBrush="{StaticResource BpLine}" BorderThickness="1,0,0,0"
-                Padding="26,40,26,120" BoxShadow="-30 0 90 0 #99000000">
+        <Border Background="{DynamicResource BpC_99060202}" PointerPressed="OnGuideScrimPressed"/>
+        <Border x:Name="NotifSheet" Width="640" HorizontalAlignment="Right" Margin="0,22,44,110" CornerRadius="30" ClipToBounds="True"
+                Background="{DynamicResource BpGlassPanel}" BorderBrush="{DynamicResource BpGlassEdge}" BorderThickness="1"
+                Padding="24,30,24,24" BoxShadow="0 30 80 0 #99000000, inset 0 1 0 0 #12FFFFFF">
           <DockPanel>
-            <Border DockPanel.Dock="Top" BorderBrush="#231010" BorderThickness="0,0,0,1" Padding="6,0,6,14" Margin="0,0,0,16">
+            <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource BpC_FF231010}" BorderThickness="0,0,0,1" Padding="6,0,6,14" Margin="0,0,0,16">
               <DockPanel>
                 <Button DockPanel.Dock="Right" IsVisible="{Binding HasNotifications}" Height="50" Padding="14,0" CornerRadius="12" Focusable="False" Click="OnClearNotificationsClick">
                   <StackPanel Orientation="Horizontal" Spacing="10">
                     <bpc:BpGlyph Button="y" Ps="{Binding UsePsGlyphs}" Size="34" VerticalAlignment="Center"/>
-                    <TextBlock Text="{l:Loc bpNtClear}" FontSize="17" Foreground="{StaticResource BpMuted}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{l:Loc bpNtClear}" FontSize="17" Foreground="{DynamicResource BpMuted}" VerticalAlignment="Center"/>
                   </StackPanel>
                 </Button>
                 <StackPanel Orientation="Horizontal" Spacing="12">
-                  <TextBlock Text="{l:Loc bpNtTitle}" FontSize="28" FontWeight="Bold" Foreground="#EF4444" VerticalAlignment="Center"/>
-                  <Border IsVisible="{Binding HasNotifications}" CornerRadius="12" Background="#2A1313" Padding="11,2" VerticalAlignment="Center">
+                  <TextBlock Text="{l:Loc bpNtTitle}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource BpC_FFEF4444}" VerticalAlignment="Center"/>
+                  <Border IsVisible="{Binding HasNotifications}" CornerRadius="12" Background="{DynamicResource BpC_FF2A1313}" Padding="11,2" VerticalAlignment="Center">
                     <TextBlock Text="{Binding NotifItems.Count}" FontSize="15" FontWeight="SemiBold"/>
                   </Border>
                 </StackPanel>
@@ -1607,9 +1612,9 @@
                           </Border>
                           <StackPanel Margin="16,0,0,0" Spacing="3">
                             <bpc:BpAutoText Text="{Binding Model.Title}" FontSize="20" FontWeight="Bold" Margin="0,0,22,0" TextWrapping="Wrap"/>
-                            <bpc:BpAutoText Text="{Binding Model.Body}" FontSize="17" Foreground="#D9C7C7" TextWrapping="Wrap" LineHeight="25"
+                            <bpc:BpAutoText Text="{Binding Model.Body}" FontSize="17" Foreground="{DynamicResource BpC_FFD9C7C7}" TextWrapping="Wrap" LineHeight="25"
                                             IsVisible="{Binding Model.Body, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-                            <TextBlock Text="{Binding Model.Time}" FontSize="14" Foreground="#9C8A8A" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding Model.Time}" FontSize="14" Foreground="{DynamicResource BpC_FF9C8A8A}" Margin="0,2,0,0"/>
                             <StackPanel Classes="nacts" Orientation="Horizontal" Spacing="10">
                               <Button IsVisible="{Binding HasAction}" Classes="btn pri sm" Focusable="False" Click="OnNotificationActionClick">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
@@ -1626,7 +1631,7 @@
                             </StackPanel>
                           </StackPanel>
                         </DockPanel>
-                        <Ellipse Classes="udot" Classes.off="{Binding !Unread}" Width="11" Height="11" Fill="#EF4444"
+                        <Ellipse Classes="udot" Classes.off="{Binding !Unread}" Width="11" Height="11" Fill="{DynamicResource BpC_FFEF4444}"
                                  HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,2,0"/>
                       </Panel>
                     </Border>
@@ -1636,7 +1641,7 @@
               <StackPanel IsVisible="{Binding !HasNotifications}" Spacing="14" Margin="20,90" HorizontalAlignment="Center">
                 <Viewbox Width="56" Height="56" HorizontalAlignment="Center"><c:StatusBadge State="Done"/></Viewbox>
                 <TextBlock Text="{l:Loc bpNtEmpty}" FontSize="23" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="{l:Loc bpNtEmptySub}" FontSize="17" Foreground="#9C8A8A" HorizontalAlignment="Center"/>
+                <TextBlock Text="{l:Loc bpNtEmptySub}" FontSize="17" Foreground="{DynamicResource BpC_FF9C8A8A}" HorizontalAlignment="Center"/>
               </StackPanel>
             </Panel>
           </DockPanel>
@@ -1645,8 +1650,8 @@
 
       <!-- ===== إشعار يصل (.ntoast) ===== -->
       <Border x:Name="IncomingToast" IsVisible="{Binding Incoming, Converter={x:Static ObjectConverters.IsNotNull}}" Width="600"
-              HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,72,120" CornerRadius="18" Background="{StaticResource BpSurface}"
-              BorderBrush="#3A1518" BorderThickness="1" BoxShadow="0 24 70 0 #99000000" ClipToBounds="True" Cursor="Hand" PointerPressed="OnIncomingPressed">
+              HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,72,120" CornerRadius="18" Background="{DynamicResource BpSurface}"
+              BorderBrush="{DynamicResource BpC_FF3A1518}" BorderThickness="1" BoxShadow="0 24 70 0 #99000000" ClipToBounds="True" Cursor="Hand" PointerPressed="OnIncomingPressed">
         <Panel>
           <StackPanel Orientation="Horizontal" Spacing="16" Margin="20,18,20,22">
             <Border Width="54" Height="54" CornerRadius="14" BorderThickness="1"
@@ -1657,17 +1662,17 @@
             </Border>
             <StackPanel VerticalAlignment="Center" Width="490" Spacing="3">
               <bpc:BpAutoText Text="{Binding Incoming.Title}" FontSize="20" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-              <bpc:BpAutoText Text="{Binding Incoming.Body}" FontSize="17" Foreground="#D9C7C7" TextTrimming="CharacterEllipsis"/>
+              <bpc:BpAutoText Text="{Binding Incoming.Body}" FontSize="17" Foreground="{DynamicResource BpC_FFD9C7C7}" TextTrimming="CharacterEllipsis"/>
             </StackPanel>
           </StackPanel>
-          <Border x:Name="IncomingBar" Height="4" VerticalAlignment="Bottom" Background="{StaticResource BpRedGrad}" RenderTransformOrigin="0%,50%"/>
+          <Border x:Name="IncomingBar" Height="4" VerticalAlignment="Bottom" Background="{DynamicResource BpRedGrad}" RenderTransformOrigin="0%,50%"/>
         </Panel>
       </Border>
 
       <!-- ===== حلقة التركيز ===== -->
       <Canvas x:Name="RingLayer" IsHitTestVisible="False">
-        <Border x:Name="Ring" Opacity="0" Width="0" Height="0" CornerRadius="20" BorderThickness="3" BorderBrush="#EF4444"
-                BoxShadow="0 0 28 0 #99EF4444, inset 0 0 16 0 #40EF4444">
+        <Border x:Name="Ring" Opacity="0" Width="0" Height="0" CornerRadius="20" BorderThickness="3" BorderBrush="{DynamicResource BpC_FFEF4444}"
+                BoxShadow="{DynamicResource BpS_7}">
                     <Border x:Name="RingFlash" Margin="-3" CornerRadius="{Binding #Ring.CornerRadius}" BorderThickness="3" BorderBrush="#8CFFFFFF" Opacity="0"/>
         </Border>
         <!-- علامة الضغط بشكل الحلقة نفسه (مربع بزوايا مستديرة حول العنصر) بدل دائرة في وسطه -->
@@ -1676,21 +1681,17 @@
       </Canvas>
 
       <!-- ===== شريط التلميحات (.hb) ===== -->
-      <Border Height="100" VerticalAlignment="Bottom" Padding="72,10,72,0" IsHitTestVisible="False">
-        <Border.Background>
-          <LinearGradientBrush StartPoint="0%,100%" EndPoint="0%,0%">
-            <GradientStop Color="#FF0A0404" Offset="0.64"/><GradientStop Color="#000A0404" Offset="1"/>
-          </LinearGradientBrush>
-        </Border.Background>
+      <Border x:Name="HintGlass" Height="70" VerticalAlignment="Bottom" Margin="44,0,44,20" Padding="28,0" CornerRadius="24" IsHitTestVisible="False"
+              Background="{DynamicResource BpGlassHint}" BorderBrush="{DynamicResource BpGlassEdge}" BorderThickness="1" BoxShadow="0 20 50 0 #80000000, inset 0 1 0 0 #12FFFFFF">
         <DockPanel>
-          <TextBlock DockPanel.Dock="Left" Text="{Binding ContextText}" FontSize="20" Foreground="#9C8A8A" VerticalAlignment="Center"/>
+          <TextBlock DockPanel.Dock="Left" Text="{Binding ContextText}" FontSize="20" Foreground="{DynamicResource BpC_FF9C8A8A}" VerticalAlignment="Center"/>
           <ItemsControl ItemsSource="{Binding Hints}" HorizontalAlignment="Right" VerticalAlignment="Center">
             <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="34"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="bp:BpHint">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                   <bpc:BpGlyph Button="{Binding Button}" Ps="{Binding $parent[Window].((bp:BigPictureViewModel)DataContext).UsePsGlyphs}" VerticalAlignment="Center"/>
-                  <TextBlock Text="{Binding Label}" FontSize="20" Foreground="#D9C7C7" VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding Label}" FontSize="20" Foreground="{DynamicResource BpC_FFD9C7C7}" VerticalAlignment="Center"/>
                 </StackPanel>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -1700,10 +1701,10 @@
 
       <!-- ===== رسالة قصيرة (.toast) ===== -->
       <Border x:Name="ToastBox" IsVisible="False" IsHitTestVisible="False" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,136,0,0"
-              Padding="14,12,22,12" CornerRadius="16" BorderBrush="#59EF4444" BorderThickness="1" Background="#0A0404"
+              Padding="14,12,22,12" CornerRadius="16" BorderBrush="{DynamicResource BpC_59EF4444}" BorderThickness="1" Background="{DynamicResource BpC_FF0A0404}"
               BoxShadow="0 20 60 0 #99000000">
         <StackPanel Orientation="Horizontal" Spacing="14">
-          <Border Width="42" Height="42" CornerRadius="21" Background="{StaticResource BpRedHot}" BoxShadow="0 0 16 0 #A6EF4444">
+          <Border Width="42" Height="42" CornerRadius="21" Background="{DynamicResource BpRedHot}" BoxShadow="{DynamicResource BpS_8}">
             <c:VectorIcon Data="M6 12.5l4 4 8-9" Size="26" StrokeWidth="3.4" Foreground="White"/>
           </Border>
           <TextBlock x:Name="ToastText" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
@@ -1717,7 +1718,7 @@
                 IsHitTestVisible="False" RenderTransformOrigin="50%,50%" Margin="0,-120,0,0">
           <Border.Background>
             <RadialGradientBrush>
-              <GradientStop Color="#80B91C1C" Offset="0"/><GradientStop Color="#2EB91C1C" Offset="0.35"/>
+              <GradientStop Color="{DynamicResource BpK_80B91C1C}" Offset="0"/><GradientStop Color="{DynamicResource BpK_2EB91C1C}" Offset="0.35"/>
               <GradientStop Color="#0FF5A623" Offset="0.5"/><GradientStop Color="#00050202" Offset="0.72"/>
             </RadialGradientBrush>
           </Border.Background>
@@ -1729,33 +1730,49 @@
           <Border.Background>
             <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
               <GradientStop Color="#00FFFFFF" Offset="0"/><GradientStop Color="#1FF5A623" Offset="0.35"/>
-              <GradientStop Color="#59FFE4D6" Offset="0.5"/><GradientStop Color="#1FEF4444" Offset="0.65"/><GradientStop Color="#00FFFFFF" Offset="1"/>
+              <GradientStop Color="#59FFE4D6" Offset="0.5"/><GradientStop Color="{DynamicResource BpK_1FEF4444}" Offset="0.65"/><GradientStop Color="#00FFFFFF" Offset="1"/>
             </LinearGradientBrush>
           </Border.Background>
         </Border>
-        <StackPanel x:Name="IntroContent" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="30" Margin="0,-60,0,0" RenderTransformOrigin="50%,40%">
-          <!-- الشعار وحده بلا مربع داكن: توهج أحمر حوله، ولمعة تمر على حرف M فقط -->
-          <Panel x:Name="IntroLogo" Width="250" Height="250" HorizontalAlignment="Center" Opacity="0" RenderTransformOrigin="50%,50%">
-            <Image Source="/Assets/logo-mark.png" Stretch="Uniform">
-              <Image.Effect><DropShadowEffect BlurRadius="70" OffsetX="0" OffsetY="0" Color="#EF4444" Opacity="0.9"/></Image.Effect>
-            </Image>
-            <Panel ClipToBounds="True">
-              <Panel.OpacityMask><ImageBrush Source="/Assets/logo-mark.png" Stretch="Uniform"/></Panel.OpacityMask>
-              <Border x:Name="IntroShine" Width="110" Height="520" VerticalAlignment="Center" HorizontalAlignment="Center" RenderTransformOrigin="50%,50%">
+        <!-- جمرة صغيرة تتوهج في البداية ثم تنفتح -->
+        <Ellipse x:Name="IntroEmber" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="#FFE3C2" Opacity="0"
+                 IsHitTestVisible="False" RenderTransformOrigin="50%,50%" Margin="0,-180,0,0">
+          <Ellipse.Effect><DropShadowEffect BlurRadius="40" OffsetX="0" OffsetY="0" Color="#F5A623" Opacity="1"/></Ellipse.Effect>
+        </Ellipse>
+        <StackPanel x:Name="IntroContent" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="34" Margin="0,-60,0,0" RenderTransformOrigin="50%,40%">
+          <!-- حرف M العائم: يطفو من الضباب، يتأرجح فوق ظله، وحلقة ترسم نفسها ثم تميل مدارًا تحته -->
+          <Panel x:Name="IntroStage" Width="340" Height="320" HorizontalAlignment="Center">
+            <Ellipse x:Name="IntroShadow" Width="190" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,16" Opacity="0"
+                     RenderTransformOrigin="50%,50%">
+              <Ellipse.Fill>
+                <RadialGradientBrush><GradientStop Color="#BF000000" Offset="0"/><GradientStop Color="#00000000" Offset="1"/></RadialGradientBrush>
+              </Ellipse.Fill>
+            </Ellipse>
+            <Ellipse x:Name="IntroRing" Width="340" Height="78" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,-4"
+                     Stroke="{DynamicResource BpC_FFEF4444}" StrokeThickness="3" StrokeDashArray="254,254" StrokeDashOffset="254"
+                     RenderTransformOrigin="50%,50%">
+              <Ellipse.Effect><DropShadowEffect BlurRadius="16" OffsetX="0" OffsetY="0" Color="{DynamicResource BpK_FFEF4444}" Opacity="0.8"/></Ellipse.Effect>
+            </Ellipse>
+            <c:HalawaMark x:Name="IntroLogo" Width="252" Height="252" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,4,0,0"
+                          LiftOnHover="False" ShowShade="False" Glow="2.2" Opacity="0" RenderTransformOrigin="50%,50%"/>
+          </Panel>
+          <StackPanel x:Name="IntroWords" Spacing="18" HorizontalAlignment="Center">
+            <StackPanel x:Name="IntroName" Orientation="Horizontal" HorizontalAlignment="Center" FlowDirection="LeftToRight"/>
+            <!-- «الشاشة الكبيرة» بين خطين ينفتحان من جهتها -->
+            <StackPanel Orientation="Horizontal" Spacing="18" HorizontalAlignment="Center">
+              <Border x:Name="IntroLine" Width="120" Height="2" CornerRadius="1" VerticalAlignment="Center" Opacity="0" RenderTransformOrigin="100%,50%">
                 <Border.Background>
-                  <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
-                    <GradientStop Color="#00FFFFFF" Offset="0"/><GradientStop Color="#CCFFF4EC" Offset="0.5"/><GradientStop Color="#00FFFFFF" Offset="1"/>
-                  </LinearGradientBrush>
+                  <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%"><GradientStop Color="#00EF4444" Offset="0"/><GradientStop Color="{DynamicResource BpK_FFEF4444}" Offset="1"/></LinearGradientBrush>
                 </Border.Background>
               </Border>
-            </Panel>
-          </Panel>
-          <StackPanel x:Name="IntroWords" Spacing="10" HorizontalAlignment="Center">
-            <StackPanel x:Name="IntroName" Orientation="Horizontal" HorizontalAlignment="Center" FlowDirection="LeftToRight"/>
-            <TextBlock x:Name="IntroSub" Text="{l:Loc bp}" FontSize="30" FontWeight="SemiBold" Foreground="#F5A623" HorizontalAlignment="Center" Opacity="0"/>
+              <TextBlock x:Name="IntroSub" Text="{l:Loc bp}" FontSize="28" FontWeight="Bold" Foreground="#F5A623" VerticalAlignment="Center" Opacity="0"/>
+              <Border x:Name="IntroLine2" Width="120" Height="2" CornerRadius="1" VerticalAlignment="Center" Opacity="0" RenderTransformOrigin="0%,50%">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%"><GradientStop Color="{DynamicResource BpK_FFEF4444}" Offset="0"/><GradientStop Color="#00EF4444" Offset="1"/></LinearGradientBrush>
+                </Border.Background>
+              </Border>
+            </StackPanel>
           </StackPanel>
-          <Border x:Name="IntroLine" Width="360" Height="4" CornerRadius="2" HorizontalAlignment="Center" Background="{StaticResource BpRedGrad}"
-                  BoxShadow="0 0 16 0 #CCEF4444" RenderTransformOrigin="50%,50%" Opacity="0"/>
         </StackPanel>
       </Panel>
     </Panel>

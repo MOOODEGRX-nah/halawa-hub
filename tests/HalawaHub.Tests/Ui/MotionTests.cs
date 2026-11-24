@@ -549,7 +549,7 @@ public class MotionTests
             "game dialog opening on a big window", minimumSteps: 2);
         gameBox.Bounds.Size.Should().Be(new Size(1400, 900), "capped so text does not stretch on very large screens");
 
-        var gamePill = Pill(ui, p => p.Orientation == Avalonia.Layout.Orientation.Vertical && p.ItemCount == 4);
+        var gamePill = Pill(ui, p => p.Orientation == Avalonia.Layout.Orientation.Vertical && p.ItemCount == 5);
         Action toLaunch = () => vm.SelectGameDialogSectionCommand.Execute("3");
         toLaunch();
         PillMove(gamePill, () => vm.SelectGameDialogSectionCommand.Execute("0"), toLaunch, "game dialog pill");

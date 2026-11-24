@@ -118,7 +118,7 @@ public partial class MainViewModel
         RunLauncherCommand(Launchers.OpenInLauncher(card.Game), "openLauncherFailed");
     }
 
-    private void VerifyFiles(GameCardViewModel? card)
+    internal void VerifyFiles(GameCardViewModel? card)
     {
         if (card == null) return;
         if (RunLauncherCommand(Launchers.Verify(card.Game), "openLauncherFailed"))

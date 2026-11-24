@@ -39,6 +39,16 @@ public static class BpPlural
         ? Ar(n, "لعبة واحدة", "لعبتان", "{0} ألعاب", "{0} لعبة")
         : n == 1 ? "1 game" : $"{n} games";
 
+    /// «4 أيام متتالية» / «4 days in a row»
+    public static string DaysInARow(int d) => Rtl
+        ? Ar(d, "يوم واحد", "يومان متتاليان", "{0} أيام متتالية", "{0} يومًا متتاليًا")
+        : d == 1 ? "1 day" : $"{d} days in a row";
+
+    /// مدة جلسة: «ساعتان»، «45 دقيقة» / «2 h»، «45 min»
+    public static string Duration(TimeSpan t) => t.TotalMinutes < 60
+        ? (Rtl ? Ar(Math.Max(1, (int)t.TotalMinutes), "دقيقة", "دقيقتان", "{0} دقائق", "{0} دقيقة") : $"{Math.Max(1, (int)t.TotalMinutes)} min")
+        : (Rtl ? HoursShort(Math.Round(t.TotalHours, t.TotalHours >= 10 ? 0 : 1)) : $"{Math.Round(t.TotalHours, t.TotalHours >= 10 ? 0 : 1)} h");
+
     public static string DaysAgo(int d) => Rtl
         ? Ar(d, "أمس", "قبل يومين", "قبل {0} أيام", "قبل {0} يومًا")
         : d == 1 ? "Yesterday" : $"{d} days ago";

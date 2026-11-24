@@ -67,4 +67,21 @@ public partial class MainViewModel
     internal void MarkNotificationsReadFromBigPicture() => UnreadNotifications = 0;
 
     internal void OpenInLauncherFromBigPicture(GameCardViewModel card) => OpenInLauncher(card);
+
+    // ===== إعدادات اللعبة من الشاشة الكبيرة =====
+
+    /// اسم جديد للعبة، ثم إعادة الترتيب كما عند إغلاق نافذة اللعبة
+    internal void RenameFromBigPicture(GameCardViewModel card, string name)
+    {
+        card.EditableName = name;
+        ApplyFilter();
+    }
+
+    /// «تحقق واحفظ» من الشاشة الكبيرة: true إن قبله SteamGridDB
+    internal async System.Threading.Tasks.Task<bool> SaveSgdbKeyFromBigPictureAsync(string key)
+    {
+        SteamGridDbApiKey = key;
+        await VerifyApiKeyAsync();
+        return ApiKeyStatus == ApiKeyCheckState.Valid;
+    }
 }

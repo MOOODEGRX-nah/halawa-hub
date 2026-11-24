@@ -17,13 +17,15 @@ namespace HalawaHub.App.ViewModels;
 public partial class MainViewModel
 {
     public const int DetailsSection = 6;
+    /// المجموعات قسم مستقل بعد «عام» (كان جزءًا منه)
+    public const int CollectionsSection = 7;
 
     /// ترتيب أقسام نافذة اللعبة كما تظهر (أرقام الأقسام ثابتة)
     private List<int> GameDialogOrder()
     {
         var order = new List<int> { 0 };
         if (DetailsGame?.HasNews == true) order.Add(DetailsSection);
-        order.AddRange(new[] { 1, 2, 3 });
+        order.AddRange(new[] { CollectionsSection, 1, 2, 3 });
         if (DetailsGame?.HasNews == true) order.Add(NewsSection);
         if (DetailsGame?.HasTools == true) order.Add(ToolsSection);
         return order;

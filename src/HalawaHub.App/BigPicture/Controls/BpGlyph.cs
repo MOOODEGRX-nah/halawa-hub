@@ -42,7 +42,7 @@ public sealed class BpGlyph : Control
     public bool Ps { get => GetValue(PsProperty); set => SetValue(PsProperty, value); }
     public double Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
 
-    private static readonly IBrush Ground = new SolidColorBrush(Color.Parse("#140808"));
+    private static IBrush Ground => BpPalette.Brush("#140808");
     private static readonly Typeface Face = new("fonts:Inter#Inter", FontStyle.Normal, FontWeight.ExtraBold);
 
     /// الرسم المباشر لا يُعكس في العربية: اتجاه ثابت يلغي مرآة الأب

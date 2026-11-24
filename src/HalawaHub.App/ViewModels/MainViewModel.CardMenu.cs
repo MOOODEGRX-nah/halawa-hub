@@ -9,7 +9,7 @@ public partial class MainViewModel
 {
     internal string? DesktopDirOverride { get; set; }
 
-    public void CreateDesktopShortcut(GameCardViewModel card)
+    public bool CreateDesktopShortcut(GameCardViewModel card)
     {
         CloseAllCardMenus();
         try
@@ -17,11 +17,13 @@ public partial class MainViewModel
             var path = DesktopShortcut.Create(card.Game, card.Name, DesktopDirOverride);
             Log.Info($"desktop shortcut created: {path}");
             ShowStatus(Loc.Instance.Format("shortcutCreated", card.Name));
+            return true;
         }
         catch (System.Exception ex)
         {
             Log.Error($"desktop shortcut failed for {card.Name}", ex);
             ShowStatus(Loc.Instance.Format("shortcutFailed", ex.Message));
+            return false;
         }
     }
 

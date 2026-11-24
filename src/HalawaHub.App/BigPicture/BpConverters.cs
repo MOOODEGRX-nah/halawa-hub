@@ -9,8 +9,8 @@ namespace HalawaHub.App.BigPicture;
 /// <summary>محوّلات صغيرة لواجهة الشاشة الكبيرة.</summary>
 public static class BpIs
 {
-    private static readonly IBrush BarOn = new SolidColorBrush(Color.Parse("#4ADE80"));
-    private static readonly IBrush BarOff = new SolidColorBrush(Color.Parse("#3A1518"));
+    private static IBrush BarOn => BpPalette.Brush("#4ADE80");
+    private static IBrush BarOff => BpPalette.Brush("#3A1518");
 
     /// زر المفضلة (لرسم القلب)
     public static IValueConverter Fav { get; } = new FuncValueConverter<string?, bool>(id => id == "fav");
@@ -18,10 +18,10 @@ public static class BpIs
     public static IValueConverter Settings { get; } = new FuncValueConverter<string?, bool>(id => id == "settings");
 
     /// لون إطار القلب: أحمر في المفضلة
-    private static readonly IBrush Red = new SolidColorBrush(Color.Parse("#EF4444"));
-    private static readonly IBrush Text = new SolidColorBrush(Color.Parse("#F5EDED"));
-    private static readonly IBrush Faded = new SolidColorBrush(Color.Parse("#9C8A8A"));
-    private static readonly IBrush Pink = new SolidColorBrush(Color.Parse("#FCA5A5"));
+    private static IBrush Red => BpPalette.Brush("#EF4444");
+    private static IBrush Text => BpPalette.Brush("#F5EDED");
+    private static IBrush Faded => BpPalette.Brush("#9C8A8A");
+    private static IBrush Pink => BpPalette.Brush("#FCA5A5");
 
     // الفرش ثابتة: فرشاة جديدة مع كل تحديث تُعيد رسم العنصر بلا داعٍ
     public static IValueConverter HeartStroke { get; } = new FuncValueConverter<bool, IBrush>(on => on ? Red : Brushes.White);
@@ -46,6 +46,24 @@ public static class BpIs
 
     /// قلب الرسم أفقيًا في العربية (للأسهم)
     public static IValueConverter FlipX { get; } = new FuncValueConverter<bool, ITransform?>(rtl => rtl ? new ScaleTransform(-1, 1) : null);
+
+    /// شارة العرض: «مجانية» بالأحمر، والخصم بالأخضر
+    public static IValueConverter DealBadge { get; } = new FuncValueConverter<bool, IBrush>(free =>
+        BpPalette.Brush((free ? "#DC2626" : "#E6166534")));
+
+    public static IValueConverter OnOpacity { get; } = new FuncValueConverter<bool, double>(b => b ? 1 : 0);
+    public static IValueConverter OffOpacity { get; } = new FuncValueConverter<bool, double>(b => b ? 0 : 1);
+    /// نقاط اللقطات: الحالية أطول وحمراء
+    public static IValueConverter DotWidth { get; } = new FuncValueConverter<bool, double>(on => on ? 26 : 7);
+    public static IValueConverter DotBrush { get; } = new FuncValueConverter<bool, IBrush>(on => BpPalette.Brush((on ? "#EF4444" : "#66FFFFFF")));
+    /// «لعبك هذا الأسبوع»: اليوم بالأحمر
+    public static IValueConverter WeekBarBrush { get; } = new FuncValueConverter<bool, IBrush>(today => BpPalette.Brush((today ? "#EF4444" : "#4A1A1E")));
+    public static IValueConverter BoldIf { get; } = new FuncValueConverter<bool, FontWeight>(b => b ? FontWeight.Bold : FontWeight.Normal);
+    public static IValueConverter TodayText { get; } = new FuncValueConverter<bool, IBrush>(today => BpPalette.Brush((today ? "#FFFFFF" : "#9C8A8A")));
+
+    public static IValueConverter IndexIs { get; } = new FuncValueConverter<int, object?, bool>((i, p) => p?.ToString() == i.ToString(CultureInfo.InvariantCulture));
+    public static IValueConverter TextIs { get; } = new FuncValueConverter<string?, object?, bool>((s, p) => s == p?.ToString());
+    public static IValueConverter DangerText { get; } = new FuncValueConverter<bool, IBrush>(d => BpPalette.Brush((d ? "#F87171" : "#F5EDED")));
 
     public static IValueConverter Positive { get; } = new FuncValueConverter<int, bool>(n => n > 0);
 
@@ -94,9 +112,9 @@ public static class BpKind
     }
 
     public static IValueConverter PathOf { get; } = new FuncValueConverter<string?, Geometry>(k => Cached(k, "p", Geometry.Parse));
-    public static IValueConverter Background { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "b", s => new SolidColorBrush(Color.Parse(s))));
-    public static IValueConverter Border { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "o", s => new SolidColorBrush(Color.Parse(s))));
-    public static IValueConverter Foreground { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "f", s => new SolidColorBrush(Color.Parse(s))));
+    public static IValueConverter Background { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "b", s => BpPalette.Brush((s))));
+    public static IValueConverter Border { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "o", s => BpPalette.Brush((s))));
+    public static IValueConverter Foreground { get; } = new FuncValueConverter<string?, IBrush>(k => Cached<IBrush>(k, "f", s => BpPalette.Brush((s))));
 }
 
 /// <summary>عنوان النافذة (في Alt+Tab وشريط المهام) باللغة الحالية.</summary>

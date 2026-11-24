@@ -218,6 +218,7 @@ public class GameCardViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(FavoriteLabel));
         OnPropertyChanged(nameof(PlatformShort));
         OnPropertyChanged(nameof(PlayLabel));
+        OnPropertyChanged(nameof(CoverSourceText));
         NotifyStatusChanged();
         foreach (var tool in Tools) tool.NotifyLanguageChanged();
     }
@@ -457,7 +458,33 @@ public class GameCardViewModel : INotifyPropertyChanged
         {
             _hasCustomCover = value;
             OnPropertyChanged(nameof(HasCustomCover));
+            NotifyCoverSource();
         }
+    }
+
+    /// مصدر الغلاف الحالي: orig (من المتجر)، own (صورة من الجهاز)، sgdb (من SteamGridDB)
+    public string CoverSource => !HasCustomCover ? "orig"
+        : CustomArtService.Get(Game.Platform, Game.Id, CustomArtService.CoverSource) is { } s && s.StartsWith("sgdb", StringComparison.Ordinal) ? "sgdb" : "own";
+    public bool IsCoverOriginal => CoverSource == "orig";
+    public bool IsCoverOwn => CoverSource == "own";
+    public bool IsCoverSgdb => CoverSource == "sgdb";
+
+    /// «الأصلي (من المتجر)» أو «صورتك» أو «SteamGridDB · بديلة»
+    public string CoverSourceText => CoverSource switch
+    {
+        "orig" => Loc.Instance["srcOrig"],
+        "sgdb" => Loc.Instance.Format("srcSg", SgdbBrowser.StyleLabel(
+            (CustomArtService.Get(Game.Platform, Game.Id, CustomArtService.CoverSource) ?? "").Replace("sgdb:", ""))),
+        _ => Loc.Instance["srcOwn"]
+    };
+
+    private void NotifyCoverSource()
+    {
+        OnPropertyChanged(nameof(CoverSource));
+        OnPropertyChanged(nameof(IsCoverOriginal));
+        OnPropertyChanged(nameof(IsCoverOwn));
+        OnPropertyChanged(nameof(IsCoverSgdb));
+        OnPropertyChanged(nameof(CoverSourceText));
     }
 
     // هل الغلاف متحرك؟ (ملف محلي بامتداد gif/webp/apng)
@@ -488,9 +515,11 @@ public class GameCardViewModel : INotifyPropertyChanged
     }
 
     /// تُستدعى لما يختار المستخدم صورة غلاف مخصصة من جهازه
-    public void SetCustomCover(string localFilePath)
+    /// source: own (من الجهاز) أو sgdb:&lt;style&gt; (من SteamGridDB)
+    public void SetCustomCover(string localFilePath, string source = "own")
     {
         CustomCoverService.Set(Game.Platform, Game.Id, localFilePath);
+        CustomArtService.Set(Game.Platform, Game.Id, CustomArtService.CoverSource, source);
 
         Game.CoverImageUrl = new Uri(localFilePath).AbsoluteUri;
         Game.CoverImageUrlFallback = null;
@@ -502,6 +531,7 @@ public class GameCardViewModel : INotifyPropertyChanged
     public void RestoreOriginalCover()
     {
         CustomCoverService.Remove(Game.Platform, Game.Id);
+        CustomArtService.Set(Game.Platform, Game.Id, CustomArtService.CoverSource, null);
 
         Game.CoverImageUrl = _originalCoverUrl;
         Game.CoverImageUrlFallback = _originalCoverFallback;

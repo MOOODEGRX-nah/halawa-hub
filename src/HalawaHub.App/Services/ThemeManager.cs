@@ -29,6 +29,7 @@ public static class ThemeManager
     /// القيم الافتراضية للثيم (الداكن الأصلي)
     private static readonly Dictionary<string, string> DarkPalette = new()
     {
+        ["GlassBarBrush"] = "#94180A0A", ["GlassPanelBrush"] = "#F5140809", ["GlassBorderBrush"] = "#12FFFFFF", ["LightScrimBrush"] = "#59060202",
         ["PageBrush"] = "#0A0404", ["SurfaceBrush"] = "#140808", ["PanelBrush"] = "#0F0607", ["DialogBrush"] = "#0E0606",
         ["HoverBrush"] = "#241010", ["BorderBrushCard"] = "#2A1212", ["BorderBrushControl"] = "#2E1616", ["DividerBrush"] = "#231010",
         ["TextBrush"] = "#F5EDED", ["MutedBrush"] = "#B8A4A4", ["ChipTextBrush"] = "#D9C7C7", ["SubtleBrush"] = "#9C8A8A",
@@ -44,6 +45,7 @@ public static class ThemeManager
 
     private static readonly Dictionary<string, string> OledPalette = new()
     {
+        ["GlassBarBrush"] = "#940A0A0A", ["GlassPanelBrush"] = "#F5080808", ["GlassBorderBrush"] = "#12FFFFFF", ["LightScrimBrush"] = "#59000000",
         ["PageBrush"] = "#000000", ["SurfaceBrush"] = "#0A0A0A", ["PanelBrush"] = "#050505", ["DialogBrush"] = "#080808",
         ["HoverBrush"] = "#1A1A1A", ["BorderBrushCard"] = "#1F1F1F", ["BorderBrushControl"] = "#262626", ["DividerBrush"] = "#1A1A1A",
         ["TextBrush"] = "#F2F2F2", ["MutedBrush"] = "#B0B0B0", ["ChipTextBrush"] = "#D4D4D4", ["SubtleBrush"] = "#9A9A9A",
@@ -63,6 +65,7 @@ public static class ThemeManager
     /// </summary>
     private static readonly Dictionary<string, string> LightPalette = new()
     {
+        ["GlassBarBrush"] = "#B8FFFFFF", ["GlassPanelBrush"] = "#FAFFFFFF", ["GlassBorderBrush"] = "#14000000", ["LightScrimBrush"] = "#331A0F0F",
         ["PageBrush"] = "#F6F2F2", ["SurfaceBrush"] = "#FFFFFF", ["PanelBrush"] = "#F0EAEA", ["DialogBrush"] = "#FFFFFF",
         ["HoverBrush"] = "#EFE6E6", ["BorderBrushCard"] = "#E0D4D4", ["BorderBrushControl"] = "#D6C8C8", ["DividerBrush"] = "#E6DCDC",
         ["TextBrush"] = "#1F1414", ["MutedBrush"] = "#5C4A4A", ["ChipTextBrush"] = "#3D2E2E", ["SubtleBrush"] = "#6A5757",
@@ -157,6 +160,14 @@ public static class ThemeManager
         r["GlowCardHover"] = Shadow(0, 12, 32, hover, 0x47);
         r["GlowMenuOpen"] = Shadow(0, 0, 18, hover, 0x99);
         r["GlowCoverHover"] = Shadow(0, 14, 30, hover, 0x4D);
+
+        // الشريط العلوي واللوحات العائمة (.top و.panel.nt في التصميم): ظل عميق مع خط ضوء علوي
+        r["GlassShadow"] = theme == Light
+            ? BoxShadows.Parse("0 12 30 0 #261A0F0F, inset 0 1 0 0 #99FFFFFF")
+            : BoxShadows.Parse("0 16 40 0 #73000000, inset 0 1 0 0 #0FFFFFFF");
+        r["GlassPanelShadow"] = theme == Light
+            ? BoxShadows.Parse("0 18 44 0 #331A0F0F, inset 0 1 0 0 #99FFFFFF")
+            : BoxShadows.Parse("0 24 60 0 #99000000, inset 0 1 0 0 #0FFFFFFF");
 
         app.RequestedThemeVariant = theme == Light ? ThemeVariant.Light : ThemeVariant.Dark;
     }

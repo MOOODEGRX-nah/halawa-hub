@@ -216,6 +216,7 @@ public partial class MainViewModel
     private void CreditPlayTime(string platform, string id, double secs)
     {
         PlayTimeService.AddSeconds(platform, id, secs);
+        PlayDaysService.Record(platform, id, DateTime.Now, secs);
         // البطاقات تُبنى من جديد مع كل فحص، فنبحث عن الحالية لا عن التي بدأت الجلسة
         foreach (var card in Games.Where(c => c.Game.Platform == platform && c.Game.Id == id))
             card.RefreshPlayTime();
@@ -428,7 +429,13 @@ public partial class MainViewModel
     private void DeleteGame()
     {
         if (DetailsGame == null) return;
-        var game = DetailsGame.Game;
+        UninstallGame(DetailsGame);
+        CloseDetails();
+    }
+
+    internal void UninstallGame(GameCardViewModel card)
+    {
+        var game = card.Game;
 
         // نعتمد فقط على أدوات الحذف الرسمية للمنصة نفسها (تفتح تأكيدها الخاص) —
         // ما نحذف أي ملفات مباشرة من هنا تفاديًا لأي خطر على بيانات المستخدم
@@ -436,8 +443,6 @@ public partial class MainViewModel
             RunLauncherCommand(uninstall.Command, "uninstallFailed");
         else
             ShowStatus(Loc.Instance["uninstallUnsupported"]);
-
-        CloseDetails();
     }
 
     private static bool IsSteamRunning()

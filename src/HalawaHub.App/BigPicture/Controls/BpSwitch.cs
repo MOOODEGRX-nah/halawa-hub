@@ -37,10 +37,10 @@ public sealed class BpSwitch : Panel
         {
             StartPoint = new RelativePoint(0, 0.5, RelativeUnit.Relative),
             EndPoint = new RelativePoint(1, 0.5, RelativeUnit.Relative),
-            GradientStops = { new GradientStop(Color.Parse("#991B1B"), 0), new GradientStop(Color.Parse("#EF4444"), 1) },
+            GradientStops = { new GradientStop(BpPalette.Map("#991B1B"), 0), new GradientStop(BpPalette.Map("#EF4444"), 1) },
         };
         _glow = new Border { CornerRadius = new CornerRadius(22), Background = grad, Opacity = 0, Effect = new BlurEffect { Radius = 24 } };
-        var track = new Border { CornerRadius = new CornerRadius(22), Background = new SolidColorBrush(Color.Parse("#2A1313")), BorderBrush = new SolidColorBrush(Color.Parse("#14FFFFFF")), BorderThickness = new Thickness(1) };
+        var track = new Border { CornerRadius = new CornerRadius(22), Background = BpPalette.Brush("#2A1313"), BorderBrush = new SolidColorBrush(Color.Parse("#14FFFFFF")), BorderThickness = new Thickness(1) };
         _fill = new Border { CornerRadius = new CornerRadius(22), Background = grad, Opacity = 0 };
         Children.Add(_glow);
         Children.Add(track);

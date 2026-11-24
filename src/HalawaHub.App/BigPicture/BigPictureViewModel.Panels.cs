@@ -27,16 +27,17 @@ public sealed partial class BigPictureViewModel
     private void BuildSettings()
     {
         SettingSections.Clear();
-        for (var i = 0; i < SectionIds.Length; i++)
-            SettingSections.Add(new BpButtonItem { FocusKey = "sec." + i, Id = SectionIds[i], IsOn = i == _section, IsDanger = false });
+        var ids = CurrentSectionIds;
+        for (var i = 0; i < ids.Length; i++)
+            SettingSections.Add(new BpButtonItem { FocusKey = "sec." + i, Id = ids[i], IsOn = i == _section, IsDanger = false });
         RefreshSectionLabels();
         BuildRows();
     }
 
     public void RefreshSectionLabels()
     {
-        string[] keys = { "bpSecGeneral", "bpSecController", "bpSecDisplay", "bpSecLanguage", "bpSecExit" };
-        for (var i = 0; i < keys.Length; i++) SettingSections[i].Label = T(keys[i]);
+        string[] keys = _gameSet != null ? GameSectionKeys : new[] { "bpSecGeneral", "bpSecController", "bpSecDisplay", "bpSecLanguage", "bpSecExit" };
+        for (var i = 0; i < keys.Length && i < SettingSections.Count; i++) SettingSections[i].Label = T(keys[i]);
     }
 
     private BpSettingRow Toggle(string id, string label, string note, bool on, int index) => new()
@@ -53,6 +54,12 @@ public sealed partial class BigPictureViewModel
     private void BuildRows()
     {
         SettingRows.Clear();
+        if (_gameSet != null)
+        {
+            BuildGameRows();
+            SectionVersion++;
+            return;
+        }
         var s = Settings;
         switch (SectionIds[_section])
         {
@@ -67,9 +74,20 @@ public sealed partial class BigPictureViewModel
                 SettingRows.Add(Toggle("swap", "bpSwapAB", "bpSwapABN", s.SwapConfirmBack, 1));
                 break;
             case "display":
+                SettingRows.Add(new BpSettingRow
+                {
+                    FocusKey = "row.0", Id = "wall", Kind = BpRowKind.Wallpaper, Label = T("bpWallpaper"), Note = T("bpWallpaperN"),
+                    OptionValues = HalawaHub.App.BigPicture.Wallpaper.WallpaperEngine.Ids,
+                    Options = HalawaHub.App.BigPicture.Wallpaper.WallpaperEngine.Ids.Select(WallLabel).ToArray(),
+                    Selected = Math.Max(0, Array.IndexOf(HalawaHub.App.BigPicture.Wallpaper.WallpaperEngine.Ids, s.Wallpaper)),
+                    Walls = HalawaHub.App.BigPicture.Wallpaper.WallpaperEngine.Ids.Select(id => new BpWallTile { Id = id, Label = WallLabel(id), Preview = WallPreview?.Invoke(id), IsOn = id == s.Wallpaper }).ToList(),
+                });
+                SettingRows.Add(Seg("wallmotion", "bpWpMotion", "bpWpMotionN", new[] { "move", "always", "still" },
+                    new[] { T("bpWpFocus"), T("bpWpAlways"), T("bpWpStill") }, s.WallpaperMotion, 1));
+                SettingRows.Add(Toggle("wallreact", "bpWpReact", "bpWpReactN", s.WallpaperReact, 2));
                 SettingRows.Add(Seg("text", "bpTextSize", "bpTextSizeN", new[] { "normal", "large" },
-                    new[] { T("bpTNormal"), T("bpTLarge") }, s.TextSize, 0));
-                SettingRows.Add(Toggle("clock", "bpShowClock", "bpShowClockN", s.ShowClock, 1));
+                    new[] { T("bpTNormal"), T("bpTLarge") }, s.TextSize, 3));
+                SettingRows.Add(Toggle("clock", "bpShowClock", "bpShowClockN", s.ShowClock, 4));
                 SettingRows.Add(new BpSettingRow { FocusKey = "info", Id = "motion", Kind = BpRowKind.Info, Label = T("bpMotionInfo") });
                 break;
             case "language":
@@ -85,9 +103,22 @@ public sealed partial class BigPictureViewModel
 
     private int ControlRowCount => SettingRows.Count(r => r.IsControl);
 
+    private static string WallLabel(string id) => T(id switch
+    {
+        "blobs" => "bpWpblobs", "aurora" => "bpWpaurora", "grain" => "bpWpgrain", "dots" => "bpWpdots", "flow" => "bpWpflow",
+        "contour" => "bpWpcontour", "stars" => "bpWpstars", "spot" => "bpWpspot", "plain" => "bpWpnone", _ => "bpWpgrid",
+    });
+    /// معاينة كل خلفية (تضعها النافذة؛ الاختبارات بلا صور)
+    public Func<string, object?>? WallPreview { get; set; }
+    /// تغيّرت الخلفية أو حركتها أو تفاعلها: النافذة تعيد ضبط السطح
+    public event Action? WallpaperChanged;
+
+    /// السطر رقم n بين الأسطر القابلة للتركيز (الشرح ورمز QR لا يُركَّز عليهما)
+    private BpSettingRow? ControlRow(int n) => SettingRows.Where(r => r.IsControl).ElementAtOrDefault(n);
+
     private void PickSection(int index)
     {
-        index = Math.Clamp(index, 0, SectionIds.Length - 1);
+        index = Math.Clamp(index, 0, CurrentSectionIds.Length - 1);
         if (index == _section) return;
         _sectionForward = index > _section;
         _section = index;
@@ -105,7 +136,15 @@ public sealed partial class BigPictureViewModel
             return;
         }
 
-        var row = _setRow < SettingRows.Count ? SettingRows[_setRow] : null;
+        var row = _setRow < SettingRows.Count ? ControlRow(_setRow) : null;
+        if (dx != 0 && row is { IsTiles: true } && MoveTiles(row, dx)) return;
+        if (dx != 0 && row is { IsWallpaper: true })
+        {
+            if (dx < 0 && row.Selected == 0) { _setCol = 0; return; }
+            if (dx > 0 && row.Selected == row.OptionValues.Count - 1) return;
+            ChangeRow(row, dx);
+            return;
+        }
         if (dx != 0 && row is { IsSegmented: true })
         {
             if (dx < 0 && row.Selected == 0) { _setCol = 0; return; }
@@ -118,8 +157,13 @@ public sealed partial class BigPictureViewModel
 
     private void ActSettings()
     {
-        if (_setCol == 0) { _setCol = 1; _setRow = 0; return; }
-        if (_setRow < SettingRows.Count) ChangeRow(SettingRows[_setRow], 1);
+        if (_setCol == 0)
+        {
+            // «العودة إلى اللعبة» قسم يعمل بالضغط مباشرة
+            if (_gameSet != null && CurrentSectionIds[_section] == "g.back") { CloseGameSettings(); return; }
+            _setCol = 1; _setRow = 0; return;
+        }
+        if (ControlRow(_setRow) is { } r) ChangeRow(r, 1);
     }
 
     public void ClickSection(int index)
@@ -133,7 +177,7 @@ public sealed partial class BigPictureViewModel
     {
         if (index >= SettingRows.Count || !SettingRows[index].IsControl) return;
         _setCol = 1;
-        _setRow = index;
+        _setRow = SettingRows.Take(index).Count(r => r.IsControl);
         ChangeRow(SettingRows[index], 1);
         SyncFocus();
     }
@@ -141,6 +185,7 @@ public sealed partial class BigPictureViewModel
     /// تبديل مفتاح، أو تحريك الاختيار في المجموعة (يدور)، أو الخروج
     private void ChangeRow(BpSettingRow row, int delta)
     {
+        if (row.Id.StartsWith("g.", StringComparison.Ordinal)) { ChangeGameRow(row, delta); return; }
         var s = Settings;
         switch (row.Kind)
         {
@@ -153,6 +198,7 @@ public sealed partial class BigPictureViewModel
                     case "exit": s.ExitOnDisconnect = row.IsOn; break;
                     case "swap": s.SwapConfirmBack = row.IsOn; break;
                     case "clock": s.ShowClock = row.IsOn; break;
+                    case "wallreact": s.WallpaperReact = row.IsOn; WallpaperChanged?.Invoke(); break;
                 }
                 _host.SaveSettings();
                 break;
@@ -164,8 +210,18 @@ public sealed partial class BigPictureViewModel
                 {
                     case "glyphs": s.Glyphs = value; _host.SaveSettings(); break;
                     case "text": s.TextSize = value; _host.SaveSettings(); break;
+                    case "wallmotion": s.WallpaperMotion = value; _host.SaveSettings(); WallpaperChanged?.Invoke(); break;
                     case "lang": _host.SetLanguage(value); OnLanguageChanged(); break;
                 }
+                break;
+            case BpRowKind.Wallpaper:
+                // يمين ويسار يغيّران الخلفية مباشرة، والخلفية خلف النافذة تتبدل وهي مفتوحة
+                var count = row.OptionValues.Count;
+                row.Selected = Math.Clamp(row.Selected + (delta == 0 ? 1 : delta), 0, count - 1);
+                s.Wallpaper = row.OptionValues[row.Selected];
+                foreach (var w in row.Walls) w.IsOn = w.Id == s.Wallpaper;
+                _host.SaveSettings();
+                WallpaperChanged?.Invoke();
                 break;
             case BpRowKind.Button:
                 ShowToast(T("bpExiting"));

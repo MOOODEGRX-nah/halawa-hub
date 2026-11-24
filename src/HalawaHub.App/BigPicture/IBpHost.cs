@@ -23,6 +23,12 @@ public sealed class BpSettings
     /// normal, large
     public string TextSize { get; set; } = "normal";
     public bool ShowClock { get; set; } = true;
+    /// الخلفية (7): grid الافتراضية، blobs، aurora، grain، dots، flow، contour، stars، spot، plain
+    public string Wallpaper { get; set; } = "grid";
+    /// move (عند التنقل، الافتراضي)، always، still
+    public string WallpaperMotion { get; set; } = "move";
+    /// «تتفاعل مع التنقل»
+    public bool WallpaperReact { get; set; } = true;
 }
 
 /// <summary>ما تحتاجه الشاشة الكبيرة من البرنامج. الاختبارات تمرر نسخة وهمية.</summary>
@@ -53,6 +59,41 @@ public interface IBpHost
     void DismissNotification(BpNotification item);
     void ClearNotifications();
     void MarkNotificationsRead();
+
+    // ===== العروض (تبويب العروض) =====
+    /// صفوف العروض بالترتيب: مجانيات Epic، تخفيضات Steam، متاجر أخرى
+    IReadOnlyList<BpDealSource> Deals => Array.Empty<BpDealSource>();
+    /// «آخر تحديث قبل N دقيقة · يتحدّث كل ساعة»، أو فارغ
+    string DealsUpdatedText => "";
+    void OpenUrl(string url) { }
+
+    // ===== العمود الجانبي في الرئيسي وصفحة اللعبة =====
+    /// لقطات اللعبة (متجر Steam)، أو فارغة
+    Task<IReadOnlyList<string>> LoadScreenshotsAsync(BpGame game) => Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
+    /// ساعات آخر 7 أيام (آخرها اليوم) كما سجلها Halawa
+    double[] WeekHours(BpGame game) => new double[7];
+    BpActivity? Activity(BpGame game) => null;
+
+    // ===== إعدادات اللعبة داخل الشاشة الكبيرة =====
+    BpGameInfo GameInfo(BpGame game) => new() { Name = game.Name, OriginalName = game.Name };
+    void RenameGame(BpGame game, string name) { }
+    IReadOnlyList<BpCollectionToggle> GameCollections(BpGame game) => Array.Empty<BpCollectionToggle>();
+    void SetCollection(BpGame game, string collectionId, bool member) { }
+    void OpenFileLocation(BpGame game) { }
+    void VerifyFiles(BpGame game) { }
+    bool CreateShortcut(BpGame game) => false;
+    void Uninstall(BpGame game) { }
+    void SetLaunchArgs(BpGame game, string args) { }
+    void RestoreCover(BpGame game) { }
+    void SetOwnCover(BpGame game, string path) { }
+    /// متصفح SteamGridDB المشترك مع النافذة العادية
+    HalawaHub.App.ViewModels.SgdbBrowser? Sgdb => null;
+    bool HasSgdbKey => false;
+    string SgdbKeyUrl => "https://www.steamgriddb.com/profile/preferences/api";
+    /// يتحقق من المفتاح ويحفظه
+    Task<bool> SaveSgdbKeyAsync(string key) => Task.FromResult(false);
+    /// ينزّل الصورة المختارة ويستعملها حسب نوعها
+    Task<bool> PickSgdbAsync(BpGame game, HalawaHub.App.ViewModels.SgdbTile tile) => Task.FromResult(false);
 
     void ExitBigPicture();
     void CloseApp();

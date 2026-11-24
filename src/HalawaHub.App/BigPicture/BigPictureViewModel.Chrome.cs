@@ -37,6 +37,7 @@ public sealed partial class BigPictureViewModel
     public bool IsHomeTab => TabScreen == BpScreen.Home;
     public bool IsLibraryTab => TabScreen == BpScreen.Library;
     public bool IsSearchTab => TabScreen == BpScreen.Search;
+    public bool IsDealsTab => TabScreen == BpScreen.Deals;
     public BpUpper Upper => BpUpper.Instance;
 
     public string ContextText => _overlay == BpOverlay.Guide ? ""
@@ -72,15 +73,20 @@ public sealed partial class BigPictureViewModel
                     : new[] { H("b", "bpClose") },
                 BpOverlay.Update => new[] { H("a", "bpSelect"), H("b", "bpCancel") },
                 BpOverlay.GameOptions => new[] { H("a", "bpSelect"), H("b", "bpClose") },
+                BpOverlay.TextEntry => new[] { H("a", "bpType"), H("b", "bpCancel") },
                 BpOverlay.Launch => LaunchState == BpLaunchState.Failed
                     ? new[] { H("a", "bpSelect"), H("b", "bpBack") }
                     : new[] { H("b", "bpCancel") },
                 _ => _screen switch
                 {
-                    BpScreen.Home => new[] { H("a", _homeRow == 2 ? "bpOpen" : "bpSelect"), H("y", "bpSearch"), H("menu", "bpGuide") },
+                    BpScreen.Home => _homeRow == 2 && _cardIndex < RowCards.Count
+                        ? new[] { H("a", "bpOpen"), H("x", "bpPlay"), H("y", "bpSearch"), H("menu", "bpGuide") }
+                        : new[] { H("a", _homeRow == 2 ? "bpOpen" : "bpSelect"), H("y", "bpSearch"), H("menu", "bpGuide") },
                     BpScreen.Library => new[] { H("a", "bpOpen"), H("x", "bpFilter"), H("b", "bpBack"), H("menu", "bpGuide") },
                     BpScreen.Game => new[] { H("a", "bpSelect"), H("b", "bpBack"), H("menu", "bpGuide") },
                     BpScreen.Search => new[] { H("a", "bpType"), H("b", "bpDel"), H("menu", "bpGuide") },
+                    BpScreen.Deals => new[] { H("a", "bpOpen"), H("b", "bpBack"), H("menu", "bpGuide") },
+                    BpScreen.Sgdb => new[] { H("a", "bpSgUse"), H("lb", "bpSgType"), H("x", "bpSgStyle"), H("y", "bpSgAnim"), H("b", "bpBack") },
                     _ => new[] { H("a", "bpSelect"), H("b", "bpBack") },
                 },
             };

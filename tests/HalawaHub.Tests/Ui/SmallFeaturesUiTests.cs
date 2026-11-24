@@ -117,7 +117,7 @@ public class SmallFeaturesUiTests
 
         var dota = ui.Vm.Games.Single(c => c.Game.Id == "570");
         ui.Vm.OpenDetailsCommand.Execute(dota);
-        ui.Vm.GameDialogSectionCount.Should().Be(6);
+        ui.Vm.GameDialogSectionCount.Should().Be(7);
         ui.Vm.SelectGameDialogSectionCommand.Execute("4");
         await ui.Vm.LoadGameNewsAsync(dota);
         ui.Settle();
@@ -130,6 +130,6 @@ public class SmallFeaturesUiTests
         var witcher = ui.Vm.Games.Single(c => c.Game.Id == "gog-1");
         witcher.HasNews.Should().BeFalse();
         ui.Vm.OpenDetailsCommand.Execute(witcher);
-        ui.Vm.GameDialogSectionCount.Should().Be(4);
+        ui.Vm.GameDialogSectionCount.Should().Be(5);
     }
 }

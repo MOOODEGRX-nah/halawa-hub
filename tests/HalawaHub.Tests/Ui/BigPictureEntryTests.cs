@@ -140,7 +140,7 @@ public class BigPictureEntryTests
         vm.CanvasWidth.Should().Be(1920);
         vm.OpenSettings();
         vm.ClickSection(2);
-        vm.ClickRow(0);
+        vm.ClickRow(vm.SettingRows.ToList().FindIndex(r => r.Id == "text"));   // بعد الخلفية وحركتها وتفاعلها
         host.Settings.TextSize.Should().Be("large");
         vm.CanvasWidth.Should().Be(1745);
         vm.CanvasHeight.Should().Be(982);

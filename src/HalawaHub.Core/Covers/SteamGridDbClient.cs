@@ -14,7 +14,7 @@ namespace HalawaHub.Core.Covers;
 /// </summary>
 public sealed record CoverCandidate(string Url, string ThumbUrl);
 
-public class SteamGridDbClient
+public partial class SteamGridDbClient
 {
     private readonly HttpClient _http;
 

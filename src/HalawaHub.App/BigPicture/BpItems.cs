@@ -2,7 +2,8 @@ using System.Collections.Generic;
 
 namespace HalawaHub.App.BigPicture;
 
-public enum BpRowKind { Toggle, Segmented, Button, Info }
+/// Tiles: بطاقات الغلاف الثلاث (يمين ويسار ثم A)؛ Qr: رمز صفحة مفتاح SteamGridDB
+public enum BpRowKind { Toggle, Segmented, Button, Info, Tiles, Qr, Wallpaper }
 
 /// <summary>سطر في نافذة إعدادات الشاشة الكبيرة.</summary>
 public sealed class BpSettingRow : BpItem
@@ -14,6 +15,12 @@ public sealed class BpSettingRow : BpItem
     public required BpRowKind Kind { get; init; }
     public required string Label { get; init; }
     public string Note { get; init; } = "";
+    /// قيمة على الطرف (الاسم، الحجم، «لا شيء») أو شارة (تحديث متوفر)
+    public string Value { get; init; } = "";
+    public string Chip { get; init; } = "";
+    public bool IsDanger { get; init; }
+    public bool HasValue => Value.Length > 0 && Kind == BpRowKind.Button;
+    public bool HasChip => Chip.Length > 0;
     public IReadOnlyList<string> Options { get; init; } = [];
     public IReadOnlyList<string> OptionValues { get; init; } = [];
 
@@ -24,7 +31,24 @@ public sealed class BpSettingRow : BpItem
     public bool IsSegmented => Kind == BpRowKind.Segmented;
     public bool IsButton => Kind == BpRowKind.Button;
     public bool IsInfo => Kind == BpRowKind.Info;
-    public bool IsControl => Kind != BpRowKind.Info;
+    public bool IsTiles => Kind == BpRowKind.Tiles;
+    public bool IsQr => Kind == BpRowKind.Qr;
+    public bool IsWallpaper => Kind == BpRowKind.Wallpaper;
+    /// بطاقات معاينة الخلفيات
+    public IReadOnlyList<BpWallTile> Walls { get; init; } = [];
+    public bool IsControl => Kind is not (BpRowKind.Info or BpRowKind.Qr);
+    public bool IsButtonOrTiles => Kind is BpRowKind.Button;
+}
+
+/// بطاقة خلفية في الإعدادات: معاينتها واسمها، والمختارة عليها إطار
+public sealed class BpWallTile : System.ComponentModel.INotifyPropertyChanged
+{
+    private bool _on;
+    public required string Id { get; init; }
+    public required string Label { get; init; }
+    public object? Preview { get; init; }
+    public bool IsOn { get => _on; set { if (_on == value) return; _on = value; PropertyChanged?.Invoke(this, new(nameof(IsOn))); } }
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 }
 
 /// <summary>إشعار في اللوحة، مع حالة الخروج (يُخفى ثم يُحذف).</summary>

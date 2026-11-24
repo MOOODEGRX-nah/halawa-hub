@@ -42,6 +42,9 @@ public partial class BigPictureWindow : Window
     public BigPictureWindow(BigPictureViewModel vm, IGamepadSource? pads)
     {
         InitializeComponent();
+        // لون التمييز وثيم OLED من الإعدادات › المظهر (6.4)
+        BpPalette.Use(ThemeManager.CurrentAccent, ThemeManager.CurrentTheme);
+        BpPalette.Apply(Resources);
         _vm = vm;
         _pads = pads;
         DataContext = vm;
@@ -70,6 +73,27 @@ public partial class BigPictureWindow : Window
         vm.Bumped += OnBumped;
         vm.Activated += OnActivated;
         vm.Toast += ShowToast;
+        // الخلفية: معاينات البطاقات، وإعادة الضبط عند تغييرها من الإعدادات
+        vm.WallPreview = id => _previews.TryGetValue(id, out var bmp) ? bmp : _previews[id] = Wallpaper.WallpaperView.Preview(id, BpPalette.Accent, BpPalette.Oled);
+        vm.WallpaperChanged += ApplyWallpaper;
+        Opened += (_, _) => ApplyWallpaper();
+        // الحافظة ومنتقي الملفات في النافذة: نسخ المسار، لصق المفتاح، صورة غلاف من الجهاز
+        vm.CopyRequested += text => _ = Clipboard?.SetTextAsync(text);
+        vm.PasteKeyRequested += () => SafeUi.Run(async () =>
+        {
+            var text = Clipboard is { } cb ? await cb.GetTextAsync() : null;
+            vm.PasteKey(text);
+        }, "paste SteamGridDB key");
+        vm.PickCoverFileRequested += game => SafeUi.Run(async () =>
+        {
+            var files = await StorageProvider.OpenFilePickerAsync(new Avalonia.Platform.Storage.FilePickerOpenOptions
+            {
+                Title = Loc.Instance["chooseCover"],
+                AllowMultiple = false,
+                FileTypeFilter = new[] { Avalonia.Platform.Storage.FilePickerFileTypes.ImageAll },
+            });
+            if (files.Count > 0) vm.SetOwnCover(game, files[0].Path.LocalPath);
+        }, "pick cover in Big Picture");
         Loc.Instance.LanguageChanged += OnLanguageChanged;
 
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
@@ -116,7 +140,17 @@ public partial class BigPictureWindow : Window
 
     // ===== مزامنة العرض مع الحالة =====
 
-    private void OnVmChanged(object? sender, PropertyChangedEventArgs e) => SyncView(animate: true);
+    /// تبدّل اللقطة كل 4.5 ثانية يغيّر صورتها فقط: لا مزامنة للنافذة كلها ولا نقرة على الخلفية (قاعدة الخمول)
+    private static readonly System.Collections.Generic.HashSet<string> ShotOnly = new()
+    {
+        nameof(BigPictureViewModel.ShotA), nameof(BigPictureViewModel.ShotB), nameof(BigPictureViewModel.ShowShotB), nameof(BigPictureViewModel.ShotCaption),
+    };
+
+    private void OnVmChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != null && ShotOnly.Contains(e.PropertyName)) return;
+        SyncView(animate: true);
+    }
 
     private void SyncView(bool animate)
     {
@@ -174,7 +208,10 @@ public partial class BigPictureWindow : Window
             "card" or "more" or "hero" or "strip" => HomePage,
             "lib" => LibraryGrid,
             "flt" => LibraryPage,
-            "kb" or "res" => SearchPage,
+            "kb" => _vm.IsEntryOpen ? EntryPanel : SearchPage,
+            "res" => SearchPage,
+            "sg" => SgdbPage,
+            "deal" => DealsPage,
             "game" or "news" => GamePage,
             "row" or "sec" => SettingsLayer,
             "upd" => UpdatePanel,
@@ -206,6 +243,10 @@ public partial class BigPictureWindow : Window
             x += v.Bounds.X;
             y += v.Bounds.Y;
             if (ReferenceEquals(v, RowStrip)) extraX += -_vm.RowOffsetCards * Pitch;
+            // صفوف العروض تنزلق أفقيًا، والقائمة كلها تصعد عند الصف الثالث
+            if (v is ItemsControl { DataContext: BpDealRow dealRow } ic && ic.Classes.Contains("dealrow")) extraX += dealRow.ShiftX;
+            if (ReferenceEquals(v, DealRowsList)) y += _vm.DealsShiftY;
+            if (ReferenceEquals(v, SgdbGrid)) y += _vm.SgdbShiftY;
             if (ReferenceEquals(v, Track)) extraX += -_vm.TabIndex * _vm.CanvasWidth;
             v = v.GetVisualParent();
         }
@@ -324,6 +365,11 @@ public partial class BigPictureWindow : Window
 
     private void OnMoreClick(object? sender, RoutedEventArgs e) => _vm.ClickCard(_vm.RowCards.Count);
 
+    private void OnDealClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpDealItem>(sender) is { } item) _vm.ClickDeal(item.Row, item.Index);
+    }
+
     private void OnHeroButtonClick(object? sender, RoutedEventArgs e)
     {
         if (Item<BpButtonItem>(sender) is { } item) _vm.ClickHeroButton(_vm.HeroButtons.IndexOf(item));
@@ -350,8 +396,16 @@ public partial class BigPictureWindow : Window
         for (var r = 0; r < _vm.KeyRows.Count; r++)
         {
             var c = _vm.KeyRows[r].IndexOf(item);
-            if (c >= 0) { _vm.ClickKey(r, c); return; }
+            if (c < 0) continue;
+            if (_vm.IsEntryOpen) _vm.ClickEntryKey(r, c);
+            else _vm.ClickKey(r, c);
+            return;
         }
+    }
+
+    private void OnSgdbClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpSgdbItem>(sender) is { } item) _vm.ClickSgdb(item.Index);
     }
 
     private void OnGameOptionClick(object? sender, RoutedEventArgs e)

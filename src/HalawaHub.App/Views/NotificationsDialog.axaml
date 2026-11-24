@@ -3,41 +3,112 @@
              xmlns:vm="using:HalawaHub.App.ViewModels"
              xmlns:l="using:HalawaHub.App.Services"
              xmlns:c="using:HalawaHub.App.Controls"
+             xmlns:conv="using:HalawaHub.App.Converters"
              x:Class="HalawaHub.App.Views.NotificationsDialog"
              x:Name="Root"
              x:DataType="vm:MainViewModel"
              IsVisible="{Binding IsNotificationsOpen}">
+    <UserControl.Styles>
+        <!-- أيقونة كل نوع بلونها (.nic في التصميم) -->
+        <Style Selector="Border.nic">
+            <Setter Property="Width" Value="38"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Background" Value="{DynamicResource ChipBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MenuBorderBrush}"/>
+        </Style>
+        <Style Selector="Border.nic c|VectorIcon"><Setter Property="Foreground" Value="{DynamicResource MenuTextBrush}"/></Style>
+        <Style Selector="Border.nic.upd">
+            <Setter Property="Background" Value="#1FF5A623"/>
+            <Setter Property="BorderBrush" Value="#66F5A623"/>
+        </Style>
+        <Style Selector="Border.nic.upd c|VectorIcon"><Setter Property="Foreground" Value="{DynamicResource AmberBrush}"/></Style>
+        <Style Selector="Border.nic.free">
+            <Setter Property="Background" Value="#1F34D399"/>
+            <Setter Property="BorderBrush" Value="#6634D399"/>
+        </Style>
+        <Style Selector="Border.nic.free c|VectorIcon"><Setter Property="Foreground" Value="{DynamicResource StatusRunningBrush}"/></Style>
+        <Style Selector="Border.nic.fail">
+            <Setter Property="Background" Value="#597F1D1D"/>
+            <Setter Property="BorderBrush" Value="#8CEF4444"/>
+        </Style>
+        <Style Selector="Border.nic.fail c|VectorIcon"><Setter Property="Foreground" Value="{DynamicResource StatBadTextBrush}"/></Style>
+        <Style Selector="Border.nic.app">
+            <Setter Property="Background" Value="{DynamicResource MenuOpenGradient}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+        <Style Selector="Border.nic.app c|VectorIcon"><Setter Property="Foreground" Value="White"/></Style>
+
+        <!-- خط فاصل بين الإشعارات، لا فوق أولها -->
+        <Style Selector="ContentPresenter:nth-child(1) Border.nti"><Setter Property="BorderThickness" Value="0"/></Style>
+        <Style Selector="Border.nti:pointerover"><Setter Property="Background" Value="{DynamicResource Wash04Brush}"/></Style>
+
+        <!-- دخول البطاقة: تنزلق قليلًا وتظهر (.panel مع setDlgIn) -->
+        <Style Selector="Border#Card">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="{x:Static l:Springs.Pop}"/>
+                </Transitions>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+
     <Panel>
-        <Border Background="{DynamicResource ScrimBrush}" PointerPressed="Scrim_PointerPressed"/>
-        <Border Width="520" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center"
-                CornerRadius="14" Padding="26,22" Background="{DynamicResource DialogBrush}"
-                BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1" BoxShadow="0 30 80 0 #B3000000">
+        <!-- خلفية خفيفة: البطاقة عائمة تحت الجرس لا نافذة في الوسط -->
+        <Border Background="{DynamicResource LightScrimBrush}" PointerPressed="Scrim_PointerPressed"/>
+        <Border Name="Card" Width="460" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,128,28,20"
+                CornerRadius="22" Padding="22,18" Background="{DynamicResource GlassPanelBrush}"
+                BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" BoxShadow="{DynamicResource GlassPanelShadow}">
             <Grid RowDefinitions="Auto,*,Auto">
-                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,14">
-                    <TextBlock Classes="h2" Text="{l:Loc notifications}" Foreground="{DynamicResource RedHoverBrush}"/>
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{l:Loc notifications}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource RedHoverBrush}"
+                                   VerticalAlignment="Center"/>
+                        <Border Name="CountBadge" MinWidth="22" Height="22" Margin="10,0,0,0" Padding="6,0" CornerRadius="11"
+                                Background="{DynamicResource RedBrush}" VerticalAlignment="Center" IsVisible="{Binding !HasNoNotifications}">
+                            <TextBlock Text="{Binding NotificationCount}" FontSize="12" Foreground="White" FlowDirection="LeftToRight"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </StackPanel>
                     <Button Grid.Column="1" Classes="x" Command="{Binding ToggleNotificationsCommand}"
                             ToolTip.Tip="{l:Loc close}" AutomationProperties.Name="{l:Loc close}">
                         <c:VectorIcon Data="{StaticResource IconX}" Size="18"/>
                     </Button>
                 </Grid>
-                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel>
-                        <TextBlock Classes="lbl" Text="{l:Loc ntEmpty}" IsVisible="{Binding HasNoNotifications}"/>
-                        <ItemsControl ItemsSource="{Binding Notifications}">
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" Margin="-12,0">
+                    <StackPanel Margin="12,0">
+                        <TextBlock Classes="lbl" Text="{l:Loc ntEmpty}" IsVisible="{Binding HasNoNotifications}" Margin="0,8"/>
+                        <ItemsControl Name="Items" ItemsSource="{Binding Notifications}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:NotificationItem">
-                                    <Border Margin="0,0,0,8" Padding="12,10" CornerRadius="10" Background="{DynamicResource PageBrush}"
-                                            BorderBrush="{DynamicResource BorderBrushCard}" BorderThickness="1">
-                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
-                                            <TextBlock Text="{Binding Text}" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                                            <Button Grid.Column="1" Classes="btn" Padding="10,4" FontSize="12" Content="{l:Loc ntOpen}" IsVisible="{Binding CanOpen}"
-                                                    Command="{Binding #Root.((vm:MainViewModel)DataContext).OpenNotificationCommand}" CommandParameter="{Binding}"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding TimeText}" FontSize="11" Margin="10,0" VerticalAlignment="Center"
-                                                       Foreground="{DynamicResource SubtleBrush}" FlowDirection="LeftToRight"/>
-                                            <Button Grid.Column="3" Classes="x" ToolTip.Tip="{l:Loc ntDismiss}" AutomationProperties.Name="{l:Loc ntDismiss}"
-                                                    Command="{Binding #Root.((vm:MainViewModel)DataContext).DismissNotificationCommand}" CommandParameter="{Binding}">
-                                                <c:VectorIcon Data="{StaticResource IconX}" Size="14"/>
-                                            </Button>
+                                    <Border Classes="nti" Padding="12,14" Margin="-12,0" BorderThickness="0,1,0,0"
+                                            BorderBrush="{DynamicResource DividerBrush}" Background="Transparent">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <Border Classes="nic" Classes.upd="{Binding Kind, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=upd}"
+                                                    Classes.free="{Binding Kind, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=free}"
+                                                    Classes.fail="{Binding Kind, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=fail}"
+                                                    Classes.app="{Binding Kind, Converter={x:Static conv:EqualsTextConverter.Instance}, ConverterParameter=app}">
+                                                <c:VectorIcon Data="{Binding Icon}" Size="18" StrokeWidth="2.2"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Margin="14,0,18,0" Spacing="3">
+                                                <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Body}" FontSize="13" Foreground="{DynamicResource MutedBrush}"
+                                                           TextWrapping="Wrap" LineHeight="19" IsVisible="{Binding HasBody}"/>
+                                                <TextBlock Text="{Binding RelativeTimeText}" FontSize="12" Foreground="{DynamicResource SubtleBrush}"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
+                                                    <Button Classes="btn sm pri" Content="{Binding ActionLabel}" IsVisible="{Binding HasAction}"
+                                                            Command="{Binding #Root.((vm:MainViewModel)DataContext).RunNotificationActionCommand}" CommandParameter="{Binding}"/>
+                                                    <Button Classes="btn sm" Content="{l:Loc ntDismiss}"
+                                                            Command="{Binding #Root.((vm:MainViewModel)DataContext).DismissNotificationCommand}" CommandParameter="{Binding}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <!-- نقطة غير المقروء -->
+                                            <Ellipse Grid.Column="1" Width="8" Height="8" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,0,0"
+                                                     Fill="{DynamicResource RedHoverBrush}" IsVisible="{Binding IsUnread}"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -45,7 +116,7 @@
                         </ItemsControl>
                     </StackPanel>
                 </ScrollViewer>
-                <Button Grid.Row="2" Classes="btn" HorizontalAlignment="Left" Margin="0,12,0,0" Content="{l:Loc ntClear}"
+                <Button Grid.Row="2" Classes="btn" HorizontalAlignment="Right" Margin="0,12,0,0" Content="{l:Loc ntClear}"
                         Command="{Binding ClearNotificationsCommand}" IsVisible="{Binding !HasNoNotifications}"/>
             </Grid>
         </Border>

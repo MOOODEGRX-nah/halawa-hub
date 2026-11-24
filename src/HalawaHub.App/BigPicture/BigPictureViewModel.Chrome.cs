@@ -78,7 +78,9 @@ public sealed partial class BigPictureViewModel
                     : new[] { H("b", "bpCancel") },
                 _ => _screen switch
                 {
-                    BpScreen.Home => new[] { H("a", _homeRow == 2 ? "bpOpen" : "bpSelect"), H("y", "bpSearch"), H("menu", "bpGuide") },
+                    BpScreen.Home => _homeRow == 2 && _cardIndex < RowCards.Count
+                        ? new[] { H("a", "bpOpen"), H("x", "bpPlay"), H("y", "bpSearch"), H("menu", "bpGuide") }
+                        : new[] { H("a", _homeRow == 2 ? "bpOpen" : "bpSelect"), H("y", "bpSearch"), H("menu", "bpGuide") },
                     BpScreen.Library => new[] { H("a", "bpOpen"), H("x", "bpFilter"), H("b", "bpBack"), H("menu", "bpGuide") },
                     BpScreen.Game => new[] { H("a", "bpSelect"), H("b", "bpBack"), H("menu", "bpGuide") },
                     BpScreen.Search => new[] { H("a", "bpType"), H("b", "bpDel"), H("menu", "bpGuide") },

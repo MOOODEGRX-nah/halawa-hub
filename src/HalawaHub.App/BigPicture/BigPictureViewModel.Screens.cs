@@ -48,6 +48,7 @@ public sealed partial class BigPictureViewModel
             _hero = value;
             HeroVersion++;
             RefreshHeroLabels();
+            OnHeroChangedForSide();
         }
     }
 
@@ -62,10 +63,8 @@ public sealed partial class BigPictureViewModel
 
     private void BuildHome()
     {
+        // التصميم الجديد: لا أزرار في أعلى الرئيسي (التشغيل والمفضلة في صفحة اللعبة، وX على البطاقة يشغّلها)
         HeroButtons.Clear();
-        HeroButtons.Add(new BpButtonItem { FocusKey = "hero.0", Id = "play", IsPrimary = true });
-        HeroButtons.Add(new BpButtonItem { FocusKey = "hero.1", Id = "details" });
-        HeroButtons.Add(new BpButtonItem { FocusKey = "hero.2", Id = "fav" });
 
         StripTabs.Clear();
         for (var i = 0; i < StripIds.Length; i++)
@@ -134,7 +133,7 @@ public sealed partial class BigPictureViewModel
     {
         if (dy != 0)
         {
-            _homeRow = Math.Clamp(_homeRow + dy, 0, 2);
+            _homeRow = Math.Clamp(_homeRow + dy, 1, 2);
             return;
         }
 
@@ -363,7 +362,8 @@ public sealed partial class BigPictureViewModel
     {
         NewsItems.Clear();
         var i = 0;
-        foreach (var (title, date, url) in news)
+        // صفحة اللعبة تعرض خبرين (التصميم)
+        foreach (var (title, date, url) in news.Take(2))
             NewsItems.Add(new BpButtonItem { FocusKey = "news." + i++, Id = url, Label = title, Note = date });
         if (_gameCol == 1 && NewsItems.Count == 0) _gameCol = 0;
         SyncFocus();

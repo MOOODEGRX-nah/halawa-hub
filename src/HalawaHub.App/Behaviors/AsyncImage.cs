@@ -179,7 +179,13 @@ public static class AsyncImage
         // تغيّر بعد إنشاء البطاقة بفترة) — AttachedToVisualTree ما راح ينطلق
         // مرة ثانية بهالحالة، فنشترك فورًا
         if (image.GetVisualRoot() != null)
+        {
             image.EffectiveViewportChanged += OnEffectiveViewportChanged;
+            // وهو معروض أصلًا: لن يصل حدث جديد ما دام لم يتحرك، فيبقى «غير مرئي» ولا يُحمَّل
+            // أبدًا (صورة أول رابط لها يصل بعد فتح النافذة، مثل لقطات الشاشة الكبيرة).
+            // نعتبره مرئيًا الآن، وأول حدث لاحق يصحح ذلك
+            state.IsVisible = image.IsEffectivelyVisible;
+        }
     }
 
     private static void CancelPending(ImageLoadState state)
@@ -290,10 +296,11 @@ public static class AsyncImage
             // خرج عن الشاشة أو تغيّر رابطه قبل ما يخلص — تجاهل بهدوء، بدون تسجيله
             // كفشل بالكاش (ممكن ننجح لو حاولنا مرة ثانية لما يرجع يصير مرئي)
         }
-        catch
+        catch (Exception ex)
         {
             // فشل حقيقي (شبكة/فك ترميز) — نسجّله كـ null بالكاش عشان ما نعيد
-            // محاولة فاشلة لنفس الرابط كل مرة
+            // محاولة فاشلة لنفس الرابط كل مرة (ومرة واحدة في السجل لكل رابط)
+            HalawaHub.Core.Log.Info("image load failed: " + (url.StartsWith("file:", StringComparison.OrdinalIgnoreCase) ? "local file" : new Uri(url).Host) + " (" + ex.GetType().Name + ": " + ex.Message + ")");
             CacheSet(cacheKey, null);
             failed = true;
         }

@@ -250,6 +250,26 @@ public sealed class BigPictureHost : IBpHost
     public void ClearNotifications() => _main.ClearNotificationsCommand.Execute(null);
     public void MarkNotificationsRead() => _main.MarkNotificationsReadFromBigPicture();
 
+    // ===== العمود الجانبي وصفحة اللعبة =====
+
+    public async Task<IReadOnlyList<string>> LoadScreenshotsAsync(BpGame game)
+    {
+        if (game.SteamAppId is not { } appId) return Array.Empty<string>();
+        var details = await HalawaHub.Core.Store.SteamStoreClient.GetDetailsAsync(appId, Loc.Instance.Language);
+        return details?.Screenshots.Take(4).Select(s => s.FullUrl).ToList() ?? (IReadOnlyList<string>)Array.Empty<string>();
+    }
+
+    public double[] WeekHours(BpGame game) =>
+        game.Source is GameCardViewModel c ? PlayDaysService.Week(c.Game.Platform, c.Game.Id, DateTime.Now) : new double[7];
+
+    public BpActivity? Activity(BpGame game)
+    {
+        if (game.Source is not GameCardViewModel c) return null;
+        var last = PlayDaysService.LastSession(c.Game.Platform, c.Game.Id);
+        var streak = PlayDaysService.Streak(c.Game.Platform, c.Game.Id, DateTime.Now);
+        return last == null && streak == 0 ? null : new BpActivity(streak, last?.End ?? DateTime.Now, last?.Length ?? TimeSpan.Zero);
+    }
+
     // ===== العروض =====
 
     public IReadOnlyList<BpDealSource> Deals => new[]

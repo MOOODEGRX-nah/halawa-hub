@@ -61,6 +61,13 @@ public interface IBpHost
     string DealsUpdatedText => "";
     void OpenUrl(string url) { }
 
+    // ===== العمود الجانبي في الرئيسي وصفحة اللعبة =====
+    /// لقطات اللعبة (متجر Steam)، أو فارغة
+    Task<IReadOnlyList<string>> LoadScreenshotsAsync(BpGame game) => Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
+    /// ساعات آخر 7 أيام (آخرها اليوم) كما سجلها Halawa
+    double[] WeekHours(BpGame game) => new double[7];
+    BpActivity? Activity(BpGame game) => null;
+
     void ExitBigPicture();
     void CloseApp();
 }

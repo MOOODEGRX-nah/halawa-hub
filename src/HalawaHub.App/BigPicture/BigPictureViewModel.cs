@@ -91,6 +91,8 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpButton.X:
                 if (_overlay == BpOverlay.Notifications) DismissFocusedNotification();
                 else if (_overlay == BpOverlay.None && _screen == BpScreen.Library) CyclePlatform();
+                // X على بطاقة في الرئيسي يشغّلها مباشرة
+                else if (_overlay == BpOverlay.None && _screen == BpScreen.Home && _homeRow == 2 && _cardIndex < RowCards.Count) Play(RowCards[_cardIndex].Game);
                 break;
             case BpButton.Y:
                 if (_overlay == BpOverlay.Notifications) ClearNotifications();
@@ -301,6 +303,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
     private void Changed()
     {
         UpdateLibraryWindow();
+        UpdateShotTimer();
         FocusKey = ComputeFocusKey();
         foreach (var item in AllItems()) item.IsFocused = item.FocusKey == FocusKey;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));

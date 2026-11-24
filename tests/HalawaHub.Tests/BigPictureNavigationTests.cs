@@ -18,6 +18,12 @@ internal sealed class FakeBpHost : IBpHost
     public BpLaunchResult NextLaunch { get; set; } = BpLaunchResult.Success;
     public TaskCompletionSource<BpLaunchResult>? PendingLaunch { get; set; }
     public List<BpNotification> NotificationList { get; } = new();
+    public List<string> ShotList { get; } = new();
+    public double[] Week { get; set; } = new double[7];
+    public BpActivity? ActivityValue { get; set; }
+    public Task<IReadOnlyList<string>> LoadScreenshotsAsync(BpGame game) => Task.FromResult<IReadOnlyList<string>>(ShotList.ToList());
+    public double[] WeekHours(BpGame game) => Week;
+    public BpActivity? Activity(BpGame game) => ActivityValue;
     public List<BpDealSource> DealList { get; } = new();
     public IReadOnlyList<BpDealSource> Deals => DealList;
     public string DealsUpdatedText { get; set; } = "";
@@ -78,15 +84,20 @@ public class BigPictureNavigationTests : IDisposable
     private static BigPictureViewModel Vm(FakeBpHost host) => new(host, NoDelay);
 
     [AvaloniaFact]
-    public void Home_starts_on_the_first_card_and_moves_up_to_the_strip_and_hero_buttons()
+    public void Home_starts_on_the_first_card_and_moves_up_to_the_strip_only()
     {
-        var vm = Vm(FakeBpHost.WithGames(10));
+        var host = FakeBpHost.WithGames(10);
+        var vm = Vm(host);
 
         vm.FocusKey.Should().Be("card.0");
         vm.Press(BpButton.Up);
         vm.FocusKey.Should().Be("strip.0");
         vm.Press(BpButton.Up);
-        vm.FocusKey.Should().Be("hero.0");
+        vm.FocusKey.Should().Be("strip.0", "the hero has no buttons any more: play and favorite live on the game page");
+        vm.HeroButtons.Should().BeEmpty();
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.X);
+        host.Calls.Should().Contain(c => c.StartsWith("launch:"), "X on a card plays it");
     }
 
     [AvaloniaFact]

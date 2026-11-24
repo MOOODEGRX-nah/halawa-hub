@@ -195,7 +195,7 @@ public class BigPictureUiTests : IDisposable
         vm.Press(App.BigPicture.Input.BpButton.Up);
         vm.Press(App.BigPicture.Input.BpButton.Up);
         Settle();
-        vm.FocusKey.Should().Be("hero.0");
+        vm.FocusKey.Should().Be("strip.0");
         Shot(window, language, "01-home");
         window.Close();
     }
@@ -468,7 +468,27 @@ public class BigPictureUiTests : IDisposable
             .Select(c => BpFocus.GetKey(c)).ToList();
 
         keys.Should().OnlyHaveUniqueItems();
-        keys.Should().Contain(new[] { "hero.0", "strip.3", "card.0", "more" });
+        keys.Should().Contain(new[] { "strip.3", "card.0", "more" });
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Home_side_column_shows_the_screenshots()
+    {
+        var png = Path.Combine(Path.GetTempPath(), "halawa-shot-test.png");
+        var bmp = new Avalonia.Media.Imaging.WriteableBitmap(new Avalonia.PixelSize(8, 8), new Avalonia.Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Premul);
+        bmp.Save(png);
+        var host = DesignHost();
+        host.ShotList.AddRange(new[] { new Uri(png).AbsoluteUri, new Uri(png).AbsoluteUri + "?2" });
+        var (window, vm) = Open(Loc.English, host);
+        vm.Press(App.BigPicture.Input.BpButton.Right);
+        Settle();
+        System.Threading.Thread.Sleep(300);
+        Settle();
+        vm.HasShots.Should().BeTrue();
+        var a = window.GetVisualDescendants().OfType<Image>().First(i => i.Name == "ShotImageA");
+        var b = window.GetVisualDescendants().OfType<Image>().First(i => i.Name == "ShotImageB");
+        (a.Source ?? b.Source).Should().NotBeNull("the current screenshot is drawn");
         window.Close();
     }
 }

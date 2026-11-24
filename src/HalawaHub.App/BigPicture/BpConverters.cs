@@ -51,6 +51,16 @@ public static class BpIs
     public static IValueConverter DealBadge { get; } = new FuncValueConverter<bool, IBrush>(free =>
         new SolidColorBrush(Color.Parse(free ? "#DC2626" : "#E6166534")));
 
+    public static IValueConverter OnOpacity { get; } = new FuncValueConverter<bool, double>(b => b ? 1 : 0);
+    public static IValueConverter OffOpacity { get; } = new FuncValueConverter<bool, double>(b => b ? 0 : 1);
+    /// نقاط اللقطات: الحالية أطول وحمراء
+    public static IValueConverter DotWidth { get; } = new FuncValueConverter<bool, double>(on => on ? 26 : 7);
+    public static IValueConverter DotBrush { get; } = new FuncValueConverter<bool, IBrush>(on => new SolidColorBrush(Color.Parse(on ? "#EF4444" : "#66FFFFFF")));
+    /// «لعبك هذا الأسبوع»: اليوم بالأحمر
+    public static IValueConverter WeekBarBrush { get; } = new FuncValueConverter<bool, IBrush>(today => new SolidColorBrush(Color.Parse(today ? "#EF4444" : "#4A1A1E")));
+    public static IValueConverter BoldIf { get; } = new FuncValueConverter<bool, FontWeight>(b => b ? FontWeight.Bold : FontWeight.Normal);
+    public static IValueConverter TodayText { get; } = new FuncValueConverter<bool, IBrush>(today => new SolidColorBrush(Color.Parse(today ? "#FFFFFF" : "#9C8A8A")));
+
     public static IValueConverter Positive { get; } = new FuncValueConverter<int, bool>(n => n > 0);
 
     /// شريط البطارية رقم N يضيء إن كان عدد الأشرطة ≥ N

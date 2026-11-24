@@ -216,6 +216,7 @@ public partial class MainViewModel
     private void CreditPlayTime(string platform, string id, double secs)
     {
         PlayTimeService.AddSeconds(platform, id, secs);
+        PlayDaysService.Record(platform, id, DateTime.Now, secs);
         // البطاقات تُبنى من جديد مع كل فحص، فنبحث عن الحالية لا عن التي بدأت الجلسة
         foreach (var card in Games.Where(c => c.Game.Platform == platform && c.Game.Id == id))
             card.RefreshPlayTime();

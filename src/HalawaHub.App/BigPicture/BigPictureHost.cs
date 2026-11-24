@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HalawaHub.App.Services;
 using HalawaHub.App.ViewModels;
+using HalawaHub.Core.Library;
 
 namespace HalawaHub.App.BigPicture;
 
@@ -249,6 +250,107 @@ public sealed class BigPictureHost : IBpHost
     public void DismissNotification(BpNotification item) => _main.DismissNotificationCommand.Execute(item.Source);
     public void ClearNotifications() => _main.ClearNotificationsCommand.Execute(null);
     public void MarkNotificationsRead() => _main.MarkNotificationsReadFromBigPicture();
+
+    // ===== إعدادات اللعبة داخل الشاشة الكبيرة =====
+
+    private static GameCardViewModel? CardOf(BpGame game) => game.Source as GameCardViewModel;
+
+    /// تغيّر شيء يظهر في القوائم (الاسم، الغلاف، الصور): نعيد بناء ألعاب الشاشة الكبيرة
+    private void Rebuilt()
+    {
+        _games = null;
+        DataChanged?.Invoke(true);
+    }
+
+    public BpGameInfo GameInfo(BpGame game)
+    {
+        if (CardOf(game) is not { } c) return new BpGameInfo { Name = game.Name, OriginalName = game.Name };
+        var L = Loc.Instance;
+        var launcher = LauncherActions.LauncherName(c.Game.Platform);
+        return new BpGameInfo
+        {
+            Name = c.Name,
+            OriginalName = c.OriginalName,
+            HasUpdate = c.HasUpdate,
+            StatusText = c.HasUpdate ? L["bpUpdAvail"] : L["bpGsReady"],
+            StatusNote = c.Game.Platform switch
+            {
+                "Steam" => L["bpGsNoteSteam"],
+                "Epic Games" => L["bpGsNoteEpic"],
+                _ => L.Format("bpGsNoteOther", launcher),
+            },
+            LauncherAction = c.CanOpenInLauncher ? c.OpenInLauncherLabel : null,
+            IsHidden = c.IsHidden,
+            InstallPath = c.InstallPath,
+            SizeText = c.SizeOnDiskText,
+            CanVerify = c.CanVerify,
+            VerifyNote = c.Game.Platform == "Steam" ? L["bpGsVerifyN"] : L.Format("bpGsNoteOther", launcher),
+            CanUninstall = c.CanUninstall,
+            UninstallLabel = c.UninstallLabel,
+            SupportsLaunchArgs = c.SupportsLaunchParameters,
+            LaunchArgs = c.LaunchParameters,
+            CoverSource = c.CoverSource,
+            CoverSourceText = c.CoverSourceText,
+        };
+    }
+
+    public void RenameGame(BpGame game, string name)
+    {
+        if (CardOf(game) is not { } c) return;
+        _main.RenameFromBigPicture(c, name);
+        Rebuilt();
+    }
+
+    public IReadOnlyList<BpCollectionToggle> GameCollections(BpGame game) =>
+        CardOf(game) is { } c
+            ? _main.ManualCollectionsOf(c).Select(x => new BpCollectionToggle(x.Id, x.Name, x.Count, x.IsMember)).ToList()
+            : Array.Empty<BpCollectionToggle>();
+
+    public void SetCollection(BpGame game, string collectionId, bool member)
+    {
+        if (CardOf(game) is { } c) _main.SetMembershipOf(c, collectionId, member);
+    }
+
+    public void OpenFileLocation(BpGame game) => _main.OpenInstallLocation(CardOf(game));
+    public void VerifyFiles(BpGame game) => _main.VerifyFiles(CardOf(game));
+    public bool CreateShortcut(BpGame game) => CardOf(game) is { } c && _main.CreateDesktopShortcut(c);
+
+    public void Uninstall(BpGame game)
+    {
+        if (CardOf(game) is { } c) _main.UninstallGame(c);
+    }
+
+    public void SetLaunchArgs(BpGame game, string args)
+    {
+        if (CardOf(game) is { } c) c.LaunchParameters = args;
+    }
+
+    public void RestoreCover(BpGame game)
+    {
+        if (CardOf(game) is not { } c) return;
+        c.RestoreOriginalCover();
+        Rebuilt();
+    }
+
+    public void SetOwnCover(BpGame game, string path)
+    {
+        if (CardOf(game) is not { } c) return;
+        c.SetCustomCover(path);
+        Rebuilt();
+    }
+
+    public SgdbBrowser? Sgdb => _main.Sgdb;
+    public bool HasSgdbKey => _main.CanSearchCovers;
+    public string SgdbKeyUrl => _main.SteamGridDbKeyUrl;
+    public Task<bool> SaveSgdbKeyAsync(string key) => _main.SaveSgdbKeyFromBigPictureAsync(key);
+
+    public async Task<bool> PickSgdbAsync(BpGame game, SgdbTile tile)
+    {
+        if (CardOf(game) is not { } c) return false;
+        var ok = await _main.PickSgdbAsync(tile, c);
+        if (ok) Rebuilt();
+        return ok;
+    }
 
     // ===== العمود الجانبي وصفحة اللعبة =====
 

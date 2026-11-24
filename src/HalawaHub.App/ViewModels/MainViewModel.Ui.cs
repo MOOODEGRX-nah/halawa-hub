@@ -440,9 +440,11 @@ public partial class MainViewModel
             DetailsGame = null;
     }
 
-    private void OpenInstallLocation()
+    private void OpenInstallLocation() => OpenInstallLocation(DetailsGame);
+
+    internal void OpenInstallLocation(GameCardViewModel? card)
     {
-        var path = DetailsGame?.InstallPath;
+        var path = card?.InstallPath;
         if (string.IsNullOrWhiteSpace(path)) return;
 
         // xdg-open لا يرمي خطأ لمسار غير موجود، ولا يرى المستخدم أي شيء يحدث
@@ -533,10 +535,12 @@ public partial class MainViewModel
     private static readonly HttpClient CoverDownloader = new() { Timeout = TimeSpan.FromSeconds(30) };
 
     /// يختار صورة من المتصفح: تُنزَّل لمجلد البيانات ثم تُستعمل حسب نوعها، ويعود المتصفح إلى قسم الغلاف
-    internal async Task PickSgdbAsync(SgdbTile? tile)
+    internal async Task PickSgdbAsync(SgdbTile? tile) => await PickSgdbAsync(tile, DetailsGame);
+
+    /// الشاشة الكبيرة تختار للعبتها هي، لا للعبة نافذة الإعدادات
+    internal async Task<bool> PickSgdbAsync(SgdbTile? tile, GameCardViewModel? card)
     {
-        var card = DetailsGame;
-        if (card == null || tile == null) return;
+        if (card == null || tile == null) return false;
         try
         {
             var path = BuildPickedCoverPath(card, tile.Image.Url);
@@ -548,11 +552,13 @@ public partial class MainViewModel
             }
             ApplySgdbArt(card, tile.Type, tile.Image.Style, path);
             IsCoverSearchOpen = false;
+            return true;
         }
         catch (Exception ex)
         {
             Log.Error("could not download the chosen SteamGridDB image", ex);
             ShowStatus(Loc.Instance["sgdbFailed"]);
+            return false;
         }
     }
 

@@ -61,6 +61,10 @@ public static class BpIs
     public static IValueConverter BoldIf { get; } = new FuncValueConverter<bool, FontWeight>(b => b ? FontWeight.Bold : FontWeight.Normal);
     public static IValueConverter TodayText { get; } = new FuncValueConverter<bool, IBrush>(today => new SolidColorBrush(Color.Parse(today ? "#FFFFFF" : "#9C8A8A")));
 
+    public static IValueConverter IndexIs { get; } = new FuncValueConverter<int, object?, bool>((i, p) => p?.ToString() == i.ToString(CultureInfo.InvariantCulture));
+    public static IValueConverter TextIs { get; } = new FuncValueConverter<string?, object?, bool>((s, p) => s == p?.ToString());
+    public static IValueConverter DangerText { get; } = new FuncValueConverter<bool, IBrush>(d => new SolidColorBrush(Color.Parse(d ? "#F87171" : "#F5EDED")));
+
     public static IValueConverter Positive { get; } = new FuncValueConverter<int, bool>(n => n > 0);
 
     /// شريط البطارية رقم N يضيء إن كان عدد الأشرطة ≥ N

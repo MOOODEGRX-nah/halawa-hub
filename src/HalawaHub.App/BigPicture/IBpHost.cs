@@ -68,6 +68,27 @@ public interface IBpHost
     double[] WeekHours(BpGame game) => new double[7];
     BpActivity? Activity(BpGame game) => null;
 
+    // ===== إعدادات اللعبة داخل الشاشة الكبيرة =====
+    BpGameInfo GameInfo(BpGame game) => new() { Name = game.Name, OriginalName = game.Name };
+    void RenameGame(BpGame game, string name) { }
+    IReadOnlyList<BpCollectionToggle> GameCollections(BpGame game) => Array.Empty<BpCollectionToggle>();
+    void SetCollection(BpGame game, string collectionId, bool member) { }
+    void OpenFileLocation(BpGame game) { }
+    void VerifyFiles(BpGame game) { }
+    bool CreateShortcut(BpGame game) => false;
+    void Uninstall(BpGame game) { }
+    void SetLaunchArgs(BpGame game, string args) { }
+    void RestoreCover(BpGame game) { }
+    void SetOwnCover(BpGame game, string path) { }
+    /// متصفح SteamGridDB المشترك مع النافذة العادية
+    HalawaHub.App.ViewModels.SgdbBrowser? Sgdb => null;
+    bool HasSgdbKey => false;
+    string SgdbKeyUrl => "https://www.steamgriddb.com/profile/preferences/api";
+    /// يتحقق من المفتاح ويحفظه
+    Task<bool> SaveSgdbKeyAsync(string key) => Task.FromResult(false);
+    /// ينزّل الصورة المختارة ويستعملها حسب نوعها
+    Task<bool> PickSgdbAsync(BpGame game, HalawaHub.App.ViewModels.SgdbTile tile) => Task.FromResult(false);
+
     void ExitBigPicture();
     void CloseApp();
 }

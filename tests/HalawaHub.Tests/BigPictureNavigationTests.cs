@@ -18,6 +18,10 @@ internal sealed class FakeBpHost : IBpHost
     public BpLaunchResult NextLaunch { get; set; } = BpLaunchResult.Success;
     public TaskCompletionSource<BpLaunchResult>? PendingLaunch { get; set; }
     public List<BpNotification> NotificationList { get; } = new();
+    public BpGameInfo? Info { get; set; }
+    public BpGameInfo GameInfo(BpGame game) => Info ?? new BpGameInfo { Name = game.Name, OriginalName = game.Name };
+    public void RenameGame(BpGame game, string name) => Calls.Add("rename:" + game.Key + ":" + name);
+    public void RestoreCover(BpGame game) => Calls.Add("restore:" + game.Key);
     public List<string> ShotList { get; } = new();
     public double[] Week { get; set; } = new double[7];
     public BpActivity? ActivityValue { get; set; }
@@ -214,6 +218,7 @@ public class BigPictureNavigationTests : IDisposable
     [AvaloniaFact]
     public void Game_settings_open_a_panel_inside_big_picture_instead_of_leaving()
     {
+        Loc.Instance.Language = Loc.English;
         var host = FakeBpHost.WithGames(3);
         var vm = Vm(host);
         vm.OpenGame(host.GameList[0]);
@@ -221,30 +226,115 @@ public class BigPictureNavigationTests : IDisposable
         vm.Press(BpButton.Down);
         vm.FocusKey.Should().Be("game.2");
 
+        // إعدادات اللعبة: نفس نافذة الإعدادات بأقسام نافذة اللعبة العادية
         vm.Press(BpButton.A);
-        vm.Overlay.Should().Be(BpOverlay.GameOptions);
-        vm.FocusKey.Should().Be("gopt.0");
-        host.Calls.Should().NotContain(c => c == "exit" || c.StartsWith("settings:"), "the panel opens inside Big Picture");
+        vm.Screen.Should().Be(BpScreen.Settings);
+        vm.IsGameSettings.Should().BeTrue();
+        vm.SettingSections.Select(s => s.Label).Should().Equal("General", "Collections", "Files", "Cover", "Launch", "Back to the game");
+        host.Calls.Should().NotContain(c => c == "exit" || c.StartsWith("settings:"), "everything stays inside Big Picture");
 
-        // B يغلق اللوحة ويعيد التركيز لزر الإعدادات
+        // عام: الاسم بلوحة المفاتيح على الشاشة، و«تم» يحفظ
+        vm.Press(BpButton.Right);
+        vm.FocusKey.Should().Be("row.0");
+        vm.Press(BpButton.A);
+        vm.Overlay.Should().Be(BpOverlay.TextEntry);
+        vm.EntryText.Should().Be(host.GameList[0].Name);
+        for (var i = 0; i < 4; i++) vm.Press(BpButton.Down);   // الصف الخاص: مسافة، حذف، لغة، تم
+        for (var i = 0; i < 3; i++) vm.Press(BpButton.Right);
+        vm.Press(BpButton.A);
+        vm.Overlay.Should().Be(BpOverlay.None);
+        host.Calls.Should().Contain("rename:g0:" + host.GameList[0].Name);
+
+        // B: من الأسطر إلى الأقسام، ثم يعود إلى صفحة اللعبة نفسها
         vm.Press(BpButton.B);
-        vm.Overlay.Should().Be(BpOverlay.None);
-        vm.FocusKey.Should().Be("game.2");
+        vm.Press(BpButton.B);
+        vm.Screen.Should().Be(BpScreen.Game);
+        vm.IsGameSettings.Should().BeFalse();
+        vm.Hero!.Key.Should().Be("g0");
 
-        // «إعدادات أكثر» هو الخيار الوحيد الذي يفتح النافذة العادية، والمضيف يعيد الشاشة الكبيرة بعدها
+        // الإخفاء من «عام»: يعود للتبويب وتختفي اللعبة، بلا خروج
         vm.Press(BpButton.A);
+        vm.Press(BpButton.Right);
         vm.Press(BpButton.Down);
-        vm.Press(BpButton.A);
-        host.Calls.Should().Contain("settings:g0");
-        vm.Overlay.Should().Be(BpOverlay.None);
-
-        // الإخفاء: يعود للصفحة السابقة وتختفي اللعبة
-        vm.Press(BpButton.A);
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.Down);
         vm.Press(BpButton.A);
         host.Calls.Should().Contain("hide:g0");
         vm.Screen.Should().Be(BpScreen.Home);
-        host.GameList.Should().NotContain(g => g.Key == "g0");
         host.Calls.Should().NotContain("exit");
+    }
+
+    [AvaloniaFact]
+    public void Game_settings_files_cover_and_launch_rows()
+    {
+        Loc.Instance.Language = Loc.English;
+        var host = FakeBpHost.WithGames(2);
+        host.Info = new BpGameInfo { Name = "G", OriginalName = "G", CanVerify = true, CanUninstall = true, UninstallLabel = "Uninstall", SizeText = "4 GB", CoverSource = "sgdb", LaunchArgs = "" };
+        var vm = Vm(host);
+        string? copied = null;
+        vm.CopyRequested += t => copied = t;
+        vm.OpenGame(host.GameList[0]);
+        vm.OpenGameSettings(host.GameList[0]);
+
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.Down);   // الملفات
+        vm.SectionTitle.Should().Be("Files");
+        vm.SettingRows.Select(r => r.Id).Should().Equal("g.open", "g.copy", "g.verify", "g.shortcut", "g.uninstall");
+        vm.SettingRows[0].Value.Should().Be("4 GB");
+        vm.SettingRows.Last().IsDanger.Should().BeTrue();
+        vm.Press(BpButton.Right);
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.A);
+        copied.Should().NotBeNull("copy path goes to the clipboard");
+
+        vm.Press(BpButton.Left);
+        vm.Press(BpButton.Down);   // الغلاف
+        vm.SettingRows.Single().Kind.Should().Be(BpRowKind.Tiles);
+        vm.SettingRows.Single().Value.Should().Be("sgdb", "the tile in use gets the check mark");
+        vm.Press(BpButton.Right);
+        vm.SettingRows.Single().Selected.Should().Be(1, "focus starts on Search SteamGridDB");
+        vm.Press(BpButton.Right);
+        vm.Press(BpButton.A);
+        host.Calls.Should().Contain("restore:g0");
+
+        vm.Press(BpButton.Left);
+        vm.Press(BpButton.Left);
+        vm.Press(BpButton.Left);   // من البطاقة الأولى إلى الأقسام
+        vm.Press(BpButton.Down);   // التشغيل
+        vm.SettingRows[0].Value.Should().Be("None");
+    }
+
+    [AvaloniaFact]
+    public void Without_a_key_the_cover_section_shows_the_qr_paste_and_type_card()
+    {
+        Loc.Instance.Language = Loc.English;
+        var host = FakeBpHost.WithGames(2);
+        var vm = Vm(host);
+        vm.OpenGame(host.GameList[0]);
+        vm.OpenGameSettings(host.GameList[0]);
+        for (var i = 0; i < 3; i++) vm.Press(BpButton.Down);   // الغلاف
+        vm.Press(BpButton.Right);
+        vm.Press(BpButton.A);                                   // ابحث في SteamGridDB بلا مفتاح
+
+        vm.IsCoverKey.Should().BeTrue();
+        vm.SettingRows.Select(r => r.Id).Should().Equal("g.keyneed", "g.keyqr", "g.keypaste", "g.keytype", "g.keyback");
+        vm.SettingRows[1].Note.Should().Be(((IBpHost)host).SgdbKeyUrl);
+        vm.FocusKey.Should().Be("row.0", "the QR and the explanation are not focusable");
+
+        vm.Press(BpButton.Down);
+        vm.Press(BpButton.A);                                   // اكتب المفتاح
+        vm.Overlay.Should().Be(BpOverlay.TextEntry);
+        vm.EntryShown.Should().Be("Paste the key here…");
+        vm.Press(BpButton.A);                                   // أول حرف
+        vm.EntryShown.Should().Be("•", "the key is hidden while typing");
+    }
+
+    [AvaloniaFact]
+    public void QR_code_encodes_the_key_page()
+    {
+        var m = HalawaHub.App.Controls.QrCode.Encode("https://www.steamgriddb.com/profile/preferences/api");
+        m.Should().NotBeNull();
+        m!.Count.Should().BeGreaterThan(21, "a real QR matrix with its quiet zone");
     }
 
     /// <summary>

@@ -86,17 +86,25 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpButton.A: Activated?.Invoke(); Act(); break;
             case BpButton.B: Back(); break;
             // LB يسار ذراع التحكم فيحرك الاختيار لليسار، وRB لليمين، في اللغتين
-            case BpButton.LB: if (_overlay == BpOverlay.None) CycleTab(IsRtl ? 1 : -1); break;
-            case BpButton.RB: if (_overlay == BpOverlay.None) CycleTab(IsRtl ? -1 : 1); break;
+            case BpButton.LB:
+                if (_overlay == BpOverlay.None && _screen == BpScreen.Sgdb) CycleSgdbType(-1);
+                else if (_overlay == BpOverlay.None && _screen != BpScreen.Settings) CycleTab(IsRtl ? 1 : -1);
+                break;
+            case BpButton.RB:
+                if (_overlay == BpOverlay.None && _screen == BpScreen.Sgdb) CycleSgdbType(1);
+                else if (_overlay == BpOverlay.None && _screen != BpScreen.Settings) CycleTab(IsRtl ? -1 : 1);
+                break;
             case BpButton.X:
                 if (_overlay == BpOverlay.Notifications) DismissFocusedNotification();
+                else if (_overlay == BpOverlay.None && _screen == BpScreen.Sgdb) CycleSgdbStyle();
                 else if (_overlay == BpOverlay.None && _screen == BpScreen.Library) CyclePlatform();
                 // X على بطاقة في الرئيسي يشغّلها مباشرة
                 else if (_overlay == BpOverlay.None && _screen == BpScreen.Home && _homeRow == 2 && _cardIndex < RowCards.Count) Play(RowCards[_cardIndex].Game);
                 break;
             case BpButton.Y:
                 if (_overlay == BpOverlay.Notifications) ClearNotifications();
-                else if (_overlay == BpOverlay.None) GoTab(BpScreen.Search);
+                else if (_overlay == BpOverlay.None && _screen == BpScreen.Sgdb) ToggleSgdbAnimated();
+                else if (_overlay == BpOverlay.None && _screen != BpScreen.Settings) GoTab(BpScreen.Search);
                 break;
             case BpButton.Menu: ToggleGuide(); break;
             case BpButton.Notifications: if (_overlay == BpOverlay.None) OpenNotifications(); break;
@@ -130,6 +138,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpOverlay.Update: _updIndex = Math.Clamp(_updIndex + dx, 0, UpdateButtons.Count - 1); return;
             case BpOverlay.Launch: if (LaunchState == BpLaunchState.Failed) _failIndex = Math.Clamp(_failIndex + dx, 0, FailButtons.Count - 1); return;
             case BpOverlay.GameOptions: _optIndex = Math.Clamp(_optIndex + dy, 0, GameOptions.Count - 1); return;
+            case BpOverlay.TextEntry: NavEntry(dx, dy); return;
         }
 
         switch (_screen)
@@ -139,6 +148,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpScreen.Game: NavGame(dx, dy); break;
             case BpScreen.Search: NavSearch(dx, dy); break;
             case BpScreen.Deals: NavDeals(dx, dy); break;
+            case BpScreen.Sgdb: NavSgdb(dx, dy); break;
             case BpScreen.Settings: NavSettings(dx, dy); break;
         }
     }
@@ -152,6 +162,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpOverlay.Update: RunUpdateButton(_updIndex); return;
             case BpOverlay.Launch: if (LaunchState == BpLaunchState.Failed) RunFailButton(_failIndex); return;
             case BpOverlay.GameOptions: RunGameOption(_optIndex); return;
+            case BpOverlay.TextEntry: ActEntry(); return;
         }
 
         switch (_screen)
@@ -164,6 +175,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpScreen.Game: ActGame(); break;
             case BpScreen.Search: ActSearch(); break;
             case BpScreen.Deals: ActDeals(); break;
+            case BpScreen.Sgdb: ActSgdb(); break;
             case BpScreen.Settings: ActSettings(); break;
         }
     }
@@ -176,8 +188,10 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpScreen.Game: GoTab(_from); break;
             case BpScreen.Settings:
                 if (_setCol == 1) _setCol = 0;
+                else if (_gameSet != null) CloseGameSettings();
                 else CloseSettings();
                 break;
+            case BpScreen.Sgdb: CloseSgdb(); break;
             case BpScreen.Search:
                 if (_query.Length > 0) SetQuery(_query[..^1]);
                 else GoTab(BpScreen.Home);
@@ -267,7 +281,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             .Concat(LibraryCards).Concat(Filters).Concat(KeyRows.SelectMany(r => r)).Concat(Results)
             .Concat(GameButtons).Concat(NewsItems).Concat(SettingSections).Concat(SettingRows)
             .Concat(GuideItems).Concat(UpdateButtons).Concat(FailButtons).Concat(NotifItems).Concat(GameOptions)
-            .Concat(DealItems());
+            .Concat(DealItems()).Concat(SgdbItems);
 
     private void SyncFocus() => Changed();
 
@@ -280,6 +294,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             case BpOverlay.Update: return "upd." + _updIndex;
             case BpOverlay.Launch: return LaunchState == BpLaunchState.Failed ? "fail." + _failIndex : null;
             case BpOverlay.GameOptions: return "gopt." + _optIndex;
+            case BpOverlay.TextEntry: return "kb." + _kbRow + "." + _kbCol;
         }
 
         return _screen switch
@@ -295,6 +310,7 @@ public sealed partial class BigPictureViewModel : INotifyPropertyChanged
             BpScreen.Search => _kbZone == 0 ? "kb." + _kbRow + "." + _kbCol : "res." + _resIndex,
             BpScreen.Settings => _setCol == 0 ? "sec." + _section : "row." + _setRow,
             BpScreen.Deals => DealsFocusKey(),
+            BpScreen.Sgdb => SgdbFocusKey(),
             _ => null,
         };
     }

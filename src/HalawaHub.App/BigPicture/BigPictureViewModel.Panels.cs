@@ -27,16 +27,17 @@ public sealed partial class BigPictureViewModel
     private void BuildSettings()
     {
         SettingSections.Clear();
-        for (var i = 0; i < SectionIds.Length; i++)
-            SettingSections.Add(new BpButtonItem { FocusKey = "sec." + i, Id = SectionIds[i], IsOn = i == _section, IsDanger = false });
+        var ids = CurrentSectionIds;
+        for (var i = 0; i < ids.Length; i++)
+            SettingSections.Add(new BpButtonItem { FocusKey = "sec." + i, Id = ids[i], IsOn = i == _section, IsDanger = false });
         RefreshSectionLabels();
         BuildRows();
     }
 
     public void RefreshSectionLabels()
     {
-        string[] keys = { "bpSecGeneral", "bpSecController", "bpSecDisplay", "bpSecLanguage", "bpSecExit" };
-        for (var i = 0; i < keys.Length; i++) SettingSections[i].Label = T(keys[i]);
+        string[] keys = _gameSet != null ? GameSectionKeys : new[] { "bpSecGeneral", "bpSecController", "bpSecDisplay", "bpSecLanguage", "bpSecExit" };
+        for (var i = 0; i < keys.Length && i < SettingSections.Count; i++) SettingSections[i].Label = T(keys[i]);
     }
 
     private BpSettingRow Toggle(string id, string label, string note, bool on, int index) => new()
@@ -53,6 +54,12 @@ public sealed partial class BigPictureViewModel
     private void BuildRows()
     {
         SettingRows.Clear();
+        if (_gameSet != null)
+        {
+            BuildGameRows();
+            SectionVersion++;
+            return;
+        }
         var s = Settings;
         switch (SectionIds[_section])
         {
@@ -85,9 +92,12 @@ public sealed partial class BigPictureViewModel
 
     private int ControlRowCount => SettingRows.Count(r => r.IsControl);
 
+    /// السطر رقم n بين الأسطر القابلة للتركيز (الشرح ورمز QR لا يُركَّز عليهما)
+    private BpSettingRow? ControlRow(int n) => SettingRows.Where(r => r.IsControl).ElementAtOrDefault(n);
+
     private void PickSection(int index)
     {
-        index = Math.Clamp(index, 0, SectionIds.Length - 1);
+        index = Math.Clamp(index, 0, CurrentSectionIds.Length - 1);
         if (index == _section) return;
         _sectionForward = index > _section;
         _section = index;
@@ -105,7 +115,8 @@ public sealed partial class BigPictureViewModel
             return;
         }
 
-        var row = _setRow < SettingRows.Count ? SettingRows[_setRow] : null;
+        var row = _setRow < SettingRows.Count ? ControlRow(_setRow) : null;
+        if (dx != 0 && row is { IsTiles: true } && MoveTiles(row, dx)) return;
         if (dx != 0 && row is { IsSegmented: true })
         {
             if (dx < 0 && row.Selected == 0) { _setCol = 0; return; }
@@ -118,8 +129,13 @@ public sealed partial class BigPictureViewModel
 
     private void ActSettings()
     {
-        if (_setCol == 0) { _setCol = 1; _setRow = 0; return; }
-        if (_setRow < SettingRows.Count) ChangeRow(SettingRows[_setRow], 1);
+        if (_setCol == 0)
+        {
+            // «العودة إلى اللعبة» قسم يعمل بالضغط مباشرة
+            if (_gameSet != null && CurrentSectionIds[_section] == "g.back") { CloseGameSettings(); return; }
+            _setCol = 1; _setRow = 0; return;
+        }
+        if (ControlRow(_setRow) is { } r) ChangeRow(r, 1);
     }
 
     public void ClickSection(int index)
@@ -133,7 +149,7 @@ public sealed partial class BigPictureViewModel
     {
         if (index >= SettingRows.Count || !SettingRows[index].IsControl) return;
         _setCol = 1;
-        _setRow = index;
+        _setRow = SettingRows.Take(index).Count(r => r.IsControl);
         ChangeRow(SettingRows[index], 1);
         SyncFocus();
     }
@@ -141,6 +157,7 @@ public sealed partial class BigPictureViewModel
     /// تبديل مفتاح، أو تحريك الاختيار في المجموعة (يدور)، أو الخروج
     private void ChangeRow(BpSettingRow row, int delta)
     {
+        if (row.Id.StartsWith("g.", StringComparison.Ordinal)) { ChangeGameRow(row, delta); return; }
         var s = Settings;
         switch (row.Kind)
         {

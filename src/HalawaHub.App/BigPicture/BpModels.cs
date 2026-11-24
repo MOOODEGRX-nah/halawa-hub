@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 
 namespace HalawaHub.App.BigPicture;
 
-public enum BpScreen { Home, Library, Search, Game, Settings, Deals }
-public enum BpOverlay { None, Guide, Notifications, Update, Launch, GameOptions }
+public enum BpScreen { Home, Library, Search, Game, Settings, Deals, Sgdb }
+public enum BpOverlay { None, Guide, Notifications, Update, Launch, GameOptions, TextEntry }
 public enum BpLaunchState { Starting, Done, Failed }
 
 /// <summary>لعبة كما تراها الشاشة الكبيرة. Source هي بطاقة المكتبة الأصلية (أو null في الاختبارات).</summary>

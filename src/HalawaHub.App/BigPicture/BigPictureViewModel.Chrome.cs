@@ -73,6 +73,7 @@ public sealed partial class BigPictureViewModel
                     : new[] { H("b", "bpClose") },
                 BpOverlay.Update => new[] { H("a", "bpSelect"), H("b", "bpCancel") },
                 BpOverlay.GameOptions => new[] { H("a", "bpSelect"), H("b", "bpClose") },
+                BpOverlay.TextEntry => new[] { H("a", "bpType"), H("b", "bpCancel") },
                 BpOverlay.Launch => LaunchState == BpLaunchState.Failed
                     ? new[] { H("a", "bpSelect"), H("b", "bpBack") }
                     : new[] { H("b", "bpCancel") },
@@ -85,6 +86,7 @@ public sealed partial class BigPictureViewModel
                     BpScreen.Game => new[] { H("a", "bpSelect"), H("b", "bpBack"), H("menu", "bpGuide") },
                     BpScreen.Search => new[] { H("a", "bpType"), H("b", "bpDel"), H("menu", "bpGuide") },
                     BpScreen.Deals => new[] { H("a", "bpOpen"), H("b", "bpBack"), H("menu", "bpGuide") },
+                    BpScreen.Sgdb => new[] { H("a", "bpSgUse"), H("lb", "bpSgType"), H("x", "bpSgStyle"), H("y", "bpSgAnim"), H("b", "bpBack") },
                     _ => new[] { H("a", "bpSelect"), H("b", "bpBack") },
                 },
             };

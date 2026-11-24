@@ -405,6 +405,16 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(HasManualCollections));
     }
 
+    /// للشاشة الكبيرة: المجموعات اليدوية وعضوية اللعبة فيها
+    internal IReadOnlyList<(string Id, string Name, int Count, bool IsMember)> ManualCollectionsOf(GameCardViewModel card)
+    {
+        var key = card.Game.Platform + "|" + card.Game.Id;
+        return _collections.Where(c => !c.IsSmart).Select(c => (c.Id, c.Name, c.Games.Count, c.Games.Contains(key))).ToList();
+    }
+
+    internal void SetMembershipOf(GameCardViewModel card, string collectionId, bool member) =>
+        SetMembership(collectionId, card.Game.Platform + "|" + card.Game.Id, member);
+
     private void SetMembership(string collectionId, string gameKey, bool member)
     {
         var c = _collections.FirstOrDefault(x => x.Id == collectionId);

@@ -70,6 +70,23 @@ public partial class BigPictureWindow : Window
         vm.Bumped += OnBumped;
         vm.Activated += OnActivated;
         vm.Toast += ShowToast;
+        // الحافظة ومنتقي الملفات في النافذة: نسخ المسار، لصق المفتاح، صورة غلاف من الجهاز
+        vm.CopyRequested += text => _ = Clipboard?.SetTextAsync(text);
+        vm.PasteKeyRequested += () => SafeUi.Run(async () =>
+        {
+            var text = Clipboard is { } cb ? await cb.GetTextAsync() : null;
+            vm.PasteKey(text);
+        }, "paste SteamGridDB key");
+        vm.PickCoverFileRequested += game => SafeUi.Run(async () =>
+        {
+            var files = await StorageProvider.OpenFilePickerAsync(new Avalonia.Platform.Storage.FilePickerOpenOptions
+            {
+                Title = Loc.Instance["chooseCover"],
+                AllowMultiple = false,
+                FileTypeFilter = new[] { Avalonia.Platform.Storage.FilePickerFileTypes.ImageAll },
+            });
+            if (files.Count > 0) vm.SetOwnCover(game, files[0].Path.LocalPath);
+        }, "pick cover in Big Picture");
         Loc.Instance.LanguageChanged += OnLanguageChanged;
 
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
@@ -174,7 +191,9 @@ public partial class BigPictureWindow : Window
             "card" or "more" or "hero" or "strip" => HomePage,
             "lib" => LibraryGrid,
             "flt" => LibraryPage,
-            "kb" or "res" => SearchPage,
+            "kb" => _vm.IsEntryOpen ? EntryPanel : SearchPage,
+            "res" => SearchPage,
+            "sg" => SgdbPage,
             "deal" => DealsPage,
             "game" or "news" => GamePage,
             "row" or "sec" => SettingsLayer,
@@ -210,6 +229,7 @@ public partial class BigPictureWindow : Window
             // صفوف العروض تنزلق أفقيًا، والقائمة كلها تصعد عند الصف الثالث
             if (v is ItemsControl { DataContext: BpDealRow dealRow } ic && ic.Classes.Contains("dealrow")) extraX += dealRow.ShiftX;
             if (ReferenceEquals(v, DealRowsList)) y += _vm.DealsShiftY;
+            if (ReferenceEquals(v, SgdbGrid)) y += _vm.SgdbShiftY;
             if (ReferenceEquals(v, Track)) extraX += -_vm.TabIndex * _vm.CanvasWidth;
             v = v.GetVisualParent();
         }
@@ -359,8 +379,16 @@ public partial class BigPictureWindow : Window
         for (var r = 0; r < _vm.KeyRows.Count; r++)
         {
             var c = _vm.KeyRows[r].IndexOf(item);
-            if (c >= 0) { _vm.ClickKey(r, c); return; }
+            if (c < 0) continue;
+            if (_vm.IsEntryOpen) _vm.ClickEntryKey(r, c);
+            else _vm.ClickKey(r, c);
+            return;
         }
+    }
+
+    private void OnSgdbClick(object? sender, RoutedEventArgs e)
+    {
+        if (Item<BpSgdbItem>(sender) is { } item) _vm.ClickSgdb(item.Index);
     }
 
     private void OnGameOptionClick(object? sender, RoutedEventArgs e)

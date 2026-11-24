@@ -397,7 +397,7 @@ public sealed partial class BigPictureViewModel
             case "play": Play(g); break;
             case "update": _host.OpenUpdateInLauncher(g); ShowToast(F("bpOpenedSteam", g.Name)); break;
             case "fav": ToggleFavorite(g); break;
-            case "settings": OpenGameOptions(); break;
+            case "settings": OpenGameSettings(g); break;
         }
     }
 
